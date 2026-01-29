@@ -30,8 +30,8 @@
   "dependencies": {
     "howler": "^2.2.4",
     "pako": "^2.1.0",
-    "pixi-filters": "^6.0.5",
-    "pixi.js": "^8.8.1",
+    "pixi-filters": "^6.1.5",
+    "pixi.js": "^8.15.0",
     "clientjs": "^0.2.1"
   },
   "devDependencies": {

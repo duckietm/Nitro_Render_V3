@@ -169,15 +169,12 @@ export class RoomSpriteCanvas implements IRoomRenderingCanvas
             if(!this._mask)
             {
                 this._mask = new Sprite(Texture.WHITE);
-
-                this._mask.tint = 0xFF0000;
                 this._mask.width = width;
                 this._mask.height = height;
 
                 if(this._master)
                 {
                     this._master.addChild(this._mask);
-
                     if(this._display) this._display.mask = this._mask;
                 }
             }
@@ -193,7 +190,6 @@ export class RoomSpriteCanvas implements IRoomRenderingCanvas
             if(this._master.filterArea)
             {
                 const filterArea = this._master.filterArea;
-
                 filterArea.width = width;
                 filterArea.height = height;
             }
@@ -461,6 +457,13 @@ export class RoomSpriteCanvas implements IRoomRenderingCanvas
             sortableSprite.y = (spriteY - this._screenOffsetY);
             sortableSprite.z = ((z + sprite.relativeDepth) + (3.7E-11 * count));
 
+            // Ensure badge renders on top of furniture
+            const isBadgeSprite = sprite.name && sprite.name.length < 10 && /^[A-Z]{2}[0-9]/.test(sprite.name);
+			
+			if(isBadgeSprite) {
+					sortableSprite.z = -999;
+			}
+
             spriteCount++;
             count++;
         }
@@ -494,7 +497,7 @@ export class RoomSpriteCanvas implements IRoomRenderingCanvas
     {
         if(index >= this._spriteCount)
         {
-            this.createAndAddSprite(sprite);
+            this.createAndAddSprite(sprite, index);
 
             return true;
         }
@@ -505,7 +508,7 @@ export class RoomSpriteCanvas implements IRoomRenderingCanvas
         const extendedSprite = this.getExtendedSprite(index);
 
         if(!objectSprite || !extendedSprite) return false;
-
+		
         if(extendedSprite.varyingDepth !== objectSprite.varyingDepth)
         {
             if(extendedSprite.varyingDepth && !objectSprite.varyingDepth)
@@ -541,28 +544,15 @@ export class RoomSpriteCanvas implements IRoomRenderingCanvas
             if(extendedSprite.blendMode !== objectSprite.blendMode) extendedSprite.blendMode = objectSprite.blendMode;
 
             if(extendedSprite.texture !== objectSprite.texture) extendedSprite.setTexture(objectSprite.texture);
+			
+			
+            const sx = Math.abs(extendedSprite.scale.x) || 1;
+            const sy = Math.abs(extendedSprite.scale.y) || 1;
 
-            if(objectSprite.flipH)
-            {
-                if(extendedSprite.scale.x !== -1) extendedSprite.scale.x = -1;
-            }
-            else
-            {
-                if(extendedSprite.scale.x !== 1) extendedSprite.scale.x = 1;
-            }
-
-            if(objectSprite.flipV)
-            {
-                if(extendedSprite.scale.y !== -1) extendedSprite.scale.y = -1;
-            }
-            else
-            {
-                if(extendedSprite.scale.y !== 1) extendedSprite.scale.y = 1;
-            }
-
-            this.updateEnterRoomEffect(extendedSprite, objectSprite);
+            extendedSprite.scale.x = objectSprite.flipH ? -sx : sx;
+            extendedSprite.scale.y = objectSprite.flipV ? -sy : sy;
         }
-
+	
         extendedSprite.x = Math.round(sprite.x);
         extendedSprite.y = Math.round(sprite.y);
 
@@ -613,7 +603,6 @@ export class RoomSpriteCanvas implements IRoomRenderingCanvas
         if(!textureSet) extendedSprite.setTexture(sprite.texture);
 
         if(sprite.flipH) extendedSprite.scale.x = -1;
-
         if(sprite.flipV) extendedSprite.scale.y = -1;
 
         this.updateEnterRoomEffect(extendedSprite, sprite);
