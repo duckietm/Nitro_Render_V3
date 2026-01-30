@@ -10,6 +10,8 @@ export class SortableSprite implements ISortableSprite
     private _x: number;
     private _y: number;
     private _z: number;
+    private _isBadge: boolean;
+    private _isAvatar: boolean;
 
     constructor()
     {
@@ -19,12 +21,16 @@ export class SortableSprite implements ISortableSprite
         this._x = 0;
         this._y = 0;
         this._z = 0;
+        this._isBadge = false;
+        this._isAvatar = false;
     }
 
     public dispose(): void
     {
         this._z = -(SortableSprite.Z_INFINITY);
         this._sprite = null;
+        this._isBadge = false;
+        this._isAvatar = false;
     }
 
     public get name(): string
@@ -75,5 +81,25 @@ export class SortableSprite implements ISortableSprite
     public set z(z: number)
     {
         this._z = z;
+    }
+
+    public get isBadge(): boolean
+    {
+        return this._isBadge;
+    }
+
+    public set isBadge(value: boolean)
+    {
+        this._isBadge = value;
+    }
+
+    public get isAvatar(): boolean
+    {
+        return this._isAvatar;
+    }
+
+    public set isAvatar(value: boolean)
+    {
+        this._isAvatar = value;
     }
 }

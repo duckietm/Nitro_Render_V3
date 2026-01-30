@@ -24,15 +24,15 @@
     "compile": "tsc --project ./tsconfig.json --noEmit false",
     "eslint": "eslint ./src ./packages/*/src",
     "eslint-fix": "eslint ./src --fix"
-
   },
   "main": "./index",
   "dependencies": {
+    "clientjs": "^0.2.1",
+    "gifuct-js": "^2.1.2",
     "howler": "^2.2.4",
     "pako": "^2.1.0",
     "pixi-filters": "^6.1.5",
-    "pixi.js": "^8.15.0",
-    "clientjs": "^0.2.1"
+    "pixi.js": "^8.15.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.13.0",

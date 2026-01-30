@@ -455,14 +455,16 @@ export class RoomSpriteCanvas implements IRoomRenderingCanvas
 
             sortableSprite.x = (spriteX - this._screenOffsetX);
             sortableSprite.y = (spriteY - this._screenOffsetY);
-            sortableSprite.z = ((z + sprite.relativeDepth) + (3.7E-11 * count));
+            
+            let calculatedZ = ((z + sprite.relativeDepth) + (3.7E-11 * count));
 
-            // Ensure badge renders on top of furniture
             const isBadgeSprite = (sprite.tag === 'BADGE');
-			
-			if(isBadgeSprite) {
-					sortableSprite.z = -999;
-			}
+            if(isBadgeSprite)
+            {
+                calculatedZ = calculatedZ + 0.001;
+            }
+            
+            sortableSprite.z = calculatedZ;
 
             spriteCount++;
             count++;
