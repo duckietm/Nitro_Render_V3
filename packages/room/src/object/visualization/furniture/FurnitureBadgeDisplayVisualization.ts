@@ -54,12 +54,12 @@ export class FurnitureBadgeDisplayVisualization extends FurnitureAnimatedVisuali
     {
         super.update(geometry, time, update, skipUpdate);
 
-        // GIF using AnimatedSprite's
+        // Update animated GIF using AnimatedSprite's current frame
         if(this._animatedSprite && this._frameTextures && this._frameTextures.length > 1)
         {
             const currentFrameIndex = this._animatedSprite.currentFrame;
 
-
+            // Only update if frame has changed
             if(currentFrameIndex !== this._lastFrameIndex)
             {
                 this._lastFrameIndex = currentFrameIndex;
@@ -73,14 +73,17 @@ export class FurnitureBadgeDisplayVisualization extends FurnitureAnimatedVisuali
                 const currentFrameTexture = this._frameTextures[currentFrameIndex];
                 if(!currentFrameTexture) return;
 
+                // Update the badge canvas with the current frame
                 const badgeCanvas = (tex.source as any).resource as HTMLCanvasElement;
                 const ctx = badgeCanvas.getContext('2d', { willReadFrequently: true });
 
+                // Create a temporary canvas to extract the frame texture data
                 const frameCanvas = document.createElement('canvas');
                 frameCanvas.width = currentFrameTexture.width;
                 frameCanvas.height = currentFrameTexture.height;
                 const frameCtx = frameCanvas.getContext('2d');
 
+                // Get the source from the texture
                 const frameSource = (currentFrameTexture.source as any).resource;
                 if(frameSource instanceof HTMLCanvasElement || frameSource instanceof HTMLImageElement)
                 {
@@ -281,23 +284,32 @@ export class FurnitureBadgeDisplayVisualization extends FurnitureAnimatedVisuali
 
                         accCtx.drawImage(tempCanvas, frame.dims.left, frame.dims.top);
 
+                        // Create a new canvas for this frame and create a texture from it
                         const frameCanvas = document.createElement('canvas');
                         frameCanvas.width = gif.lsd.width;
                         frameCanvas.height = gif.lsd.height;
                         const frameCtx = frameCanvas.getContext('2d');
                         frameCtx.drawImage(accCanvas, 0, 0);
 
+                        // Create texture from canvas
                         const frameTexture = Texture.from(frameCanvas);
                         this._frameTextures.push(frameTexture);
 
+                        // GIF delays are in centiseconds (1/100th of a second)
                         frameDelays.push(frame.delay || 10);
                     }
 
+                    // Create AnimatedSprite with frame textures
                     if(this._frameTextures.length > 1)
                     {
                         this._animatedSprite = new AnimatedSprite(this._frameTextures);
 
+                        // Calculate average delay and set animation speed
                         const avgDelay = frameDelays.reduce((a, b) => a + b, 0) / frameDelays.length;
+                        // Convert centiseconds to seconds, then to animation speed
+                        // AnimatedSprite.animationSpeed is frames per ticker update (60fps default)
+                        // delay in centiseconds * 10 = milliseconds, / 1000 = seconds
+                        // At 60fps, 1 frame = ~16.67ms
                         const delayMs = (avgDelay > 50 ? 10 : avgDelay) * 10;
                         const framesPerTick = 16.67 / delayMs;
                         this._animatedSprite.animationSpeed = framesPerTick;
@@ -307,6 +319,7 @@ export class FurnitureBadgeDisplayVisualization extends FurnitureAnimatedVisuali
                         this._lastFrameIndex = -1;
                     }
 
+                    // Draw first frame to the badge canvas
                     const firstFrameSource = (this._frameTextures[0].source as any).resource;
                     if(firstFrameSource instanceof HTMLCanvasElement)
                     {

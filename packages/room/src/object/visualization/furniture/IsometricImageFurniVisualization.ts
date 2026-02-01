@@ -1,6 +1,6 @@
 import { IGraphicAsset } from '@nitrots/api';
 import { GetRenderer, TextureUtils } from '@nitrots/utils';
-import { Container, Matrix, Sprite, Texture, RenderTexture } from 'pixi.js';
+import { Container, Graphics, Matrix, Sprite, Texture, RenderTexture } from 'pixi.js';
 import { FurnitureAnimatedVisualization } from './FurnitureAnimatedVisualization';
 
 export class IsometricImageFurniVisualization extends FurnitureAnimatedVisualization {
@@ -80,12 +80,10 @@ export class IsometricImageFurniVisualization extends FurnitureAnimatedVisualiza
                 const asset = this.getAsset(assetName, layerId);
                 const thumbnailAssetName = `${this.getThumbnailAssetName(scale)}-${this._uniqueId}`;
                 const transformedTexture = this.generateTransformedThumbnail(k, asset || { width: 64, height: 64 });
-
-                // Calculate dynamic offsets based on transformed bounds
                 const sprite = new Sprite(transformedTexture);
                 const bounds = sprite.getLocalBounds();
-                const offsetX = -Math.floor(bounds.width / 2); // Center horizontally
-                const offsetY = -Math.floor(bounds.height / 2); // Center vertically
+                const offsetX = -Math.floor(bounds.width / 2);
+                const offsetY = -Math.floor(bounds.height / 2);
 
                 this.asset.addAsset(thumbnailAssetName, transformedTexture, true, offsetX, offsetY, false, false);
 
@@ -102,16 +100,18 @@ export class IsometricImageFurniVisualization extends FurnitureAnimatedVisualiza
     }
 
     protected generateTransformedThumbnail(texture: Texture, asset: IGraphicAsset): Texture {
-        const sprite = new Sprite(texture);
         const scaleFactor = (asset?.width || 64) / texture.width;
+        const verticalScale = 1.0265;
         const matrix = new Matrix();
+        const frameThickness = 20;
+        const frameColor = 0x000000;
 
         switch (this.direction) {
             case 2:
                 matrix.a = scaleFactor;
                 matrix.b = (-0.5 * scaleFactor);
                 matrix.c = 0;
-                matrix.d = scaleFactor;
+                matrix.d = (scaleFactor * verticalScale);
                 matrix.tx = 0;
                 matrix.ty = (0.5 * scaleFactor * texture.width);
                 break;
@@ -120,7 +120,7 @@ export class IsometricImageFurniVisualization extends FurnitureAnimatedVisualiza
                 matrix.a = scaleFactor;
                 matrix.b = (0.5 * scaleFactor);
                 matrix.c = 0;
-                matrix.d = scaleFactor;
+                matrix.d = (scaleFactor * verticalScale);
                 matrix.tx = 0;
                 matrix.ty = 0;
                 break;
@@ -133,17 +133,27 @@ export class IsometricImageFurniVisualization extends FurnitureAnimatedVisualiza
                 matrix.ty = 0;
         }
 
-        sprite.setFromMatrix(matrix);
-
-        const width = 64;
-        const height = 64;
-
-        const container = new Container();
-        sprite.position.set((width - sprite.width) / 2, (height - sprite.height) / 2);
-        container.addChild(sprite);
+        const imgWidth = texture.width;
+        const imgHeight = texture.height;
+        const flatWidth = imgWidth + frameThickness * 2;
+        const flatHeight = imgHeight + frameThickness * 2;
+        const flatRenderTexture = TextureUtils.createAndFillRenderTexture(flatWidth, flatHeight, frameColor);
+        const imageSprite = new Sprite(texture);
+        imageSprite.position.set(frameThickness, frameThickness);
+        TextureUtils.writeToTexture(imageSprite, flatRenderTexture, false);
+        const flatTexture = flatRenderTexture;
+        const transformedSprite = new Sprite(flatTexture);
+        transformedSprite.setFromMatrix(matrix);
+        const width = 80;
+        const height = 80;
+        const finalContainer = new Container();
+        const posX = (width - transformedSprite.width) / 2;
+        const posY = (height - transformedSprite.height) / 2;
+        transformedSprite.position.set(posX, posY);
+        finalContainer.addChild(transformedSprite);
 
         const renderTexture = RenderTexture.create({ width, height, resolution: 1 });
-        GetRenderer().render({ container, target: renderTexture, clear: true });
+        GetRenderer().render({ container: finalContainer, target: renderTexture, clear: true });
 
         return renderTexture;
     }
