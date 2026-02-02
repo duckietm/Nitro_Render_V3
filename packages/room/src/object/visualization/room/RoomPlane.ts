@@ -17,7 +17,6 @@ export class RoomPlane implements IRoomPlane
         '32': new RoomGeometry(32, new Vector3d(RoomPlane.HORIZONTAL_ANGLE_DEFAULT, RoomPlane.VERTICAL_ANGLE_DEFAULT), new Vector3d(-10, 0, 0)),
         '64': new RoomGeometry(64, new Vector3d(RoomPlane.HORIZONTAL_ANGLE_DEFAULT, RoomPlane.VERTICAL_ANGLE_DEFAULT), new Vector3d(-10, 0, 0))
     };
-    private static LANDSCAPE_COLOR: number = 0x0082F0;
     private static ANIMATION_UPDATE_INTERVAL: number = 500;
 
     public static TYPE_UNDEFINED: number = 0;
@@ -78,6 +77,12 @@ export class RoomPlane implements IRoomPlane
     private _landscapeRenderHeight: number = 0;
     private _landscapeOffsetX: number = 0;
     private _landscapeOffsetY: number = 0;
+    private _landscapeBackgroundTexture: Texture = null;
+    private _landscapeBackgroundTint: number = 0xffffff;
+    private _landscapeForegroundTexture: Texture = null;
+    private _landscapeForegroundTint: number = 0xffffff;
+    private _landscapeBaseAlignBottom: boolean = false;
+    private _landscapeForegroundAlignBottom: boolean = false;
     private _hasWindowMask: boolean = false;
     private _windowMasks: { leftSideLoc: number; rightSideLoc: number }[] = [];
 
@@ -211,9 +216,11 @@ export class RoomPlane implements IRoomPlane
 
             switch(this._type)
             {
-                case RoomPlane.TYPE_FLOOR:
-                    relativeDepth = (relativeDepth - ((this._location.z + Math.min(0, this._leftSide.z, this._rightSide.z)) * 8));
+                case RoomPlane.TYPE_FLOOR: {
+                    const heightOffset = (this._location.z + Math.min(0, this._leftSide.z, this._rightSide.z)) * geometry.scale;
+                    relativeDepth = (relativeDepth - heightOffset);
                     break;
+                }
                 case RoomPlane.TYPE_LANDSCAPE:
                     relativeDepth = (relativeDepth + 0.02);
                     break;
@@ -229,7 +236,7 @@ export class RoomPlane implements IRoomPlane
             let height = (this._rightSide.length * geometry.scale);
             const normal = geometry.getCoordinatePosition(this._normal);
 
-            const getTextureAndColorForPlane = (planeId: string, planeType: number) =>
+            const getTextureAndColorForPlane = (planeId: string, planeType: number, planeNormal: IVector3D) =>
             {
                 const dataType: keyof IAssetRoomVisualizationData = (planeType === RoomPlane.TYPE_FLOOR) ? 'floorData' : (planeType === RoomPlane.TYPE_WALL) ? 'wallData' : 'landscapeData';
 
@@ -249,12 +256,99 @@ export class RoomPlane implements IRoomPlane
                     }
                 }
 
-                const planeVisualization = ((dataType === 'landscapeData') ? plane?.animatedVisualization : plane?.visualizations)?.find(visualization => (visualization.size === planeGeometry.scale)) ?? null;
-                const planeLayer = planeVisualization?.allLayers?.[0] as IAssetPlaneVisualizationLayer;
-                const planeMaterialId = planeLayer?.materialId;
-                const planeColor = planeLayer?.color;
-                const planeAssetName = planeVisualizationData?.textures?.find(texture => (texture.id === planeMaterialId))?.bitmaps?.[0]?.assetName;
-                const texture = assetCollection ? GetAssetManager().getAsset(planeAssetName)?.texture : null;
+                let planeVisualization = null;
+                if(dataType === 'landscapeData')
+                {
+                    planeVisualization = plane?.animatedVisualization?.find(visualization => (visualization.size === planeGeometry.scale)) ?? null;
+
+                    if(!planeVisualization)
+                    {
+                        planeVisualization = plane?.visualizations?.find(visualization => (visualization.size === planeGeometry.scale)) ?? null;
+                    }
+                }
+                else
+                {
+                    planeVisualization = plane?.visualizations?.find(visualization => (visualization.size === planeGeometry.scale)) ?? null;
+                }
+
+                const layers = planeVisualization?.allLayers ?? [];
+                const colorLayer = layers.find(layer => (layer as IAssetPlaneVisualizationLayer)?.color !== undefined) as IAssetPlaneVisualizationLayer;
+                const materialLayers = layers.filter(layer => (layer as IAssetPlaneVisualizationLayer)?.materialId) as IAssetPlaneVisualizationLayer[];
+                const planeColor = colorLayer?.color;
+                const baseMaterialId = materialLayers[0]?.materialId;
+                const foregroundMaterialId = materialLayers[1]?.materialId;
+                const baseAlignBottom = materialLayers[0]?.align === 'bottom';
+                const foregroundAlignBottom = materialLayers[1]?.align === 'bottom';
+
+                const selectMaterialMatrixForNormal = (matrices = [], normal = null) =>
+                {
+                    if(!matrices.length) return null;
+                    if(!normal) return matrices[0];
+
+                    const matchesNormal = (matrix) =>
+                    {
+                        const minX = (matrix.normalMinX !== undefined) ? matrix.normalMinX : -1;
+                        const maxX = (matrix.normalMaxX !== undefined) ? matrix.normalMaxX : 1;
+                        const minY = (matrix.normalMinY !== undefined) ? matrix.normalMinY : -1;
+                        const maxY = (matrix.normalMaxY !== undefined) ? matrix.normalMaxY : 1;
+
+                        return ((normal.x >= minX) && (normal.x <= maxX) && (normal.y >= minY) && (normal.y <= maxY));
+                    };
+
+                    return matrices.find(matchesNormal) ?? matrices[0];
+                };
+
+                const selectBitmapForNormal = (bitmaps = [], normal = null) =>
+                {
+                    if(!bitmaps.length) return null;
+                    if(!normal) return bitmaps[0];
+
+                    const matchesNormal = (bitmap) =>
+                    {
+                        const minX = (bitmap.normalMinX !== undefined) ? bitmap.normalMinX : -1;
+                        const maxX = (bitmap.normalMaxX !== undefined) ? bitmap.normalMaxX : 1;
+                        const minY = (bitmap.normalMinY !== undefined) ? bitmap.normalMinY : -1;
+                        const maxY = (bitmap.normalMaxY !== undefined) ? bitmap.normalMaxY : 1;
+
+                        return ((normal.x >= minX) && (normal.x <= maxX) && (normal.y >= minY) && (normal.y <= maxY));
+                    };
+
+                    return bitmaps.find(matchesNormal) ?? bitmaps[0];
+                };
+                const getCollectionTexture = (name: string) =>
+                {
+                    if(!name || !assetCollection) return null;
+
+                    return assetCollection.getTexture(name) ?? assetCollection.getTexture(`${ assetCollection.name }_${ name }`);
+                };
+
+                const resolveTextureForMaterial = (materialId: string) =>
+                {
+                    if(!materialId || !assetCollection) return null;
+
+                    const planeTextureById = planeVisualizationData?.textures?.find(texture => (texture.id === materialId));
+                    const planeMaterial = planeVisualizationData?.materials?.find(material => (material.id === materialId));
+                    const planeMaterialMatrix = selectMaterialMatrixForNormal(planeMaterial?.matrices, planeNormal);
+                    const planeMaterialTextureId = planeMaterialMatrix?.columns?.[0]?.cells?.[0]?.textureId ?? null;
+                    const planeTexture = planeTextureById ?? planeVisualizationData?.textures?.find(texture => (texture.id === planeMaterialTextureId));
+                    const planeBitmap = selectBitmapForNormal(planeTexture?.bitmaps, planeNormal);
+                    const planeAssetName = planeBitmap?.assetName;
+
+                    if(planeAssetName)
+                    {
+                        return assetCollection.getAsset(planeAssetName)?.texture ?? getCollectionTexture(planeAssetName);
+                    }
+
+                    if(planeMaterialTextureId)
+                    {
+                        return assetCollection.getAsset(planeMaterialTextureId)?.texture ?? getCollectionTexture(planeMaterialTextureId);
+                    }
+
+                    return assetCollection.getAsset(materialId)?.texture ?? getCollectionTexture(materialId);
+                };
+
+                const texture = resolveTextureForMaterial(baseMaterialId);
+                const foregroundTexture = resolveTextureForMaterial(foregroundMaterialId);
 
                 const animationLayers: PlaneVisualizationAnimationLayer[] = [];
                 if(planeType === RoomPlane.TYPE_LANDSCAPE && planeVisualization?.allLayers && assetCollection)
@@ -270,10 +364,10 @@ export class RoomPlane implements IRoomPlane
                     }
                 }
 
-                return { texture, color: planeColor, animationLayers };
+                return { texture, foregroundTexture, color: planeColor, baseAlignBottom, foregroundAlignBottom, animationLayers };
             };
 
-            const planeData = getTextureAndColorForPlane(this._id, this._type);
+            const planeData = getTextureAndColorForPlane(this._id, this._type, normal);
             const texture = this._hasTexture ? planeData.texture ?? Texture.WHITE : Texture.WHITE;
 
             switch(this._type)
@@ -374,16 +468,25 @@ export class RoomPlane implements IRoomPlane
                     this._animationLayers = planeData.animationLayers || [];
                     this._isAnimated = this._animationLayers.length > 0;
 
+                    this._landscapeBackgroundTexture = planeData.texture ?? null;
+                    this._landscapeBackgroundTint = planeData.color ?? 0xffffff;
+                    this._landscapeForegroundTexture = planeData.foregroundTexture ?? null;
+                    const landscapeTint = planeData.color ?? this._color ?? 0xffffff;
+                    this._landscapeForegroundTint = landscapeTint;
+                    this._landscapeBaseAlignBottom = planeData.baseAlignBottom ?? false;
+                    this._landscapeForegroundAlignBottom = planeData.foregroundAlignBottom ?? false;
+
                     this._planeSprite = new TilingSprite({
-                        texture,
+                        texture: Texture.WHITE,
                         width,
                         height,
                         tilePosition: {
                             x: renderOffsetX,
                             y: renderOffsetY
                         },
-                        tint: RoomPlane.LANDSCAPE_COLOR
+                        tint: landscapeTint
                     });
+                    this._landscapeBackgroundTint = landscapeTint;
                     break;
                 }
                 default: {
@@ -438,10 +541,21 @@ export class RoomPlane implements IRoomPlane
                 transform: this.getMatrixForDimensions(this._planeSprite.width, this._planeSprite.height),
                 clear: true
             });
-			
+
             if(this._isAnimated && this._type === RoomPlane.TYPE_LANDSCAPE && this._animationLayers.length > 0 && this._hasWindowMask)
             {
                 this.renderAnimationLayers(timeSinceStartMs, geometry);
+            }
+
+            if(this._type === RoomPlane.TYPE_LANDSCAPE && this._landscapeBackgroundTexture)
+            {
+                this.renderLandscapeLayer(this._landscapeBackgroundTexture, this._landscapeBackgroundTint, this._landscapeBaseAlignBottom);
+            }
+
+            // Render foreground layer for landscapes on top of background/animation
+            if(this._type === RoomPlane.TYPE_LANDSCAPE && this._landscapeForegroundTexture)
+            {
+                this.renderLandscapeLayer(this._landscapeForegroundTexture, this._landscapeForegroundTint, this._landscapeForegroundAlignBottom);
             }
         }
 
@@ -508,6 +622,64 @@ export class RoomPlane implements IRoomPlane
         });
 
         animationCanvas.destroy(true);
+    }
+
+    private renderLandscapeLayer(texture: Texture, tint: number, alignBottom: boolean): void
+    {
+        if(!this._planeTexture || !texture) return;
+
+        const canvasWidth = this._landscapeRenderWidth;
+        const canvasHeight = this._landscapeRenderHeight;
+
+        if(canvasWidth <= 0 || canvasHeight <= 0) return;
+
+        const layerHeight = Math.min(texture.height, canvasHeight);
+        const layerPositionY = alignBottom ? (canvasHeight - layerHeight) : 0;
+
+        const layerSprite = new TilingSprite({
+            texture,
+            width: canvasWidth,
+            height: layerHeight,
+            tilePosition: {
+                x: this._landscapeOffsetX,
+                y: this._landscapeOffsetY
+            },
+            tint
+        });
+        layerSprite.y = layerPositionY;
+
+        const layerContainer = new Container();
+        layerContainer.addChild(layerSprite);
+
+        if(this._maskFilter)
+        {
+            layerContainer.filters = [this._maskFilter];
+        }
+
+        if(this._planeSprite && this._planeSprite.children)
+        {
+            for(const child of this._planeSprite.children)
+            {
+                if(child instanceof Sprite)
+                {
+                    const maskClone = new Sprite(child.texture);
+                    maskClone.position.copyFrom(child.position);
+                    maskClone.scale.copyFrom(child.scale);
+                    layerContainer.addChild(maskClone);
+                }
+            }
+        }
+
+        const transform = this.getMatrixForDimensions(canvasWidth, canvasHeight);
+
+        GetRenderer().render({
+            target: this._planeTexture,
+            container: layerContainer,
+            transform,
+            clear: false
+        });
+
+        layerSprite.destroy();
     }
 
     private updateCorners(geometry: IRoomGeometry): void
