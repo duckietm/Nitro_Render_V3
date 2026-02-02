@@ -522,7 +522,11 @@ export class RoomContentLoader implements IRoomContentLoader
 
     private getAssetUrlWithGenericBase(assetName: string): string
     {
-        return (GetConfiguration().getValue<string>('generic.asset.url').replace(/%libname%/gi, assetName));
+        const assetUrl = GetConfiguration().getValue<string>('generic.asset.url').replace(/%libname%/gi, assetName);
+
+        if(assetUrl.endsWith('.nitro')) return assetUrl.replace(/\.nitro$/i, '.json');
+
+        return assetUrl;
     }
 
     public getAssetUrlWithFurniBase(assetName: string): string

@@ -1,0 +1,113 @@
+{
+  "type": "place_holder_wall",
+  "name": "place_holder_wall",
+  "visualizationType": "furniture_static",
+  "logicType": "furniture_basic",
+  "spritesheet": {
+    "meta": {
+      "format": "RGBA8888",
+      "image": "place_holder_wall.png",
+      "scale": "1.0",
+      "size": {
+        "w": 128,
+        "h": 64
+      },
+      "version": "1.0"
+    },
+    "frames": {
+      "place_holder_wall_place_holder_wall_icon_a.png": {
+        "frame": {
+          "x": 40,
+          "y": 28,
+          "w": 24,
+          "h": 24
+        },
+        "sourceSize": {
+          "w": 24,
+          "h": 24
+        },
+        "spriteSourceSize": {
+          "x": 0,
+          "y": 0,
+          "w": 24,
+          "h": 24
+        },
+        "rotated": false,
+        "trimmed": false
+      },
+      "place_holder_wall_place_holder_wall_64_a_2_0.png": {
+        "frame": {
+          "x": 2,
+          "y": 2,
+          "w": 36,
+          "h": 50
+        },
+        "sourceSize": {
+          "w": 36,
+          "h": 50
+        },
+        "spriteSourceSize": {
+          "x": 0,
+          "y": 0,
+          "w": 36,
+          "h": 50
+        },
+        "rotated": false,
+        "trimmed": false
+      }
+    }
+  },
+  "logic": {
+    "model": {
+      "dimensions": {
+        "x": 1,
+        "y": 1,
+        "z": 0
+      },
+      "directions": [
+        90,
+        180
+      ]
+    }
+  },
+  "assets": {
+    "place_holder_wall_icon_a": {
+      "x": 16,
+      "y": 16
+    },
+    "place_holder_wall_64_a_2_0": {
+      "x": 18,
+      "y": 25
+    },
+    "place_holder_wall_64_a_4_0": {
+      "source": "place_holder_wall_64_a_2_0",
+      "x": 18,
+      "y": 25,
+      "flipH": true
+    }
+  },
+  "visualizations": [
+    {
+      "size": 64,
+      "layerCount": 1,
+      "angle": 45,
+      "layers": {
+        "0": {
+          "z": -1500
+        }
+      },
+      "directions": {
+        "2": {},
+        "4": {}
+      }
+    },
+    {
+      "size": 1,
+      "layerCount": 1,
+      "angle": 360,
+      "directions": {
+        "0": {}
+      }
+    }
+  ]
+}

@@ -1,0 +1,337 @@
+{
+  "type": "avatar_additions",
+  "name": "avatar_additions",
+  "spritesheet": {
+    "meta": {
+      "image": "avatar_additions.png",
+      "format": "RGBA8888",
+      "size": {
+        "w": 61,
+        "h": 217
+      },
+      "scale": "1.0"
+    },
+    "frames": {
+      "avatar_addition_number_1.png": {
+        "frame": {
+          "x": 28,
+          "y": 168,
+          "w": 15,
+          "h": 23
+        },
+        "rotated": false,
+        "trimmed": true,
+        "spriteSourceSize": {
+          "x": 1,
+          "y": 0,
+          "w": 15,
+          "h": 23
+        },
+        "sourceSize": {
+          "w": 18,
+          "h": 23
+        }
+      },
+      "avatar_addition_number_2.png": {
+        "frame": {
+          "x": 42,
+          "y": 58,
+          "w": 18,
+          "h": 23
+        },
+        "rotated": false,
+        "trimmed": false,
+        "spriteSourceSize": {
+          "x": 0,
+          "y": 0,
+          "w": 18,
+          "h": 23
+        },
+        "sourceSize": {
+          "w": 18,
+          "h": 23
+        }
+      },
+      "avatar_addition_number_3.png": {
+        "frame": {
+          "x": 42,
+          "y": 83,
+          "w": 18,
+          "h": 23
+        },
+        "rotated": false,
+        "trimmed": false,
+        "spriteSourceSize": {
+          "x": 0,
+          "y": 0,
+          "w": 18,
+          "h": 23
+        },
+        "sourceSize": {
+          "w": 18,
+          "h": 23
+        }
+      },
+      "avatar_addition_number_4.png": {
+        "frame": {
+          "x": 42,
+          "y": 108,
+          "w": 18,
+          "h": 23
+        },
+        "rotated": false,
+        "trimmed": false,
+        "spriteSourceSize": {
+          "x": 0,
+          "y": 0,
+          "w": 18,
+          "h": 23
+        },
+        "sourceSize": {
+          "w": 18,
+          "h": 23
+        }
+      },
+      "avatar_addition_number_5.png": {
+        "frame": {
+          "x": 42,
+          "y": 133,
+          "w": 18,
+          "h": 23
+        },
+        "rotated": false,
+        "trimmed": false,
+        "spriteSourceSize": {
+          "x": 0,
+          "y": 0,
+          "w": 18,
+          "h": 23
+        },
+        "sourceSize": {
+          "w": 18,
+          "h": 23
+        }
+      },
+      "avatar_addition_pet_experience_bubble.png": {
+        "frame": {
+          "x": 1,
+          "y": 1,
+          "w": 53,
+          "h": 55
+        },
+        "rotated": false,
+        "trimmed": false,
+        "spriteSourceSize": {
+          "x": 0,
+          "y": 0,
+          "w": 53,
+          "h": 55
+        },
+        "sourceSize": {
+          "w": 53,
+          "h": 55
+        }
+      },
+      "avatar_addition_user_blowkiss.png": {
+        "frame": {
+          "x": 45,
+          "y": 181,
+          "w": 13,
+          "h": 11
+        },
+        "rotated": false,
+        "trimmed": false,
+        "spriteSourceSize": {
+          "x": 0,
+          "y": 0,
+          "w": 13,
+          "h": 11
+        },
+        "sourceSize": {
+          "w": 13,
+          "h": 11
+        }
+      },
+      "avatar_addition_user_guide_bubble.png": {
+        "frame": {
+          "x": 1,
+          "y": 58,
+          "w": 39,
+          "h": 38
+        },
+        "rotated": false,
+        "trimmed": false,
+        "spriteSourceSize": {
+          "x": 0,
+          "y": 0,
+          "w": 39,
+          "h": 38
+        },
+        "sourceSize": {
+          "w": 39,
+          "h": 38
+        }
+      },
+      "avatar_addition_user_guide_requester_bubble.png": {
+        "frame": {
+          "x": 1,
+          "y": 98,
+          "w": 39,
+          "h": 38
+        },
+        "rotated": false,
+        "trimmed": false,
+        "spriteSourceSize": {
+          "x": 0,
+          "y": 0,
+          "w": 39,
+          "h": 38
+        },
+        "sourceSize": {
+          "w": 39,
+          "h": 38
+        }
+      },
+      "avatar_addition_user_idle_left_1.png": {
+        "frame": {
+          "x": 1,
+          "y": 194,
+          "w": 12,
+          "h": 22
+        },
+        "rotated": false,
+        "trimmed": false,
+        "spriteSourceSize": {
+          "x": 0,
+          "y": 0,
+          "w": 12,
+          "h": 22
+        },
+        "sourceSize": {
+          "w": 12,
+          "h": 22
+        }
+      },
+      "avatar_addition_user_idle_left_2.png": {
+        "frame": {
+          "x": 49,
+          "y": 194,
+          "w": 9,
+          "h": 21
+        },
+        "rotated": false,
+        "trimmed": false,
+        "spriteSourceSize": {
+          "x": 0,
+          "y": 0,
+          "w": 9,
+          "h": 21
+        },
+        "sourceSize": {
+          "w": 9,
+          "h": 21
+        }
+      },
+      "avatar_addition_user_idle_right_1.png": {
+        "frame": {
+          "x": 45,
+          "y": 158,
+          "w": 12,
+          "h": 21
+        },
+        "rotated": false,
+        "trimmed": false,
+        "spriteSourceSize": {
+          "x": 0,
+          "y": 0,
+          "w": 12,
+          "h": 21
+        },
+        "sourceSize": {
+          "w": 12,
+          "h": 21
+        }
+      },
+      "avatar_addition_user_idle_right_2.png": {
+        "frame": {
+          "x": 15,
+          "y": 194,
+          "w": 8,
+          "h": 22
+        },
+        "rotated": false,
+        "trimmed": false,
+        "spriteSourceSize": {
+          "x": 0,
+          "y": 0,
+          "w": 8,
+          "h": 22
+        },
+        "sourceSize": {
+          "w": 8,
+          "h": 22
+        }
+      },
+      "avatar_addition_user_muted.png": {
+        "frame": {
+          "x": 1,
+          "y": 138,
+          "w": 31,
+          "h": 28
+        },
+        "rotated": false,
+        "trimmed": false,
+        "spriteSourceSize": {
+          "x": 0,
+          "y": 0,
+          "w": 31,
+          "h": 28
+        },
+        "sourceSize": {
+          "w": 31,
+          "h": 28
+        }
+      },
+      "avatar_addition_user_muted_small.png": {
+        "frame": {
+          "x": 1,
+          "y": 168,
+          "w": 25,
+          "h": 24
+        },
+        "rotated": false,
+        "trimmed": false,
+        "spriteSourceSize": {
+          "x": 0,
+          "y": 0,
+          "w": 25,
+          "h": 24
+        },
+        "sourceSize": {
+          "w": 25,
+          "h": 24
+        }
+      },
+      "avatar_addition_user_typing.png": {
+        "frame": {
+          "x": 25,
+          "y": 194,
+          "w": 22,
+          "h": 18
+        },
+        "rotated": false,
+        "trimmed": false,
+        "spriteSourceSize": {
+          "x": 0,
+          "y": 0,
+          "w": 22,
+          "h": 18
+        },
+        "sourceSize": {
+          "w": 22,
+          "h": 18
+        }
+      }
+    }
+  }
+}

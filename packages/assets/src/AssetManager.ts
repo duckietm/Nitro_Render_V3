@@ -121,6 +121,26 @@ export class AssetManager implements IAssetManager
                     if(texture) this.setTexture(url, texture);
                 }
             }
+            else if(url.endsWith('.json'))
+            {
+                const response = await fetch(url);
+
+                if(!response || response.status !== 200) return false;
+
+                const data = await response.json() as IAssetData;
+                let texture: Texture = null;
+                const imagePath = data?.spritesheet?.meta?.image;
+                const fallbackImagePath = ((data?.name && data.name.length > 0)
+                    ? `${data.name}.png`
+                    : url.replace(/\.json$/i, '.png'));
+                const resolvedImageUrl = (imagePath
+                    ? new URL(imagePath, url).toString()
+                    : new URL(fallbackImagePath, url).toString());
+
+                texture = await Assets.load<Texture>(resolvedImageUrl);
+
+                await this.processAsset(texture, data);
+            }
             else
             {
                 const texture = await Assets.load<Texture>(url);
@@ -139,7 +159,7 @@ export class AssetManager implements IAssetManager
         }
     }
 
-    private async processAsset(texture: Texture, data: IAssetData): Promise<void>
+    private async processAsset(texture: Texture, data: IAssetData): Promise<IGraphicAssetCollection>
     {
         let spritesheet: Spritesheet<SpritesheetData> = null;
 
@@ -152,7 +172,7 @@ export class AssetManager implements IAssetManager
             spritesheet.textureSource.label = data.name ?? null;
         }
 
-        this.createCollection(data, spritesheet);
+        return this.createCollection(data, spritesheet);
     }
 
     public get collections(): Map<string, IGraphicAssetCollection>

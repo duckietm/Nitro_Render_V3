@@ -1,0 +1,100 @@
+{
+  "assets": {
+    "place_holder_64_a_0_0": {
+      "x": 34,
+      "y": 49
+    },
+    "place_holder_icon_a": {
+      "x": 16,
+      "y": 16
+    }
+  },
+  "logic": {
+    "model": {
+      "dimensions": {
+        "x": 1,
+        "y": 1,
+        "z": 0
+      },
+      "directions": [
+        0
+      ]
+    }
+  },
+  "logicType": "furniture_basic",
+  "name": "place_holder",
+  "spritesheet": {
+    "frames": {
+      "place_holder_place_holder_64_a_0_0.png": {
+        "frame": {
+          "h": 67,
+          "w": 68,
+          "x": 2,
+          "y": 28
+        },
+        "rotated": false,
+        "sourceSize": {
+          "h": 67,
+          "w": 68
+        },
+        "spriteSourceSize": {
+          "h": 67,
+          "w": 68,
+          "x": 0,
+          "y": 0
+        },
+        "trimmed": false
+      },
+      "place_holder_place_holder_icon_a.png": {
+        "frame": {
+          "h": 24,
+          "w": 24,
+          "x": 2,
+          "y": 2
+        },
+        "rotated": false,
+        "sourceSize": {
+          "h": 24,
+          "w": 24
+        },
+        "spriteSourceSize": {
+          "h": 24,
+          "w": 24,
+          "x": 0,
+          "y": 0
+        },
+        "trimmed": false
+      }
+    },
+    "meta": {
+      "format": "RGBA8888",
+      "image": "place_holder.png",
+      "scale": "1.0",
+      "size": {
+        "h": 128,
+        "w": 128
+      },
+      "version": "1.0"
+    }
+  },
+  "type": "place_holder",
+  "visualizationType": "furniture_static",
+  "visualizations": [
+    {
+      "angle": 45,
+      "directions": {
+        "0": {}
+      },
+      "layerCount": 1,
+      "size": 64
+    },
+    {
+      "angle": 360,
+      "directions": {
+        "0": {}
+      },
+      "layerCount": 1,
+      "size": 1
+    }
+  ]
+}
