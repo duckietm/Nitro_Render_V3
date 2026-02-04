@@ -460,7 +460,7 @@ export class RoomContentLoader implements IRoomContentLoader
             case RoomContentLoader.PLACE_HOLDER_PET:
                 return [this.getAssetUrlWithGenericBase(RoomContentLoader.PLACE_HOLDER_PET)];
             case RoomContentLoader.ROOM:
-                return [this.getAssetUrlWithGenericBase('room')];
+                return ['local://room'];
             case RoomContentLoader.TILE_CURSOR:
                 return [this.getAssetUrlWithGenericBase(RoomContentLoader.TILE_CURSOR)];
             case RoomContentLoader.SELECTION_ARROW:

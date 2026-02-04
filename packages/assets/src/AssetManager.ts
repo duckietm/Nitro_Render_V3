@@ -4,6 +4,7 @@ import { AnimatedGIF } from '@pixi/gif';
 import { Assets, Spritesheet, SpritesheetData, Texture } from 'pixi.js';
 import { GraphicAssetCollection } from './GraphicAssetCollection';
 
+
 export class AssetManager implements IAssetManager
 {
     private _textures: Map<string, Texture> = new Map();
@@ -84,7 +85,6 @@ export class AssetManager implements IAssetManager
 
             return true;
         }
-
         catch (err)
         {
             NitroLogger.error(err);
@@ -98,6 +98,20 @@ export class AssetManager implements IAssetManager
         try
         {
             if(!url || !url.length) return false;
+
+            if(url.startsWith('local://'))
+            {
+                const key = url.substring('local://'.length);
+
+                switch(key)
+                {
+                    case 'room':
+                        await this.loadLocalRoom();
+                        return true;
+                }
+
+                return false;
+            }
 
             if(url.endsWith('.nitro') || url.endsWith('.gif'))
             {
@@ -150,13 +164,49 @@ export class AssetManager implements IAssetManager
 
             return true;
         }
-
         catch (err)
         {
             NitroLogger.error(err);
 
             return false;
         }
+    }
+
+    private async loadLocalRoom(): Promise<void>
+    {
+        const roomDataModule = await import('./assets/room/room.asset.json');
+        const roomData = (roomDataModule.default ?? roomDataModule) as IAssetData;
+        const collection = this.createCollection(roomData, null) as GraphicAssetCollection;
+        if(!collection) return;
+
+        const roomImages = import.meta.glob('./assets/room/*.png', { eager: true });
+        const roomImagesSub = import.meta.glob('./assets/room/images/*.png', { eager: true });
+        const merged = { ...roomImages, ...roomImagesSub };
+
+        for(const path in merged)
+        {
+            const mod = merged[path];
+            const imageUrl = (mod.default ?? mod) as string;
+
+            const file = path.split('/').pop()!;
+            const rawName = file.replace(/\.png$/i, '');
+
+            const texture = await Assets.load<Texture>(imageUrl);
+            if(!texture) continue;
+
+            this.setTexture(rawName, texture);
+
+            collection.textures.set(rawName, texture);
+
+            if(rawName.startsWith('room_'))
+            {
+                const normalizedName = rawName.substring('room_'.length);
+                this.setTexture(normalizedName, texture);
+                collection.textures.set(normalizedName, texture);
+            }
+        }
+
+        collection.define(roomData);
     }
 
     private async processAsset(texture: Texture, data: IAssetData): Promise<IGraphicAssetCollection>
