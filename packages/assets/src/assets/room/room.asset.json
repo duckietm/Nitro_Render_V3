@@ -5606,7 +5606,8 @@
               "size": 64,
               "allLayers": [
                 {
-                  "color": 8703727
+                  "color": 8703727,
+				  "backgroundColor": "#84C6DF"
                 },
                 {
                   "items": [
@@ -5730,7 +5731,7 @@
                 {
                   "materialId": "landscape_64_background_1",
                   "align": "bottom",
-                  "backgroundColor": "#FEFEFE"
+                  "backgroundColor": "#B85D58"
                 },
                 {
                   "items": [
@@ -5857,7 +5858,8 @@
               "allLayers": [
                 {
                   "materialId": "landscape_64_background_2",
-                  "align": "bottom"
+                  "align": "bottom",
+				  "backgroundColor": "#58B3B8"
                 },
                 {
                   "items": [
@@ -5984,7 +5986,8 @@
               "allLayers": [
                 {
                   "materialId": "landscape_64_background_3",
-                  "align": "bottom"
+                  "align": "bottom",
+				  "backgroundColor": "#77B8CB"
                 },
                 {
                   "items": [
@@ -6111,7 +6114,8 @@
               "allLayers": [
                 {
                   "materialId": "landscape_64_background_4",
-                  "align": "bottom"
+                  "align": "bottom",
+				  "backgroundColor": "#77CBC9"
                 },
                 {
                   "items": [
@@ -6238,7 +6242,8 @@
               "allLayers": [
                 {
                   "materialId": "landscape_64_background_5",
-                  "align": "bottom"
+                  "align": "bottom",
+				  "backgroundColor": "#475962"
                 },
                 {
                   "items": [
@@ -6365,7 +6370,8 @@
               "allLayers": [
                 {
                   "materialId": "landscape_64_background_6",
-                  "align": "bottom"
+                  "align": "bottom",
+				  "backgroundColor": "#191E3F"
                 },
                 {
                   "items": [
@@ -6492,7 +6498,8 @@
               "allLayers": [
                 {
                   "materialId": "landscape_64_background_7",
-                  "align": "bottom"
+                  "align": "bottom",
+				  "backgroundColor": "#FFFF00"
                 },
                 {
                   "items": [

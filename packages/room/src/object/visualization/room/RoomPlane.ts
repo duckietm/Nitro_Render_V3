@@ -18,6 +18,7 @@ export class RoomPlane implements IRoomPlane
         '64': new RoomGeometry(64, new Vector3d(RoomPlane.HORIZONTAL_ANGLE_DEFAULT, RoomPlane.VERTICAL_ANGLE_DEFAULT), new Vector3d(-10, 0, 0))
     };
     private static ANIMATION_UPDATE_INTERVAL: number = 500;
+    private static LANDSCAPE_DEFAULT_BACKGROUND_COLOR: number = 0x84C6DF;
 
     public static TYPE_UNDEFINED: number = 0;
     public static TYPE_WALL: number = 1;
@@ -84,6 +85,7 @@ export class RoomPlane implements IRoomPlane
     private _landscapeBaseAlignBottom: boolean = false;
     private _landscapeForegroundAlignBottom: boolean = false;
     private _landscapeBackgroundColor: number = null;
+    private _lastLandscapeDebugSignature: string = null;
     private _hasWindowMask: boolean = false;
     private _windowMasks: { leftSideLoc: number; rightSideLoc: number }[] = [];
 
@@ -295,13 +297,48 @@ export class RoomPlane implements IRoomPlane
                 const foregroundAlignBottom = materialLayers[1]?.align === 'bottom';
 
                 // Parse backgroundColor from the first material layer (background layer)
-                const backgroundColorStr = materialLayers[0]?.backgroundColor;
+                const backgroundMaterialId = materialLayers[0]?.materialId;
+                const hasDirectBackgroundColor = !!materialLayers[0]?.backgroundColor;
+                let backgroundColorStr = materialLayers[0]?.backgroundColor;
+
+                if(!backgroundColorStr && backgroundMaterialId)
+                {
+                    const findBackgroundColorByMaterial = () =>
+                    {
+                        for(const candidatePlane of planeVisualizationData?.planes ?? [])
+                        {
+                            const candidateVisualizations = [
+                                ...(candidatePlane.visualizations ?? []),
+                                ...(candidatePlane.animatedVisualization ?? [])
+                            ];
+
+                            for(const candidateVisualization of candidateVisualizations)
+                            {
+                                if(candidateVisualization?.size !== planeGeometry.scale) continue;
+
+                                const candidateMaterialLayers = (candidateVisualization.allLayers ?? []).filter(layer => (layer as IAssetPlaneVisualizationLayer)?.materialId) as IAssetPlaneVisualizationLayer[];
+                                const candidateBackgroundLayer = candidateMaterialLayers[0];
+
+                                if(candidateBackgroundLayer?.materialId !== backgroundMaterialId) continue;
+
+                                if(candidateBackgroundLayer.backgroundColor) return candidateBackgroundLayer.backgroundColor;
+                            }
+                        }
+
+                        return null;
+                    };
+
+                    backgroundColorStr = findBackgroundColorByMaterial();
+                }
+
                 let backgroundColor: number = null;
                 if(backgroundColorStr)
                 {
                     // Convert hex string like "#FEFEFE" to number
                     backgroundColor = parseInt(backgroundColorStr.replace('#', ''), 16);
                 }
+
+                const backgroundColorSource = hasDirectBackgroundColor ? 'direct' : (backgroundColor !== null ? 'fallback-material' : 'none');
 
                 const selectMaterialMatrixForNormal = (matrices = [], normal = null) =>
                 {
@@ -389,7 +426,7 @@ export class RoomPlane implements IRoomPlane
                     }
                 }
 
-                return { texture, foregroundTexture, color: planeColor, baseAlignBottom, foregroundAlignBottom, animationLayers, backgroundColor };
+                return { texture, foregroundTexture, color: planeColor, baseAlignBottom, foregroundAlignBottom, animationLayers, backgroundColor, backgroundColorSource };
             };
 
             const planeData = getTextureAndColorForPlane(this._id, this._type, normal);
@@ -504,6 +541,22 @@ export class RoomPlane implements IRoomPlane
                     this._landscapeForegroundAlignBottom = planeData.foregroundAlignBottom ?? false;
                     this._landscapeBackgroundColor = planeData.backgroundColor ?? null;
 
+                    const landscapeDebugPayload = {
+                        planeId: this._id,
+                        backgroundColor: this._landscapeBackgroundColor,
+                        backgroundColorSource: planeData.backgroundColorSource,
+                        backgroundTexture: this._landscapeBackgroundTexture?.label ?? this._landscapeBackgroundTexture?.source?.label ?? null,
+                        foregroundTexture: this._landscapeForegroundTexture?.label ?? this._landscapeForegroundTexture?.source?.label ?? null,
+                        hasCloudAnimation: this._isAnimated
+                    };
+                    const landscapeDebugSignature = JSON.stringify(landscapeDebugPayload);
+
+                    if(this._lastLandscapeDebugSignature !== landscapeDebugSignature)
+                    {
+                        this._lastLandscapeDebugSignature = landscapeDebugSignature;
+                        console.debug('[RoomPlane] Loaded landscape background', landscapeDebugPayload);
+                    }
+
                     this._planeSprite = new TilingSprite({
                         texture: Texture.WHITE,
                         width,
@@ -563,18 +616,29 @@ export class RoomPlane implements IRoomPlane
 
         if(needsUpdate || animationUpdate)
         {
-            // For landscapes with a custom backgroundColor, render it first
-            if(this._type === RoomPlane.TYPE_LANDSCAPE && this._landscapeBackgroundColor !== null)
-            {
-                this.renderBackgroundColor();
-            }
+            const isLandscape = (this._type === RoomPlane.TYPE_LANDSCAPE);
+            const hasLandscapeLayeredRendering = (isLandscape && (this._landscapeBackgroundTexture !== null || this._landscapeForegroundTexture !== null || this._animationLayers.length > 0 || this._landscapeBackgroundColor !== null));
 
-            GetRenderer().render({
-                target: this._planeTexture,
-                container: this._planeSprite,
-                transform: this.getMatrixForDimensions(this._planeSprite.width, this._planeSprite.height),
-                clear: this._landscapeBackgroundColor === null
-            });
+            if(hasLandscapeLayeredRendering)
+            {
+                if(this._landscapeBackgroundColor !== null)
+                {
+                    this.renderBackgroundColor();
+                }
+                else
+                {
+                    this.clearPlaneTexture();
+                }
+            }
+            else
+            {
+                GetRenderer().render({
+                    target: this._planeTexture,
+                    container: this._planeSprite,
+                    transform: this.getMatrixForDimensions(this._planeSprite.width, this._planeSprite.height),
+                    clear: true
+                });
+            }
 
             // Layer order for landscapes:
             // 1. Background color (rendered above)
@@ -736,6 +800,43 @@ export class RoomPlane implements IRoomPlane
         const colorGraphics = new Graphics();
         colorGraphics.rect(0, 0, canvasWidth, canvasHeight);
         colorGraphics.fill(this._landscapeBackgroundColor);
+
+        const colorContainer = new Container();
+        colorContainer.addChild(colorGraphics);
+
+        const transform = this.getMatrixForDimensions(canvasWidth, canvasHeight);
+
+        GetRenderer().render({
+            target: this._planeTexture,
+            container: colorContainer,
+            transform,
+            clear: true
+        });
+
+        colorGraphics.destroy();
+    }
+
+    private clearPlaneTexture(): void
+    {
+        if(!this._planeTexture) return;
+
+        const canvasWidth = this._landscapeRenderWidth;
+        const canvasHeight = this._landscapeRenderHeight;
+
+        if(canvasWidth <= 0 || canvasHeight <= 0)
+        {
+            GetRenderer().render({
+                target: this._planeTexture,
+                container: new Container(),
+                clear: true
+            });
+
+            return;
+        }
+
+        const colorGraphics = new Graphics();
+        colorGraphics.rect(0, 0, canvasWidth, canvasHeight);
+        colorGraphics.fill(RoomPlane.LANDSCAPE_DEFAULT_BACKGROUND_COLOR);
 
         const colorContainer = new Container();
         colorContainer.addChild(colorGraphics);
