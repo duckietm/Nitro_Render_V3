@@ -41,8 +41,6 @@ export class AssetManager implements IAssetManager
             return existing;
         }
 
-        NitroLogger.warn(`AssetManager: Asset not found: ${name}`);
-
         return null;
     }
 
@@ -99,7 +97,6 @@ export class AssetManager implements IAssetManager
         {
             if(!url || !url.length) return false;
 
-            // ✅ NEW: Local bundled assets (no generic.asset.url)
             if(url.startsWith('local://'))
             {
                 const key = url.substring('local://'.length);
@@ -173,52 +170,32 @@ export class AssetManager implements IAssetManager
         }
     }
 
-    /**
-     * ✅ Loads room assets from bundled code:
-     * - /packages/assets/src/assets/room/room.asset.json
-     * - /packages/assets/src/assets/room/images/*.png
-     *
-     * This loads individual PNG files instead of a spritesheet, then uses
-     * the JSON asset definitions for proper x, y offsets, flipH settings, etc.
-     */
     private async loadLocalRoom(): Promise<void>
     {
-        // 1) Load room JSON locally (bundled)
         const roomDataModule = await import('./assets/room/room.asset.json');
         const roomData = (roomDataModule.default ?? roomDataModule) as IAssetData;
-
-        // 2) Create collection WITHOUT spritesheet
-        //    Note: Constructor calls define(), but assets won't be created since textures don't exist yet
         const collection = this.createCollection(roomData, null) as GraphicAssetCollection;
         if(!collection) return;
 
-        // 3) Load all images from the bundled assets
         const roomImages = import.meta.glob('./assets/room/*.png', { eager: true });
         const roomImagesSub = import.meta.glob('./assets/room/images/*.png', { eager: true });
         const merged = { ...roomImages, ...roomImagesSub };
 
-        // 4) Register textures in the collection's _textures map
-        //    getLibraryAsset() prepends collection name, so for asset 'wall_texture_64_0_wall_white'
-        //    it looks for 'room_wall_texture_64_0_wall_white' in _textures
         for(const path in merged)
         {
             const mod = merged[path];
             const imageUrl = (mod.default ?? mod) as string;
 
             const file = path.split('/').pop()!;
-            const rawName = file.replace(/\.png$/i, '');  // e.g., "room_wall_texture_64_0_wall_white"
+            const rawName = file.replace(/\.png$/i, '');
 
             const texture = await Assets.load<Texture>(imageUrl);
             if(!texture) continue;
 
-            // Register in AssetManager's global _textures for direct lookups
             this.setTexture(rawName, texture);
 
-            // Register in collection's _textures with the full name (room_...)
-            // This is what getLibraryAsset() will look for when defining assets
             collection.textures.set(rawName, texture);
 
-            // Also register without the "room_" prefix for direct lookups
             if(rawName.startsWith('room_'))
             {
                 const normalizedName = rawName.substring('room_'.length);
@@ -227,8 +204,6 @@ export class AssetManager implements IAssetManager
             }
         }
 
-        // 5) Now call define() again to process asset definitions with correct x, y offsets
-        //    Assets that were skipped before (no textures) will now be created properly
         collection.define(roomData);
     }
 

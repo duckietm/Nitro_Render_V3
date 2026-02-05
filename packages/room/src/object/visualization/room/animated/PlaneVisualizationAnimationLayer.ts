@@ -120,25 +120,21 @@ export class PlaneVisualizationAnimationLayer
             const assetWidth = item.bitmapData.width;
             const assetHeight = item.bitmapData.height;
 
-            // Render at primary position
             if(this.isVisible(point.x, point.y, assetWidth, assetHeight, canvas.width, canvas.height))
             {
                 this.renderSprite(item, point.x, point.y, canvas);
             }
 
-            // Wrap horizontally (left side)
             if(this.isVisible(point.x - maxX, point.y, assetWidth, assetHeight, canvas.width, canvas.height))
             {
                 this.renderSprite(item, point.x - maxX, point.y, canvas);
             }
 
-            // Wrap vertically (top side)
             if(this.isVisible(point.x, point.y - maxY, assetWidth, assetHeight, canvas.width, canvas.height))
             {
                 this.renderSprite(item, point.x, point.y - maxY, canvas);
             }
 
-            // Wrap both (top-left corner)
             if(this.isVisible(point.x - maxX, point.y - maxY, assetWidth, assetHeight, canvas.width, canvas.height))
             {
                 this.renderSprite(item, point.x - maxX, point.y - maxY, canvas);

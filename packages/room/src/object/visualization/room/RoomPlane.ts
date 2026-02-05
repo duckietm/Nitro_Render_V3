@@ -413,7 +413,6 @@ export class RoomPlane implements IRoomPlane
                 const animationLayers: PlaneVisualizationAnimationLayer[] = [];
                 if(planeType === RoomPlane.TYPE_LANDSCAPE && planeVisualization?.allLayers)
                 {
-                    // Always use the room collection for animation assets (clouds etc.) since they are stored there
                     const animationAssetCollection = roomCollection;
                     for(const layer of planeVisualization.allLayers)
                     {
@@ -554,7 +553,6 @@ export class RoomPlane implements IRoomPlane
                     if(this._lastLandscapeDebugSignature !== landscapeDebugSignature)
                     {
                         this._lastLandscapeDebugSignature = landscapeDebugSignature;
-                        console.debug('[RoomPlane] Loaded landscape background', landscapeDebugPayload);
                     }
 
                     this._planeSprite = new TilingSprite({

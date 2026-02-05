@@ -5606,8 +5606,7 @@
               "size": 64,
               "allLayers": [
                 {
-                  "color": 8703727,
-				  "backgroundColor": "#84C6DF"
+                  "color": 8703727
                 },
                 {
                   "items": [
