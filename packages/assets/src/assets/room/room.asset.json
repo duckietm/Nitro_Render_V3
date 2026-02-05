@@ -5729,7 +5729,8 @@
               "allLayers": [
                 {
                   "materialId": "landscape_64_background_1",
-                  "align": "bottom"
+                  "align": "bottom",
+                  "backgroundColor": "#FEFEFE"
                 },
                 {
                   "items": [

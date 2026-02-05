@@ -4,4 +4,5 @@ export interface IAssetPlaneVisualizationLayer
     color?: number;
     offset?: number;
     align?: string;
+    backgroundColor?: string;
 }
