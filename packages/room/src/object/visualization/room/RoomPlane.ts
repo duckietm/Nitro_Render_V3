@@ -3,6 +3,7 @@ import { GetAssetManager } from '@nitrots/assets';
 import { GetRenderer, GetTexturePool, PlaneMaskFilter, Vector3d } from '@nitrots/utils';
 import { Container, Filter, Graphics, Matrix, Point, RenderTexture, Sprite, Texture, TilingSprite } from 'pixi.js';
 import { RoomGeometry } from '../../../utils';
+import { RoomWindowReflectionState } from '../RoomWindowReflectionState';
 import { PlaneVisualizationAnimationLayer } from './animated';
 import { RoomPlaneBitmapMask } from './RoomPlaneBitmapMask';
 import { RoomPlaneRectangleMask } from './RoomPlaneRectangleMask';
@@ -88,6 +89,10 @@ export class RoomPlane implements IRoomPlane
     private _lastLandscapeDebugSignature: string = null;
     private _hasWindowMask: boolean = false;
     private _windowMasks: { leftSideLoc: number; rightSideLoc: number }[] = [];
+    private _lastWindowReflectionUpdateId: number = -1;
+    private _windowReflectionFirstSeenAt: Map<number, number> = new Map();
+    private _windowReflectionLastVisible: Map<number, { texture: Texture; location: IVector3D }> = new Map();
+    private _windowReflectionFadeOut: Map<number, { texture: Texture; location: IVector3D; startedAt: number }> = new Map();
 
     constructor(origin: IVector3D, location: IVector3D, leftSide: IVector3D, rightSide: IVector3D, type: number, usesMask: boolean, secondaryNormals: IVector3D[], randomSeed: number, textureOffsetX: number = 0, textureOffsetY: number = 0, textureMaxX: number = 0, textureMaxY: number = 0)
     {
@@ -259,7 +264,6 @@ export class RoomPlane implements IRoomPlane
                     }
                 }
 
-                // Fall back to "default" plane if the requested landscape plane wasn't found
                 if(!plane && planeType === RoomPlane.TYPE_LANDSCAPE)
                 {
                     const roomCollection2 = GetAssetManager().getCollection('room');
@@ -334,7 +338,6 @@ export class RoomPlane implements IRoomPlane
                 let backgroundColor: number = null;
                 if(backgroundColorStr)
                 {
-                    // Convert hex string like "#FEFEFE" to number
                     backgroundColor = parseInt(backgroundColorStr.replace('#', ''), 16);
                 }
 
@@ -514,10 +517,8 @@ export class RoomPlane implements IRoomPlane
 
                     this._landscapeRenderWidth = width;
                     this._landscapeRenderHeight = height;
-                    // Use total landscape width for animation canvas, but always use actual height
-                    // The renderMaxY is often too small (e.g., 160) while actual height is much larger (e.g., 755)
                     this._animationCanvasWidth = renderMaxX || width;
-                    this._animationCanvasHeight = height; // Always use actual landscape height for animations
+                    this._animationCanvasHeight = height;
                     this._landscapeOffsetX = renderOffsetX;
                     this._landscapeOffsetY = renderOffsetY;
 
@@ -601,18 +602,31 @@ export class RoomPlane implements IRoomPlane
 
         this._planeTexture.source.label = `room_plane_${ this._uniqueId.toString() }`;
 
+        let reflectionUpdate = false;
+
+        if(this._type === RoomPlane.TYPE_LANDSCAPE && this._windowMasks.length)
+        {
+            const reflectionUpdateId = RoomWindowReflectionState.updateId;
+
+            if(reflectionUpdateId !== this._lastWindowReflectionUpdateId)
+            {
+                this._lastWindowReflectionUpdateId = reflectionUpdateId;
+                reflectionUpdate = true;
+            }
+        }
+
         let animationUpdate = false;
         if(this._isAnimated && this._type === RoomPlane.TYPE_LANDSCAPE)
         {
             const timeSinceLastUpdate = timeSinceStartMs - this._lastAnimationUpdate;
-            if(timeSinceLastUpdate >= RoomPlane.ANIMATION_UPDATE_INTERVAL || needsUpdate)
+            if(timeSinceLastUpdate >= RoomPlane.ANIMATION_UPDATE_INTERVAL || needsUpdate || reflectionUpdate)
             {
                 animationUpdate = true;
                 this._lastAnimationUpdate = timeSinceStartMs;
             }
         }
 
-        if(needsUpdate || animationUpdate)
+        if(needsUpdate || animationUpdate || reflectionUpdate)
         {
             const isLandscape = (this._type === RoomPlane.TYPE_LANDSCAPE);
             const hasLandscapeLayeredRendering = (isLandscape && (this._landscapeBackgroundTexture !== null || this._landscapeForegroundTexture !== null || this._animationLayers.length > 0 || this._landscapeBackgroundColor !== null));
@@ -649,16 +663,19 @@ export class RoomPlane implements IRoomPlane
                 this.renderLandscapeLayer(this._landscapeBackgroundTexture, this._landscapeBackgroundTint, this._landscapeBaseAlignBottom);
             }
 
-            // Render animation layers (clouds) - between background and foreground
             if(this._isAnimated && this._type === RoomPlane.TYPE_LANDSCAPE && this._animationLayers.length > 0)
             {
                 this.renderAnimationLayers(timeSinceStartMs, geometry);
             }
 
-            // Render foreground layer for landscapes on top of background and clouds
             if(this._type === RoomPlane.TYPE_LANDSCAPE && this._landscapeForegroundTexture)
             {
                 this.renderLandscapeLayer(this._landscapeForegroundTexture, this._landscapeForegroundTint, this._landscapeForegroundAlignBottom);
+            }
+
+            if(this._type === RoomPlane.TYPE_LANDSCAPE && this._windowMasks.length)
+            {
+                this.renderWindowReflections();
             }
         }
 
@@ -794,7 +811,6 @@ export class RoomPlane implements IRoomPlane
 
         if(canvasWidth <= 0 || canvasHeight <= 0) return;
 
-        // Create a solid color rectangle to fill the background
         const colorGraphics = new Graphics();
         colorGraphics.rect(0, 0, canvasWidth, canvasHeight);
         colorGraphics.fill(this._landscapeBackgroundColor);
@@ -849,6 +865,145 @@ export class RoomPlane implements IRoomPlane
         });
 
         colorGraphics.destroy();
+    }
+
+    private renderWindowReflections(): void
+    {
+        if(!this._planeTexture || !this._leftSide || !this._rightSide || !this._normal) return;
+
+        if(this._leftSide.length <= 0 || this._rightSide.length <= 0) return;
+
+        const now = Date.now();
+        const fadeDurationMs = 150;
+        const avatars = RoomWindowReflectionState.getAvatars();
+        const canvasWidth = this._landscapeRenderWidth;
+        const canvasHeight = this._landscapeRenderHeight;
+
+        if(canvasWidth <= 0 || canvasHeight <= 0) return;
+
+        const container = new Container();
+        const visibleAvatarIds = new Set<number>();
+
+        const addReflectionSprite = (texture: Texture, location: IVector3D, alpha: number): boolean => {
+            if(!texture || !location || alpha < 0) return false;
+
+            const relative = Vector3d.dif(location, this._location);
+            const planeDistance = Math.abs(Vector3d.scalarProjection(relative, this._normal));
+
+            if(planeDistance > 0.8) return false;
+
+            const leftSideLoc = Vector3d.scalarProjection(relative, this._leftSide);
+            const rightSideLoc = Vector3d.scalarProjection(relative, this._rightSide);
+
+            const closestMask = this._windowMasks.reduce((best, mask) => {
+                const score = Math.abs(mask.leftSideLoc - leftSideLoc) + Math.abs(mask.rightSideLoc - rightSideLoc);
+
+                if(!best || (score < best.score)) return { mask, score };
+
+                return best;
+            }, null as { mask: { leftSideLoc: number; rightSideLoc: number }; score: number } | null);
+
+            if(!closestMask || (closestMask.score > 3)) return false;
+
+            const x = (canvasWidth - ((canvasWidth * leftSideLoc) / this._leftSide.length));
+            const y = (canvasHeight - ((canvasHeight * rightSideLoc) / this._rightSide.length));
+
+            const sprite = new Sprite(texture);
+            sprite.anchor.set(0.5, 1);
+            sprite.position.set(Math.trunc(x), Math.trunc(y));
+            sprite.scale.set(1, 1);
+            sprite.tint = 0xCFE3FF;
+            sprite.alpha = alpha;
+
+            container.addChild(sprite);
+
+            return true;
+        };
+
+        for(const avatar of avatars)
+        {
+            if(!avatar?.texture || !avatar.location) continue;
+
+            let firstSeenAt = this._windowReflectionFirstSeenAt.get(avatar.id);
+
+            if(firstSeenAt === undefined)
+            {
+                firstSeenAt = now;
+            }
+
+            const elapsed = Math.min(fadeDurationMs, Math.max(0, (now - firstSeenAt)));
+            const progress = (elapsed / fadeDurationMs);
+            const alpha = (0.4 * progress);
+
+            if(!addReflectionSprite(avatar.texture, avatar.location, alpha)) continue;
+
+            if(!this._windowReflectionFirstSeenAt.has(avatar.id)) this._windowReflectionFirstSeenAt.set(avatar.id, firstSeenAt);
+
+            visibleAvatarIds.add(avatar.id);
+            this._windowReflectionFadeOut.delete(avatar.id);
+
+            const storedLocation = new Vector3d();
+            storedLocation.assign(avatar.location);
+
+            this._windowReflectionLastVisible.set(avatar.id, {
+                texture: avatar.texture,
+                location: storedLocation
+            });
+        }
+
+        for(const [id, lastVisible] of this._windowReflectionLastVisible)
+        {
+            if(visibleAvatarIds.has(id) || this._windowReflectionFadeOut.has(id)) continue;
+
+            this._windowReflectionFadeOut.set(id, {
+                texture: lastVisible.texture,
+                location: lastVisible.location,
+                startedAt: now
+            });
+
+            this._windowReflectionLastVisible.delete(id);
+            this._windowReflectionFirstSeenAt.delete(id);
+        }
+
+        for(const [id, fadeOut] of this._windowReflectionFadeOut)
+        {
+            const elapsed = (now - fadeOut.startedAt);
+
+            if(elapsed >= fadeDurationMs)
+            {
+                this._windowReflectionFadeOut.delete(id);
+
+                continue;
+            }
+
+            const alpha = (0.4 * (1 - (elapsed / fadeDurationMs)));
+
+            if(!addReflectionSprite(fadeOut.texture, fadeOut.location, alpha)) this._windowReflectionFadeOut.delete(id);
+        }
+
+        if(!container.children.length)
+        {
+            container.destroy({ children: true });
+
+            if(!avatars.length)
+            {
+                this._windowReflectionFirstSeenAt.clear();
+                this._windowReflectionLastVisible.clear();
+            }
+
+            return;
+        }
+
+        if(this._maskFilter) container.filters = [this._maskFilter];
+
+        GetRenderer().render({
+            target: this._planeTexture,
+            container,
+            transform: this.getMatrixForDimensions(canvasWidth, canvasHeight),
+            clear: false
+        });
+
+        container.destroy({ children: true });
     }
 
     private updateCorners(geometry: IRoomGeometry): void

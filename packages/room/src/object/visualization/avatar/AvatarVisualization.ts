@@ -3,6 +3,7 @@ import { GetAssetManager } from '@nitrots/assets';
 import { AdvancedMap } from '@nitrots/utils';
 import { Texture } from 'pixi.js';
 import { RoomObjectSpriteVisualization } from '../RoomObjectSpriteVisualization';
+import { RoomWindowReflectionState } from '../RoomWindowReflectionState';
 import { AvatarVisualizationData } from './AvatarVisualizationData';
 import { ExpressionAdditionFactory, FloatingIdleZAddition, GameClickTargetAddition, GuideStatusBubbleAddition, IAvatarAddition, MutedBubbleAddition, NumberBubbleAddition, TypingBubbleAddition } from './additions';
 
@@ -119,7 +120,7 @@ export class AvatarVisualization extends RoomObjectSpriteVisualization implement
         this._isLaying = false;
         this._layInside = false;
         this._isAnimating = false;
-        this._extraSpritesStartIndex = 2;
+        this._extraSpritesStartIndex = AvatarVisualization.INITIAL_RESERVED_SPRITES;
         this._forcedAnimFrames = 0;
         this._updatesUntilFrameUpdate = 0;
 
@@ -150,6 +151,8 @@ export class AvatarVisualization extends RoomObjectSpriteVisualization implement
         super.dispose();
 
         if(this._avatarImage) this._avatarImage.dispose();
+
+        if(this.object) RoomWindowReflectionState.removeAvatar(this.object.id);
 
         this._shadow = null;
         this._disposed = true;
@@ -265,6 +268,8 @@ export class AvatarVisualization extends RoomObjectSpriteVisualization implement
             }
             else
             {
+                this.updateWindowReflectionSource();
+
                 return;
             }
 
@@ -273,7 +278,6 @@ export class AvatarVisualization extends RoomObjectSpriteVisualization implement
             if(!_local_20 || (_local_20.length < 3)) _local_20 = AvatarVisualization.DEFAULT_CANVAS_OFFSETS;
 
             const sprite = this.getSprite(AvatarVisualization.SPRITE_INDEX_AVATAR);
-
             if(sprite)
             {
                 const highlightEnabled = ((this.object.model.getValue<number>(RoomObjectVariable.FIGURE_HIGHLIGHT_ENABLE) === 1) && (this.object.model.getValue<number>(RoomObjectVariable.FIGURE_HIGHLIGHT) === 1));
@@ -324,6 +328,8 @@ export class AvatarVisualization extends RoomObjectSpriteVisualization implement
                     sprite.spriteType = RoomObjectSpriteType.AVATAR;
                 }
             }
+
+            this.updateWindowReflectionSource();
 
             const typingBubble = this.getAddition(AvatarVisualization.TYPING_BUBBLE_ID) as TypingBubbleAddition;
 
@@ -993,6 +999,22 @@ export class AvatarVisualization extends RoomObjectSpriteVisualization implement
         this.clearAvatar();
     }
 
+    private updateWindowReflectionSource(): void
+    {
+        if(!this.object) return;
+
+        const sprite = this.getSprite(AvatarVisualization.SPRITE_INDEX_AVATAR);
+
+        if(sprite?.texture)
+        {
+            RoomWindowReflectionState.setAvatar(this.object.id, sprite.texture, this.object.getLocation());
+
+            return;
+        }
+
+        RoomWindowReflectionState.removeAvatar(this.object.id);
+    }
+
     private clearAvatar(): void
     {
         const sprite = this.getSprite(AvatarVisualization.AVATAR_LAYER_ID);
@@ -1003,6 +1025,7 @@ export class AvatarVisualization extends RoomObjectSpriteVisualization implement
             sprite.alpha = 255;
         }
 
+
         for(const avatar of this._cachedAvatars.getValues()) avatar && avatar.dispose();
 
         for(const avatar of this._cachedAvatarEffects.getValues()) avatar && avatar.dispose();
@@ -1011,6 +1034,8 @@ export class AvatarVisualization extends RoomObjectSpriteVisualization implement
         this._cachedAvatarEffects.reset();
 
         this._avatarImage = null;
+
+        if(this.object) RoomWindowReflectionState.removeAvatar(this.object.id);
     }
 
     private getAddition(id: number): IAvatarAddition
