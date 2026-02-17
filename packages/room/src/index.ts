@@ -1,3 +1,4 @@
+export * from './common';
 export * from './GetRoomContentLoader';
 export * from './GetRoomEngine';
 export * from './GetRoomManager';
