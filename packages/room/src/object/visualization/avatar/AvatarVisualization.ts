@@ -1,7 +1,7 @@
 import { AlphaTolerance, AvatarAction, AvatarGuideStatus, AvatarSetType, IAdvancedMap, IAvatarEffectListener, IAvatarImage, IAvatarImageListener, IGraphicAsset, IObjectVisualizationData, IRoomGeometry, IRoomObject, IRoomObjectModel, RoomObjectSpriteType, RoomObjectVariable } from '@nitrots/api';
 import { GetAssetManager } from '@nitrots/assets';
-import { AdvancedMap } from '@nitrots/utils';
-import { Texture } from 'pixi.js';
+import { AdvancedMap, GetRenderer } from '@nitrots/utils';
+import { Container, RenderTexture, Sprite, Texture } from 'pixi.js';
 import { RoomObjectSpriteVisualization } from '../RoomObjectSpriteVisualization';
 import { RoomWindowReflectionState } from '../RoomWindowReflectionState';
 import { AvatarVisualizationData } from './AvatarVisualizationData';
@@ -77,6 +77,9 @@ export class AvatarVisualization extends RoomObjectSpriteVisualization implement
     private _needsUpdate: boolean;
     private _geometryUpdateCounter: number;
     private _reflectionVerticalOffset: number;
+    private _reflectionOppositeTexture: Texture;
+    private _reflectionOppositeDirection: number;
+    private _reflectionOppositeBaseTexture: Texture;
 
     private _additions: Map<number, IAvatarAddition>;
 
@@ -129,6 +132,9 @@ export class AvatarVisualization extends RoomObjectSpriteVisualization implement
         this._needsUpdate = false;
         this._geometryUpdateCounter = -1;
         this._reflectionVerticalOffset = 0;
+        this._reflectionOppositeTexture = null;
+        this._reflectionOppositeDirection = -1;
+        this._reflectionOppositeBaseTexture = null;
 
         this._additions = new Map();
     }
@@ -153,6 +159,12 @@ export class AvatarVisualization extends RoomObjectSpriteVisualization implement
         super.dispose();
 
         if(this._avatarImage) this._avatarImage.dispose();
+
+        if(this._reflectionOppositeTexture)
+        {
+            this._reflectionOppositeTexture.destroy(true);
+            this._reflectionOppositeTexture = null;
+        }
 
         if(this.object) RoomWindowReflectionState.removeAvatar(this.object.id);
 
@@ -1010,6 +1022,29 @@ export class AvatarVisualization extends RoomObjectSpriteVisualization implement
         this.clearAvatar();
     }
 
+    private cloneTexture(texture: Texture): Texture
+    {
+        if(!texture) return null;
+
+        const width = Math.max(1, Math.ceil(texture.width));
+        const height = Math.max(1, Math.ceil(texture.height));
+        const target = RenderTexture.create({ width, height });
+        const sprite = new Sprite(texture);
+        const container = new Container();
+
+        container.addChild(sprite);
+
+        GetRenderer().render({
+            target,
+            container,
+            clear: true
+        });
+
+        container.destroy({ children: true });
+
+        return target;
+    }
+
     private updateWindowReflectionSource(): void
     {
         if(!this.object) return;
@@ -1018,7 +1053,45 @@ export class AvatarVisualization extends RoomObjectSpriteVisualization implement
 
         if(sprite?.texture)
         {
-            RoomWindowReflectionState.setAvatar(this.object.id, sprite.texture, this.object.getLocation(), this._reflectionVerticalOffset);
+            const currentDirection = this._avatarImage?.getDirection();
+            let oppositeTexture = sprite.texture;
+
+            if((currentDirection !== undefined) && this._avatarImage)
+            {
+                const oppositeDirection = ((currentDirection + 4) % 8);
+
+                if(oppositeDirection !== currentDirection)
+                {
+                    const highlightEnabled = ((this.object.model.getValue<number>(RoomObjectVariable.FIGURE_HIGHLIGHT_ENABLE) === 1) && (this.object.model.getValue<number>(RoomObjectVariable.FIGURE_HIGHLIGHT) === 1));
+
+                    this._avatarImage.setDirection(AvatarSetType.FULL, oppositeDirection);
+
+                    const renderedOpposite = (this._avatarImage.processAsTexture(AvatarSetType.FULL, highlightEnabled) || sprite.texture);
+
+                    if((this._reflectionOppositeDirection !== currentDirection) || (this._reflectionOppositeBaseTexture !== sprite.texture) || !this._reflectionOppositeTexture)
+                    {
+                        if(this._reflectionOppositeTexture)
+                        {
+                            this._reflectionOppositeTexture.destroy(true);
+                            this._reflectionOppositeTexture = null;
+                        }
+
+                        this._reflectionOppositeTexture = this.cloneTexture(renderedOpposite);
+                        this._reflectionOppositeDirection = currentDirection;
+                        this._reflectionOppositeBaseTexture = sprite.texture;
+                    }
+
+                    oppositeTexture = (this._reflectionOppositeTexture || renderedOpposite);
+
+                    // Restore the live avatar direction and refresh the current texture so
+                    // movement updates do not keep showing the opposite-facing texture.
+                    this._avatarImage.setDirection(AvatarSetType.FULL, currentDirection);
+
+                    sprite.texture = (this._avatarImage.processAsTexture(AvatarSetType.FULL, highlightEnabled) || sprite.texture);
+                }
+            }
+
+            RoomWindowReflectionState.setAvatar(this.object.id, sprite.texture, this.object.getLocation(), this._reflectionVerticalOffset, this.object.getDirection().x, oppositeTexture);
 
             return;
         }
@@ -1043,6 +1116,15 @@ export class AvatarVisualization extends RoomObjectSpriteVisualization implement
 
         this._cachedAvatars.reset();
         this._cachedAvatarEffects.reset();
+
+        if(this._reflectionOppositeTexture)
+        {
+            this._reflectionOppositeTexture.destroy(true);
+            this._reflectionOppositeTexture = null;
+        }
+
+        this._reflectionOppositeDirection = -1;
+        this._reflectionOppositeBaseTexture = null;
 
         this._avatarImage = null;
 

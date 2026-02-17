@@ -91,8 +91,8 @@ export class RoomPlane implements IRoomPlane
     private _windowMasks: { leftSideLoc: number; rightSideLoc: number }[] = [];
     private _lastWindowReflectionUpdateId: number = -1;
     private _windowReflectionFirstSeenAt: Map<number, number> = new Map();
-    private _windowReflectionLastVisible: Map<number, { texture: Texture; location: IVector3D; verticalOffset: number }> = new Map();
-    private _windowReflectionFadeOut: Map<number, { texture: Texture; location: IVector3D; verticalOffset: number; startedAt: number }> = new Map();
+    private _windowReflectionLastVisible: Map<number, { texture: Texture; oppositeTexture: Texture; location: IVector3D; verticalOffset: number; direction: number }> = new Map();
+    private _windowReflectionFadeOut: Map<number, { texture: Texture; oppositeTexture: Texture; location: IVector3D; verticalOffset: number; direction: number; startedAt: number }> = new Map();
 
     constructor(origin: IVector3D, location: IVector3D, leftSide: IVector3D, rightSide: IVector3D, type: number, usesMask: boolean, secondaryNormals: IVector3D[], randomSeed: number, textureOffsetX: number = 0, textureOffsetY: number = 0, textureMaxX: number = 0, textureMaxY: number = 0)
     {
@@ -884,7 +884,7 @@ export class RoomPlane implements IRoomPlane
         const container = new Container();
         const visibleAvatarIds = new Set<number>();
 
-        const addReflectionSprite = (texture: Texture, location: IVector3D, alpha: number, verticalOffset: number = 0): boolean => {
+        const addReflectionSprite = (texture: Texture, oppositeTexture: Texture, location: IVector3D, alpha: number, verticalOffset: number = 0, direction: number = 0, avatarId: number = -1): boolean => {
             if(!texture?.source || texture.source.destroyed || !texture.source.style || !location || alpha < 0) return false;
 
             const relative = Vector3d.dif(location, this._location);
@@ -908,9 +908,33 @@ export class RoomPlane implements IRoomPlane
             const x = (canvasWidth - ((canvasWidth * leftSideLoc) / this._leftSide.length));
             const y = (canvasHeight - ((canvasHeight * rightSideLoc) / this._rightSide.length)) + verticalOffset;
 
-            const sprite = new Sprite(texture);
+            const toPlaneX = (this._location.x - location.x);
+            const toPlaneY = (this._location.y - location.y);
+            const toPlaneLength = Math.hypot(toPlaneX, toPlaneY);
+
+            const facingRadians = ((((direction - 90) % 360) + 360) % 360) * (Math.PI / 180);
+            const facingX = Math.cos(facingRadians);
+            const facingY = Math.sin(facingRadians);
+            const facingWindow = (toPlaneLength > 0.001)
+                ? (((facingX * toPlaneX) + (facingY * toPlaneY)) / toPlaneLength) > 0.5
+                : false;
+
+            const deltaLeft = Math.abs(closestMask.mask.leftSideLoc - leftSideLoc);
+            const deltaRight = Math.abs(closestMask.mask.rightSideLoc - rightSideLoc);
+
+            const isInFrontOfWindow = ((closestMask.score <= 2) && ((deltaLeft <= 0.9) || (deltaRight <= 0.9)));
+            const shouldMirror = isInFrontOfWindow;
+
+            const normal2DLength = Math.hypot(this._normal.x, this._normal.y);
+            const normalX = (normal2DLength > 0.0001) ? (this._normal.x / normal2DLength) : 0;
+            const normalY = (normal2DLength > 0.0001) ? (this._normal.y / normal2DLength) : 0;
+            const normalFacingDot = Math.abs((facingX * normalX) + (facingY * normalY));
+            const useOppositeTexture = (shouldMirror && (normalFacingDot > 0.7));
+
+            const sprite = new Sprite((useOppositeTexture ? (oppositeTexture || texture) : texture));
             sprite.anchor.set(0.5, 1);
             sprite.position.set(Math.trunc(x), Math.trunc(y));
+
             sprite.scale.set(1, 1);
             sprite.tint = 0xCFE3FF;
             sprite.alpha = alpha;
@@ -935,7 +959,7 @@ export class RoomPlane implements IRoomPlane
             const progress = (elapsed / fadeDurationMs);
             const alpha = (0.4 * progress);
 
-            if(!addReflectionSprite(avatar.texture, avatar.location, alpha, avatar.verticalOffset || 0)) continue;
+            if(!addReflectionSprite(avatar.texture, avatar.oppositeTexture, avatar.location, alpha, avatar.verticalOffset || 0, avatar.direction || 0, avatar.id)) continue;
 
             if(!this._windowReflectionFirstSeenAt.has(avatar.id)) this._windowReflectionFirstSeenAt.set(avatar.id, firstSeenAt);
 
@@ -947,8 +971,10 @@ export class RoomPlane implements IRoomPlane
 
             this._windowReflectionLastVisible.set(avatar.id, {
                 texture: avatar.texture,
+                oppositeTexture: avatar.oppositeTexture,
                 location: storedLocation,
-                verticalOffset: avatar.verticalOffset || 0
+                verticalOffset: avatar.verticalOffset || 0,
+                direction: avatar.direction || 0
             });
         }
 
@@ -966,8 +992,10 @@ export class RoomPlane implements IRoomPlane
 
             this._windowReflectionFadeOut.set(id, {
                 texture: lastVisible.texture,
+                oppositeTexture: lastVisible.oppositeTexture,
                 location: lastVisible.location,
                 verticalOffset: lastVisible.verticalOffset,
+                direction: lastVisible.direction,
                 startedAt: now
             });
 
@@ -988,7 +1016,7 @@ export class RoomPlane implements IRoomPlane
 
             const alpha = (0.4 * (1 - (elapsed / fadeDurationMs)));
 
-            if(!addReflectionSprite(fadeOut.texture, fadeOut.location, alpha, fadeOut.verticalOffset)) this._windowReflectionFadeOut.delete(id);
+            if(!addReflectionSprite(fadeOut.texture, fadeOut.oppositeTexture, fadeOut.location, alpha, fadeOut.verticalOffset, fadeOut.direction, id)) this._windowReflectionFadeOut.delete(id);
         }
 
         if(!container.children.length)
