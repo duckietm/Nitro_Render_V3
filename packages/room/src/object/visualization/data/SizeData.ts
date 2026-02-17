@@ -144,8 +144,7 @@ export class SizeData
 
             if(layerId < 0 || (layerId >= this._layerCount)) return false;
 
-            // TODO: check the .nitro files for inks
-            if(layer.ink !== undefined) directionData.setLayerBlendMode(layerId, (layer.ink?.toLowerCase() as BLEND_MODES));
+            if(layer.ink !== undefined) directionData.setLayerBlendMode(layerId, this.parseLayerBlendMode(layer.ink));
 
             if(layer.tag !== undefined) directionData.setLayerTag(layerId, layer.tag);
 
@@ -161,6 +160,28 @@ export class SizeData
         }
 
         return true;
+    }
+
+    private parseLayerBlendMode(ink: string | number): BLEND_MODES
+    {
+        if(typeof ink === 'number')
+        {
+            if(ink === 33) return 'add';
+
+            return LayerData.DEFAULT_BLEND_MODE;
+        }
+
+        switch(ink.toUpperCase())
+        {
+            case 'ADD':
+                return 'add';
+            case 'SUBTRACT':
+                return 'subtract';
+            case 'DARKEN':
+                return 'darken';
+            default:
+                return LayerData.DEFAULT_BLEND_MODE;
+        }
     }
 
     public getValidDirection(direction: number): number

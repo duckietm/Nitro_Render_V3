@@ -319,6 +319,7 @@ export class FurnitureVisualization extends RoomObjectSpriteVisualization
                     sprite.offsetX = assetData.offsetX;
                     sprite.offsetY = (assetData.offsetY + this.getLayerYOffset(scale, this._direction, layerId));
                     sprite.alpha = (48 * this._alphaMultiplier);
+
                     sprite.alphaTolerance = AlphaTolerance.MATCH_NOTHING;
 
                     relativeDepth = 1;
@@ -463,9 +464,48 @@ export class FurnitureVisualization extends RoomObjectSpriteVisualization
 
         if(this._alphaMultiplier !== null) alpha = (alpha * this._alphaMultiplier);
 
+        if(this.shouldSuppressBackgroundMatteLayer(scale, direction, layerId, alpha)) alpha = 0;
+
         this._spriteAlphas[layerId] = alpha;
 
         return alpha;
+    }
+
+    private shouldSuppressBackgroundMatteLayer(scale: number, direction: number, layerId: number, alpha: number): boolean
+    {
+        if((layerId < 0) || (alpha <= 0)) return false;
+
+        const state = this.object?.getState?.(0) ?? 0;
+
+        if(state === 0 || this.isBackgroundColorBlack()) return false;
+
+        const totalLayers = Math.max((this._layerCount - this.getAdditionalLayerCount()), 0);
+
+        if(totalLayers < 3) return false;
+
+        if(!this.getLayerIgnoreMouse(scale, direction, layerId)) return false;
+
+        if(this.getLayerBlendMode(scale, direction, layerId) === 'normal') return false;
+
+        if(layerId !== (totalLayers - 1)) return false;
+
+        if(this.getLayerBlendMode(scale, direction, 0) !== 'normal') return false;
+
+        return (this.getLayerBlendMode(scale, direction, 1) !== 'normal');
+    }
+
+
+    private isBackgroundColorBlack(): boolean
+    {
+        const model = this.object?.model;
+
+        if(!model) return false;
+
+        const lightness = model.getValue<number>(RoomObjectVariable.FURNITURE_ROOM_BACKGROUND_COLOR_LIGHTNESS);
+
+        if(lightness === undefined || lightness === null) return false;
+
+        return (lightness <= 0);
     }
 
     protected getLayerColor(scale: number, layerId: number, colorId: number): number

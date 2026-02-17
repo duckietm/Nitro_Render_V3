@@ -4,8 +4,9 @@ import { FurnitureBrandedImageVisualization } from './FurnitureBrandedImageVisua
 
 export class FurnitureRoomBackgroundVisualization extends FurnitureBrandedImageVisualization
 {
-    private _imageOffset: DirectionalOffsetData;
+    private static readonly BRANDED_IMAGE_LAYER_DEPTH_BIAS: number = 0.01;
 
+    private _imageOffset: DirectionalOffsetData;
     protected imageReady(texture: Texture, imageUrl: string): void
     {
         super.imageReady(texture, imageUrl);
@@ -52,9 +53,33 @@ export class FurnitureRoomBackgroundVisualization extends FurnitureBrandedImageV
         return super.getLayerYOffset(scale, direction, layerId) + this._offsetY;
     }
 
+
+    protected getLayerAlpha(scale: number, direction: number, layerId: number): number
+    {
+        let alpha = super.getLayerAlpha(scale, direction, layerId);
+
+        if(this.shouldSuppressInkLayer(scale, direction, layerId)) alpha = 0;
+
+        return alpha;
+    }
+
+    private shouldSuppressInkLayer(scale: number, direction: number, layerId: number): boolean
+    {
+        if(this.getLayerTag(scale, direction, layerId) === FurnitureBrandedImageVisualization.BRANDED_IMAGE) return false;
+
+        return (this.getLayerBlendMode(scale, direction, layerId) !== 'normal');
+    }
+
     protected getLayerZOffset(scale: number, direction: number, layerId: number): number
     {
-        return super.getLayerZOffset(scale, direction, layerId) + (-(this._offsetZ));
+        let zOffset = (super.getLayerZOffset(scale, direction, layerId) + (-(this._offsetZ)));
+
+        if(this.getLayerTag(scale, direction, layerId) === FurnitureBrandedImageVisualization.BRANDED_IMAGE)
+        {
+            zOffset += FurnitureRoomBackgroundVisualization.BRANDED_IMAGE_LAYER_DEPTH_BIAS;
+        }
+
+        return zOffset;
     }
 
     protected getLayerIgnoreMouse(scale: number, direction: number, layerId: number): boolean
