@@ -1,4 +1,5 @@
 import { AlphaTolerance, IGraphicAsset, IObjectVisualizationData, IRoomGeometry, IRoomObjectSprite, RoomObjectVariable, RoomObjectVisualizationType } from '@nitrots/api';
+import { BlackToAlphaFilter } from '@nitrots/utils';
 import { BLEND_MODES, Filter, Texture } from 'pixi.js';
 import { RoomObjectSpriteVisualization } from '../RoomObjectSpriteVisualization';
 import { ColorData, LayerData } from '../data';
@@ -7,6 +8,7 @@ import { FurnitureVisualizationData } from './FurnitureVisualizationData';
 export class FurnitureVisualization extends RoomObjectSpriteVisualization
 {
     protected static DEPTH_MULTIPLIER: number = Math.sqrt(0.5);
+    private static _blackToAlphaFilter: BlackToAlphaFilter = null;
 
     public static TYPE: string = RoomObjectVisualizationType.FURNITURE_STATIC;
 
@@ -333,7 +335,16 @@ export class FurnitureVisualization extends RoomObjectSpriteVisualization
                 sprite.posture = this.getPostureForAsset(scale, assetData.source);
                 sprite.clickHandling = this._clickHandling;
 
-                if(sprite.blendMode !== 'add') sprite.filters = this._filters;
+                if(sprite.blendMode === 'add')
+                {
+                    if(!FurnitureVisualization._blackToAlphaFilter) FurnitureVisualization._blackToAlphaFilter = new BlackToAlphaFilter();
+
+                    sprite.filters = [FurnitureVisualization._blackToAlphaFilter];
+                }
+                else
+                {
+                    sprite.filters = this._filters;
+                }
             }
             else
             {
@@ -485,7 +496,9 @@ export class FurnitureVisualization extends RoomObjectSpriteVisualization
 
         if(!this.getLayerIgnoreMouse(scale, direction, layerId)) return false;
 
-        if(this.getLayerBlendMode(scale, direction, layerId) === 'normal') return false;
+        const blendMode = this.getLayerBlendMode(scale, direction, layerId);
+
+        if(blendMode === 'normal' || blendMode === 'add') return false;
 
         if(layerId !== (totalLayers - 1)) return false;
 
