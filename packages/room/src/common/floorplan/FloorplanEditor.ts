@@ -89,6 +89,8 @@ export class FloorplanEditor
             this._squareSelectStart = tile;
             this._squareSelectEnd = tile;
 
+            this.renderTiles();
+
             return;
         }
 
@@ -105,7 +107,11 @@ export class FloorplanEditor
         {
             const tile = this.getTileAtPosition(location);
 
-            if(tile) this._squareSelectEnd = tile;
+            if(tile)
+            {
+                this._squareSelectEnd = tile;
+                this.renderTiles();
+            }
 
             return;
         }
@@ -289,6 +295,51 @@ export class FloorplanEditor
                 this.renderer.drawImage(this._image, asset.frame.x, asset.frame.y, asset.frame.w, asset.frame.h, positionX, positionY, asset.frame.w, asset.frame.h);
             }
         }
+
+        this.renderSquareSelectionPreview();
+    }
+
+    private renderSquareSelectionPreview(): void
+    {
+        if(!this._isSquareSelectMode || !this._isPointerDown || !this._squareSelectStart || !this._squareSelectEnd) return;
+
+        const startX = Math.min(this._squareSelectStart.x, this._squareSelectEnd.x);
+        const endX = Math.max(this._squareSelectStart.x, this._squareSelectEnd.x);
+        const startY = Math.min(this._squareSelectStart.y, this._squareSelectEnd.y);
+        const endY = Math.max(this._squareSelectStart.y, this._squareSelectEnd.y);
+
+        const width = TILE_SIZE;
+        const height = TILE_SIZE / 2;
+
+        this.renderer.save();
+
+        for(let y = startY; y <= endY; y++)
+        {
+            for(let x = startX; x <= endX; x++)
+            {
+                const tile = (this._tilemap[y] && this._tilemap[y][x]);
+
+                if(!tile || tile.isBlocked) continue;
+
+                const [ tileStartX, tileStartY ] = getScreenPositionForTile(x, y);
+                const centreX = tileStartX + (width / 2);
+                const centreY = tileStartY + (height / 2);
+
+                this.renderer.beginPath();
+                this.renderer.moveTo(centreX, tileStartY);
+                this.renderer.lineTo(tileStartX + width, centreY);
+                this.renderer.lineTo(centreX, tileStartY + height);
+                this.renderer.lineTo(tileStartX, centreY);
+                this.renderer.closePath();
+                this.renderer.fillStyle = 'rgba(255, 255, 255, 0.25)';
+                this.renderer.fill();
+                this.renderer.strokeStyle = 'rgba(255, 255, 255, 0.7)';
+                this.renderer.lineWidth = 1;
+                this.renderer.stroke();
+            }
+        }
+
+        this.renderer.restore();
     }
 
     public setTilemap(map: string, blockedTiles: boolean[][]): void
