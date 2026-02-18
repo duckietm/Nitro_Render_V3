@@ -335,7 +335,7 @@ export class FurnitureVisualization extends RoomObjectSpriteVisualization
                 sprite.posture = this.getPostureForAsset(scale, assetData.source);
                 sprite.clickHandling = this._clickHandling;
 
-                if(sprite.blendMode === 'add')
+                if(sprite.blendMode === 'add' && !this.isBackgroundColorBlack())
                 {
                     if(!FurnitureVisualization._blackToAlphaFilter) FurnitureVisualization._blackToAlphaFilter = new BlackToAlphaFilter();
 
