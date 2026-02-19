@@ -929,17 +929,38 @@ export class RoomPlane implements IRoomPlane
             const normalX = (normal2DLength > 0.0001) ? (this._normal.x / normal2DLength) : 0;
             const normalY = (normal2DLength > 0.0001) ? (this._normal.y / normal2DLength) : 0;
             const normalFacingDot = Math.abs((facingX * normalX) + (facingY * normalY));
-            const useOppositeTexture = (shouldMirror && (normalFacingDot > 0.7));
 
-            const sprite = new Sprite((useOppositeTexture ? (oppositeTexture || texture) : texture));
-            sprite.anchor.set(0.5, 1);
-            sprite.position.set(Math.trunc(x), Math.trunc(y));
+            const transitionLow = 0.6;
+            const transitionHigh = 0.8;
+            let oppositeWeight = 0;
 
-            sprite.scale.set(1, 1);
-            sprite.tint = 0xCFE3FF;
-            sprite.alpha = alpha;
+            if(shouldMirror && oppositeTexture)
+            {
+                if(normalFacingDot >= transitionHigh) oppositeWeight = 1;
+                else if(normalFacingDot > transitionLow) oppositeWeight = (normalFacingDot - transitionLow) / (transitionHigh - transitionLow);
+            }
 
-            container.addChild(sprite);
+            if(oppositeWeight < 1)
+            {
+                const sprite = new Sprite(texture);
+                sprite.anchor.set(0.5, 1);
+                sprite.position.set(Math.trunc(x), Math.trunc(y));
+                sprite.scale.set(1, 1);
+                sprite.tint = 0xCFE3FF;
+                sprite.alpha = alpha * (1 - oppositeWeight);
+                container.addChild(sprite);
+            }
+
+            if(oppositeWeight > 0 && oppositeTexture)
+            {
+                const sprite = new Sprite(oppositeTexture);
+                sprite.anchor.set(0.5, 1);
+                sprite.position.set(Math.trunc(x), Math.trunc(y));
+                sprite.scale.set(1, 1);
+                sprite.tint = 0xCFE3FF;
+                sprite.alpha = alpha * oppositeWeight;
+                container.addChild(sprite);
+            }
 
             return true;
         };
