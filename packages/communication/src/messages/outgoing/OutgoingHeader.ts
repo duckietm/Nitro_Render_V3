@@ -475,4 +475,5 @@ export class OutgoingHeader
 	public static FURNITURE_PICKUP_ALL = 10017;
 	public static DELETE_ITEM = 10018;
 	public static DELETE_PET = 10030;
+	public static DELETE_BADGE = 10031;
 }
