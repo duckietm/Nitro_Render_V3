@@ -1,6 +1,5 @@
 export class OutgoingHeader
 {
-    // These packets do not belong to this revision, so these are custom packet ids
     public static CLICK_FURNI = 6002;
 
     public static ACHIEVEMENT_LIST = 219;
@@ -475,4 +474,5 @@ export class OutgoingHeader
 	
 	public static FURNITURE_PICKUP_ALL = 10017;
 	public static DELETE_ITEM = 10018;
+	public static DELETE_PET = 10030;
 }
