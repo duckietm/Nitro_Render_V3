@@ -171,14 +171,15 @@ export class BadgeImageManager
     private loadGroupBadge(badgeCode: string): boolean
     {
         const groupBadge = new GroupBadge(badgeCode);
-        const partMatches = [...badgeCode.matchAll(/[b|s][0-9]{4,6}/g)];
+        const partMatches = [...badgeCode.matchAll(/[bst][0-9]{4,6}/g)];
 
         for(const partMatch of partMatches)
         {
             const partCode = partMatch[0];
             const shortMethod = (partCode.length === 6);
             const partType = partCode[0];
-            const partId = parseInt(partCode.slice(1, shortMethod ? 3 : 4));
+            const parsedPartId = parseInt(partCode.slice(1, shortMethod ? 3 : 4));
+            const partId = ((partType === GroupBadgePart.SYMBOL_ALT) ? (parsedPartId + 100) : parsedPartId);
             const partColor = parseInt(partCode.slice(shortMethod ? 3 : 4, shortMethod ? 5 : 6));
             const partPosition = partCode.length < 6 ? 0 : parseInt(partCode.slice(shortMethod ? 5 : 6, shortMethod ? 6 : 7)); // sometimes position is ommitted
             const part = new GroupBadgePart(partType, partId, partColor, partPosition);
@@ -208,6 +209,7 @@ export class BadgeImageManager
         for(const part of groupBadge.parts)
         {
             let isFirst = true;
+            let renderedPartLayers = 0;
 
             const partNames = ((part.type === 'b') ? this._groupBases.get(part.key) : this._groupSymbols.get(part.key));
 
@@ -217,9 +219,9 @@ export class BadgeImageManager
             {
                 if(!partName || !partName.length) continue;
 
-                const texture = GetAssetManager().getTexture(`badgepart_${partName}`);
+                const texture = this.getBadgePartTexture(part.type, partName);
 
-                if(!texture) return false;
+                if(!texture) continue;
 
                 const { x, y } = part.calculatePosition(texture);
                 const sprite = new Sprite(texture);
@@ -235,9 +237,12 @@ export class BadgeImageManager
 
                 isFirst = false;
                 renderedLayers++;
+                renderedPartLayers++;
 
                 container.addChild(sprite);
             }
+
+            if(!renderedPartLayers) return false;
         }
 
         if(!renderedLayers) return false;
@@ -249,6 +254,36 @@ export class BadgeImageManager
 
         return true;
     }
+
+    private getBadgePartTexture(partType: string, rawPartName: string): Texture
+    {
+        const partName = rawPartName.replace('.png', '').replace('.gif', '');
+        const withoutLayerSuffix = partName.replace(/_part[12]$/i, '');
+        const candidates = new Set<string>();
+
+        candidates.add(partName);
+        candidates.add(withoutLayerSuffix);
+        candidates.add(`badgepart_${partName}`);
+        candidates.add(`badgepart_${withoutLayerSuffix}`);
+
+        if(!partName.startsWith('badgepart_'))
+        {
+            if((partType === 's') || (partType === 't')) candidates.add(`badgepart_symbol_${partName}`);
+            if((partType === 's') || (partType === 't')) candidates.add(`badgepart_symbol_${withoutLayerSuffix}`);
+            if(partType === 'b') candidates.add(`badgepart_base_${partName}`);
+            if(partType === 'b') candidates.add(`badgepart_base_${withoutLayerSuffix}`);
+        }
+
+        for(const candidate of candidates)
+        {
+            const texture = GetAssetManager().getTexture(candidate);
+
+            if(texture) return texture;
+        }
+
+        return null;
+    }
+
 
     private getPartTintColor(colorId: number): number | null
     {
