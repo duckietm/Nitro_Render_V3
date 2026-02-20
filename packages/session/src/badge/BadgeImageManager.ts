@@ -19,6 +19,9 @@ export class BadgeImageManager
     private _requestedBadges: Map<string, boolean> = new Map();
     private _groupBadgesQueue: Map<string, boolean> = new Map();
     private _readyToGenerateGroupBadges: boolean = false;
+    private _groupBadgeAssetsLoaded: boolean = false;
+    private _groupBadgeAssetsLoading: Promise<boolean> = null;
+    private _groupBadgeRetryTimeout: ReturnType<typeof setTimeout> = null;
 
     public async init(): Promise<void>
     {
@@ -64,9 +67,9 @@ export class BadgeImageManager
                 {
                     if(!await GetAssetManager().downloadAsset(url)) return;
 
-                    const texture = GetAssetManager().getTexture(url);
+                    const loadedTexture = GetAssetManager().getTexture(url);
 
-                    if(texture) GetEventDispatcher().dispatchEvent(new BadgeImageReadyEvent(badgeName, texture));
+                    if(loadedTexture) GetEventDispatcher().dispatchEvent(new BadgeImageReadyEvent(badgeName, loadedTexture));
                 }
 
                 catch (err)
@@ -75,16 +78,13 @@ export class BadgeImageManager
                 }
             };
 
-            loadBadge();
+            void loadBadge();
         }
 
         else if(type === BadgeImageManager.GROUP_BADGE)
         {
-            if(this._groupBadgesQueue.get(badgeName)) return;
-
             this._groupBadgesQueue.set(badgeName, true);
-
-            if(this._readyToGenerateGroupBadges) this.loadGroupBadge(badgeName);
+            void this.processGroupBadgeQueue();
         }
 
         return this.getBadgePlaceholder();
@@ -112,7 +112,63 @@ export class BadgeImageManager
         return url;
     }
 
-    private loadGroupBadge(badgeCode: string): void
+    private scheduleQueueRetry(): void
+    {
+        if(this._groupBadgeRetryTimeout) return;
+
+        this._groupBadgeRetryTimeout = setTimeout(() =>
+        {
+            this._groupBadgeRetryTimeout = null;
+            void this.processGroupBadgeQueue();
+        }, 250);
+    }
+
+    private async ensureGroupBadgeAssetsLoaded(): Promise<boolean>
+    {
+        if(this._groupBadgeAssetsLoaded) return true;
+
+        if(!this._groupBadgeAssetsLoading)
+        {
+            this._groupBadgeAssetsLoading = GetAssetManager().downloadAsset('local://group_badge')
+                .then(result =>
+                {
+                    this._groupBadgeAssetsLoaded = result;
+
+                    return result;
+                })
+                .catch(err =>
+                {
+                    NitroLogger.error(err);
+
+                    return false;
+                })
+                .finally(() => this._groupBadgeAssetsLoading = null);
+        }
+
+        return this._groupBadgeAssetsLoading;
+    }
+
+    private async processGroupBadgeQueue(): Promise<void>
+    {
+        if(!this._readyToGenerateGroupBadges || !this._groupBadgesQueue.size) return;
+
+        if(!await this.ensureGroupBadgeAssetsLoaded())
+        {
+            this.scheduleQueueRetry();
+            return;
+        }
+
+        let hasPending = false;
+
+        for(const badgeCode of Array.from(this._groupBadgesQueue.keys()))
+        {
+            if(!this.loadGroupBadge(badgeCode)) hasPending = true;
+        }
+
+        if(hasPending) this.scheduleQueueRetry();
+    }
+
+    private loadGroupBadge(badgeCode: string): boolean
     {
         const groupBadge = new GroupBadge(badgeCode);
         const partMatches = [...badgeCode.matchAll(/[b|s][0-9]{4,6}/g)];
@@ -124,19 +180,25 @@ export class BadgeImageManager
             const partType = partCode[0];
             const partId = parseInt(partCode.slice(1, shortMethod ? 3 : 4));
             const partColor = parseInt(partCode.slice(shortMethod ? 3 : 4, shortMethod ? 5 : 6));
-            const partPosition = partCode.length < 6 ? 0 : parseInt(partCode.slice(shortMethod ? 5 : 6, shortMethod ? 6 : 7)); // sometimes position is ommitted 
+            const partPosition = partCode.length < 6 ? 0 : parseInt(partCode.slice(shortMethod ? 5 : 6, shortMethod ? 6 : 7)); // sometimes position is ommitted
             const part = new GroupBadgePart(partType, partId, partColor, partPosition);
 
             groupBadge.parts.push(part);
         }
 
-        this.renderGroupBadge(groupBadge);
+        if(!this.renderGroupBadge(groupBadge)) return false;
+
+        this._requestedBadges.delete(groupBadge.code);
+        this._groupBadgesQueue.delete(groupBadge.code);
+
+        return true;
     }
 
-    private renderGroupBadge(groupBadge: GroupBadge): void
+    private renderGroupBadge(groupBadge: GroupBadge): boolean
     {
         const container = new Container();
         const tempSprite = new Sprite(Texture.EMPTY);
+        let renderedLayers = 0;
 
         tempSprite.width = GroupBadgePart.IMAGE_WIDTH;
         tempSprite.height = GroupBadgePart.IMAGE_HEIGHT;
@@ -149,37 +211,56 @@ export class BadgeImageManager
 
             const partNames = ((part.type === 'b') ? this._groupBases.get(part.key) : this._groupSymbols.get(part.key));
 
-            if(partNames)
+            if(!partNames || !partNames.length) return false;
+
+            for(const partName of partNames)
             {
-                for(const partName of partNames)
+                if(!partName || !partName.length) continue;
+
+                const texture = GetAssetManager().getTexture(`badgepart_${partName}`);
+
+                if(!texture) return false;
+
+                const { x, y } = part.calculatePosition(texture);
+                const sprite = new Sprite(texture);
+
+                sprite.position.set(x, y);
+
+                if(isFirst)
                 {
-                    if(!partName || !partName.length) continue;
+                    const tintColor = this.getPartTintColor(part.color);
 
-                    const texture = GetAssetManager().getTexture(`badgepart_${partName}`);
-
-                    if(!texture) continue;
-
-                    const { x, y } = part.calculatePosition(texture);
-                    const sprite = new Sprite(texture);
-
-                    sprite.position.set(x, y);
-
-                    if(isFirst) sprite.tint = parseInt(this._groupPartColors.get(part.color), 16);
-
-                    isFirst = false;
-
-                    container.addChild(sprite);
+                    if(tintColor !== null) sprite.tint = tintColor;
                 }
+
+                isFirst = false;
+                renderedLayers++;
+
+                container.addChild(sprite);
             }
         }
 
-        this._requestedBadges.delete(groupBadge.code);
-        this._groupBadgesQueue.delete(groupBadge.code);
+        if(!renderedLayers) return false;
 
         const texture = TextureUtils.generateTexture(container);
         GetAssetManager().setTexture(groupBadge.code, texture);
 
         GetEventDispatcher().dispatchEvent(new BadgeImageReadyEvent(groupBadge.code, texture));
+
+        return true;
+    }
+
+    private getPartTintColor(colorId: number): number | null
+    {
+        let colorHex = (this._groupPartColors.get(colorId) || this._groupPartColors.get(1) || 'FFFFFF');
+
+        if(!colorHex || !colorHex.length) return null;
+
+        if(colorHex.startsWith('#')) colorHex = colorHex.substring(1);
+
+        const tintColor = parseInt(colorHex, 16);
+
+        return Number.isFinite(tintColor) ? tintColor : null;
     }
 
     private onGroupBadgePartsEvent(event: GroupBadgePartsEvent): void
@@ -197,6 +278,6 @@ export class BadgeImageManager
         this._groupPartColors = data.partColors;
         this._readyToGenerateGroupBadges = true;
 
-        for(const badgeCode of this._groupBadgesQueue.keys()) this.loadGroupBadge(badgeCode);
+        void this.processGroupBadgeQueue();
     }
 }
