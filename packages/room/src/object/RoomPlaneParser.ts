@@ -12,7 +12,7 @@ export class RoomPlaneParser
     public static TILE_HOLE: number = -100;
     private static FLOOR_THICKNESS: number = 0.25;
     private static WALL_THICKNESS: number = 0.25;
-    private static MAX_WALL_ADDITIONAL_HEIGHT: number = 20;
+    private static MAX_WALL_ADDITIONAL_HEIGHT: number = 26;
     private _tileMatrix: number[][];
     private _tileMatrixOriginal: number[][];
     private _width: number = 0;

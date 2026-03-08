@@ -23,7 +23,7 @@ export class RoomVisualization extends RoomObjectSpriteVisualization implements 
     private static LANDSCAPE_COLOR_TOP: number = 0xFFFFFF;
     private static LANDSCAPE_COLOR_SIDE: number = 0xCCCCCC;
     private static LANDSCAPE_COLOR_BOTTOM: number = 0x999999;
-    private static ROOM_DEPTH_OFFSET: number = 1000;
+    private static ROOM_DEPTH_OFFSET: number = 2000;
 
     protected _data: RoomVisualizationData = null;
 
