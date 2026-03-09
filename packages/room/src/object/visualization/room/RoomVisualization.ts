@@ -24,6 +24,7 @@ export class RoomVisualization extends RoomObjectSpriteVisualization implements 
     private static LANDSCAPE_COLOR_SIDE: number = 0xCCCCCC;
     private static LANDSCAPE_COLOR_BOTTOM: number = 0x999999;
     private static ROOM_DEPTH_OFFSET: number = 2000;
+    private static WALL_DEPTH_OFFSET: number = 1000;
 
     protected _data: RoomVisualizationData = null;
 
@@ -891,6 +892,6 @@ export class RoomVisualization extends RoomObjectSpriteVisualization implements 
 
     public get wallRelativeDepth(): number
     {
-        return RoomVisualization.ROOM_DEPTH_OFFSET + 0.5;
+        return RoomVisualization.WALL_DEPTH_OFFSET + 0.5;
     }
 }
