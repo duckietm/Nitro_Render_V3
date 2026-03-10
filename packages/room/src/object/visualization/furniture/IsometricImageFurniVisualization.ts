@@ -80,6 +80,9 @@ export class IsometricImageFurniVisualization extends FurnitureAnimatedVisualiza
                 const asset = this.getAsset(assetName, layerId);
                 const thumbnailAssetName = `${this.getThumbnailAssetName(scale)}-${this._uniqueId}`;
                 const transformedTexture = this.generateTransformedThumbnail(k, asset || { width: 64, height: 64 });
+
+                // Use the original asset's registered offsets so the thumbnail is drawn at the
+                // furniture-defined sprite position. Fall back to centering when no asset exists.
                 const offsetX = asset ? asset.offsetX : -Math.floor(transformedTexture.width / 2);
                 const offsetY = asset ? asset.offsetY : -Math.floor(transformedTexture.height / 2);
 

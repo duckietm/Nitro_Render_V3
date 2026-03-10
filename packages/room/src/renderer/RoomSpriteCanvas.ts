@@ -1,8 +1,8 @@
-import { IRoomCanvasMouseListener, IRoomGeometry, IRoomObject, IRoomObjectSprite, IRoomObjectSpriteVisualization, IRoomRenderingCanvas, IRoomSpriteCanvasContainer, IRoomSpriteMouseEvent, MouseEventType, RoomObjectSpriteData, RoomObjectSpriteType } from '@nitrots/api';
+import { IPlaneVisualization, IRoomCanvasMouseListener, IRoomGeometry, IRoomObject, IRoomObjectSprite, IRoomObjectSpriteVisualization, IRoomPlane, IRoomRenderingCanvas, IRoomSpriteCanvasContainer, IRoomSpriteMouseEvent, MouseEventType, RoomObjectSpriteData, RoomObjectSpriteType } from '@nitrots/api';
 import { GetConfiguration } from '@nitrots/configuration';
 import { RoomSpriteMouseEvent } from '@nitrots/events';
 import { GetTicker, TextureUtils, Vector3d } from '@nitrots/utils';
-import { Container, Matrix, Point, Rectangle, Sprite, Texture } from 'pixi.js';
+import { Container, Graphics, Matrix, Point, Rectangle, Sprite, Texture } from 'pixi.js';
 import { RoomEnterEffect, RoomGeometry, RoomRotatingEffect, RoomShakingEffect } from '../utils';
 import { RoomObjectCache, RoomObjectCacheItem } from './cache';
 import { ExtendedSprite, ObjectMouseData, SortableSprite } from './utils';
@@ -18,6 +18,11 @@ export class RoomSpriteCanvas implements IRoomRenderingCanvas
     private _master: Container = null;
     private _display: Container = null;
     private _mask: Sprite = null;
+    private _boundaryMask: Graphics = null;
+    private _lastBoundaryOffsetX: number = NaN;
+    private _lastBoundaryOffsetY: number = NaN;
+    private _lastBoundaryGeometryId: number = -1;
+    private _lastBoundaryScale: number = NaN;
 
     private _sortableSprites: SortableSprite[] = [];
     private _spriteCount: number = 0;
@@ -91,6 +96,13 @@ export class RoomSpriteCanvas implements IRoomRenderingCanvas
 
             this._display = display;
         }
+
+        if(!this._boundaryMask)
+        {
+            this._boundaryMask = new Graphics();
+
+            this._master.addChild(this._boundaryMask);
+        }
     }
 
     public dispose(): void
@@ -105,6 +117,8 @@ export class RoomSpriteCanvas implements IRoomRenderingCanvas
         }
 
         if(this._mask) this._mask = null;
+
+        if(this._boundaryMask) this._boundaryMask = null;
 
         if(this._objectCache)
         {
@@ -246,6 +260,170 @@ export class RoomSpriteCanvas implements IRoomRenderingCanvas
         this.screenOffsetY = (offsetPoint.y - (point.y * this._scale));
     }
 
+    private updateBoundaryMask(): void
+    {
+        if(!this._boundaryMask || !this._display || !this._geometry) return;
+
+        const geometryId = this._geometry.updateId;
+        const offsetX = this._screenOffsetX;
+        const offsetY = this._screenOffsetY;
+        const scale = this._scale;
+
+        if(geometryId === this._lastBoundaryGeometryId && offsetX === this._lastBoundaryOffsetX && offsetY === this._lastBoundaryOffsetY && scale === this._lastBoundaryScale) return;
+
+        this._lastBoundaryGeometryId = geometryId;
+        this._lastBoundaryOffsetX = offsetX;
+        this._lastBoundaryOffsetY = offsetY;
+        this._lastBoundaryScale = scale;
+
+        const pts: { x: number; y: number }[] = [];
+        const w2 = this._width / 2;
+        const h2 = this._height / 2;
+
+        for(const object of this._container.objects.values())
+        {
+            if(!object) continue;
+
+            const viz = object.visualization as unknown as IPlaneVisualization;
+
+            if(!viz || !viz.planes) continue;
+
+            for(const plane of (viz.planes as IRoomPlane[]))
+            {
+                if(!plane || plane.type === 3) continue;
+
+                const loc = plane.location;
+                const ls = plane.leftSide;
+                const rs = plane.rightSide;
+
+                const corners = [
+                    new Vector3d(loc.x, loc.y, loc.z),
+                    new Vector3d(loc.x + rs.x, loc.y + rs.y, loc.z + rs.z),
+                    new Vector3d(loc.x + ls.x + rs.x, loc.y + ls.y + rs.y, loc.z + ls.z + rs.z),
+                    new Vector3d(loc.x + ls.x, loc.y + ls.y, loc.z + ls.z)
+                ];
+
+                for(const c of corners)
+                {
+                    const sp = this._geometry.getScreenPosition(c);
+
+                    if(!sp) continue;
+
+                    pts.push({ x: (sp.x + w2) * scale + offsetX, y: (sp.y + h2) * scale + offsetY });
+                }
+            }
+
+            break;
+        }
+
+        this._boundaryMask.clear();
+
+        if(pts.length < 3)
+        {
+            if(this._display.mask === this._boundaryMask) this._display.mask = this._mask ?? null;
+
+            return;
+        }
+
+        const hull = RoomSpriteCanvas.convexHull(pts);
+        const maskPolygon = RoomSpriteCanvas.createMaskPolygon(hull);
+
+        this._boundaryMask.poly(maskPolygon.flatMap(p => [p.x, p.y]));
+        this._boundaryMask.fill(0xFFFFFF);
+
+        if(this._display.mask !== this._boundaryMask)
+        {
+            this._display.mask = this._boundaryMask;
+        }
+    }
+
+    private static convexHull(points: { x: number; y: number }[]): { x: number; y: number }[]
+    {
+        if(points.length < 3) return points;
+
+        const sorted = [...points].sort((a, b) => (a.x !== b.x ? a.x - b.x : a.y - b.y));
+
+        const cross = (o: { x: number; y: number }, a: { x: number; y: number }, b: { x: number; y: number }) =>
+            (a.x - o.x) * (b.y - o.y) - (a.y - o.y) * (b.x - o.x);
+
+        const lower: { x: number; y: number }[] = [];
+
+        for(const p of sorted)
+        {
+            while(lower.length >= 2 && cross(lower[lower.length - 2], lower[lower.length - 1], p) <= 0) lower.pop();
+
+            lower.push(p);
+        }
+
+        const upper: { x: number; y: number }[] = [];
+
+        for(let i = sorted.length - 1; i >= 0; i--)
+        {
+            const p = sorted[i];
+
+            while(upper.length >= 2 && cross(upper[upper.length - 2], upper[upper.length - 1], p) <= 0) upper.pop();
+
+            upper.push(p);
+        }
+
+        lower.pop();
+        upper.pop();
+
+        return [...lower, ...upper];
+    }
+
+    private static createMaskPolygon(hull: { x: number; y: number }[], extension: number = 5000): { x: number; y: number }[]
+    {
+        if(hull.length < 3) return hull;
+
+        let leftIdx = 0;
+        let rightIdx = 0;
+
+        for(let i = 1; i < hull.length; i++)
+        {
+            if(hull[i].x < hull[leftIdx].x) leftIdx = i;
+            if(hull[i].x > hull[rightIdx].x) rightIdx = i;
+        }
+
+        const n = hull.length;
+
+        // Collect arc going CCW: leftIdx → rightIdx via increasing indices
+        const arcCCW: { x: number; y: number }[] = [];
+        let idx = leftIdx;
+
+        while(idx !== rightIdx)
+        {
+            arcCCW.push(hull[idx]);
+            idx = (idx + 1) % n;
+        }
+
+        arcCCW.push(hull[rightIdx]);
+
+        // Collect arc going CW: leftIdx → rightIdx via decreasing indices
+        const arcCW: { x: number; y: number }[] = [];
+        idx = leftIdx;
+
+        while(idx !== rightIdx)
+        {
+            arcCW.push(hull[idx]);
+            idx = (idx - 1 + n) % n;
+        }
+
+        arcCW.push(hull[rightIdx]);
+
+        // Bottom arc = the arc with larger average Y (floor/front tiles)
+        const avgCCW = arcCCW.reduce((s, p) => s + p.y, 0) / arcCCW.length;
+        const avgCW = arcCW.reduce((s, p) => s + p.y, 0) / arcCW.length;
+        const bottomArc = avgCCW >= avgCW ? arcCCW : arcCW;
+
+        // Build polygon: extend upward far above walls, then trace bottom boundary
+        return [
+            { x: hull[leftIdx].x, y: -extension },
+            { x: hull[rightIdx].x, y: -extension },
+            ...bottomArc.slice().reverse()
+        ];
+    }
+
     public render(time: number, update: boolean = false): void
     {
         this._canvasUpdated = false;
@@ -318,6 +496,9 @@ export class RoomSpriteCanvas implements IRoomRenderingCanvas
         }
 
         this.cleanSprites(spriteCount);
+
+        this.updateBoundaryMask();
+
 
         if(update || updateVisuals) this._canvasUpdated = true;
 

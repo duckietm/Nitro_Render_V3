@@ -701,9 +701,11 @@ export class RoomVisualization extends RoomObjectSpriteVisualization implements 
                     {
                         if(plane.visible)
                         {
-                            depth = ((plane.relativeDepth + this.floorRelativeDepth) + (id / 1000));
-
-                            if(plane.type !== RoomPlane.TYPE_FLOOR)
+                            if(plane.type === RoomPlane.TYPE_FLOOR)
+                            {
+                                depth = ((plane.relativeDepth + this.floorRelativeDepth) + (id / 1000));
+                            }
+                            else
                             {
                                 depth = ((plane.relativeDepth + this.wallRelativeDepth) + (id / 1000));
 

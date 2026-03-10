@@ -51,6 +51,10 @@ export class FurnitureGuildIsometricBadgeVisualization extends IsometricImageFur
 
     protected generateTransformedThumbnail(texture: Texture, asset: IGraphicAsset): Texture
     {
+        // Render into a texture exactly matching the asset slot (e.g. 40×58 for guild_forum layer i).
+        // dScale is derived so the sheared content fills the slot top-to-bottom without overflow:
+        //   shear contribution = 0.5 * renderWidth,  vertical fill = dScale * texture.height
+        //   => dScale = (renderHeight - 0.5 * renderWidth) / texture.height
         const renderWidth = asset.width || 64;
         const renderHeight = asset.height || renderWidth;
         const difference = (renderWidth / texture.width);
@@ -85,6 +89,7 @@ export class FurnitureGuildIsometricBadgeVisualization extends IsometricImageFur
                 matrix.ty = 0;
         }
 
+        // Pass the matrix directly as a render transform — preserves full skew/shear in Pixi.js v8.
         return TextureUtils.createAndWriteRenderTexture(renderWidth, renderHeight, new Sprite(texture), matrix);
     }
 

@@ -225,8 +225,7 @@ export class RoomPlane implements IRoomPlane
             switch(this._type)
             {
                 case RoomPlane.TYPE_FLOOR: {
-                    const heightOffset = (this._location.z + Math.min(0, this._leftSide.z, this._rightSide.z)) * geometry.scale;
-                    relativeDepth = (relativeDepth - heightOffset);
+                    relativeDepth = (relativeDepth - ((this._location.z + Math.min(0, this._leftSide.z, this._rightSide.z)) * 8));
                     break;
                 }
                 case RoomPlane.TYPE_LANDSCAPE:
