@@ -16,6 +16,9 @@ export class UserProfileParser implements IMessageParser
     private _groups: HabboGroupEntryData[];
     private _secondsSinceLastVisit: number;
     private _openProfileWindow: boolean;
+    private _backgroundId: number;
+    private _standId: number;
+    private _overlayId: number;
 
     public flush(): boolean
     {
@@ -32,6 +35,9 @@ export class UserProfileParser implements IMessageParser
         this._groups = [];
         this._secondsSinceLastVisit = 0;
         this._openProfileWindow = false;
+        this._backgroundId = 0;
+        this._standId = 0;
+        this._overlayId = 0;
 
         return true;
     }
@@ -59,6 +65,13 @@ export class UserProfileParser implements IMessageParser
 
         this._secondsSinceLastVisit = wrapper.readInt();
         this._openProfileWindow = wrapper.readBoolean();
+
+        if(wrapper.bytesAvailable)
+        {
+            this._backgroundId = wrapper.readInt();
+            this._standId = wrapper.readInt();
+            this._overlayId = wrapper.readInt();
+        }
 
         return true;
     }
@@ -126,5 +139,20 @@ export class UserProfileParser implements IMessageParser
     public get openProfileWindow(): boolean
     {
         return this._openProfileWindow;
+    }
+
+    public get backgroundId(): number
+    {
+        return this._backgroundId;
+    }
+
+    public get standId(): number
+    {
+        return this._standId;
+    }
+
+    public get overlayId(): number
+    {
+        return this._overlayId;
     }
 }
