@@ -377,7 +377,7 @@ export class RoomMessageHandler
 
         if(unitRollData)
         {
-            this._roomEngine.updateRoomObjectUserLocation(this._currentRoomId, unitRollData.id, unitRollData.location, unitRollData.targetLocation);
+            this._roomEngine.updateRoomObjectUserLocation(this._currentRoomId, unitRollData.id, unitRollData.location, unitRollData.targetLocation, false, 0, null, NaN, true);
 
             const object = this._roomEngine.getRoomObjectUser(this._currentRoomId, unitRollData.id);
 

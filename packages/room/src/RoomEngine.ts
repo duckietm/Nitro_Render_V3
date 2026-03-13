@@ -1884,7 +1884,7 @@ export class RoomEngine implements IRoomEngine, IRoomCreator, IRoomEngineService
         return true;
     }
 
-    public updateRoomObjectUserLocation(roomId: number, objectId: number, location: IVector3D, targetLocation: IVector3D, canStandUp: boolean = false, baseY: number = 0, direction: IVector3D = null, headDirection: number = NaN): boolean
+    public updateRoomObjectUserLocation(roomId: number, objectId: number, location: IVector3D, targetLocation: IVector3D, canStandUp: boolean = false, baseY: number = 0, direction: IVector3D = null, headDirection: number = NaN, skipLocationFix: boolean = false): boolean
     {
         const object = this.getRoomObjectUser(roomId, objectId);
 
@@ -1896,7 +1896,10 @@ export class RoomEngine implements IRoomEngine, IRoomCreator, IRoomEngineService
 
         if(isNaN(headDirection)) headDirection = object.model.getValue<number>(RoomObjectVariable.HEAD_DIRECTION);
 
-        object.processUpdateMessage(new ObjectAvatarUpdateMessage(this.fixedUserLocation(roomId, location), this.fixedUserLocation(roomId, targetLocation), direction, headDirection, canStandUp, baseY));
+        const fixedLoc = skipLocationFix ? location : this.fixedUserLocation(roomId, location);
+        const fixedTarget = skipLocationFix ? targetLocation : this.fixedUserLocation(roomId, targetLocation);
+
+        object.processUpdateMessage(new ObjectAvatarUpdateMessage(fixedLoc, fixedTarget, direction, headDirection, canStandUp, baseY));
 
         const roomSession = this._roomSessionManager.getSession(roomId);
 

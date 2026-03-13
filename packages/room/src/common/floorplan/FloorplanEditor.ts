@@ -411,26 +411,31 @@ export class FloorplanEditor
 
     public getCurrentTilemapString(): string
     {
-        this._width = 0;
-        this._height = 0;
+        const highestTile = this._tilemap[this._height - 1][this._width - 1];
 
-        for(let y = MAX_NUM_TILE_PER_AXIS - 1; y >= 0; y--)
+        if(highestTile.height === 'x')
         {
-            if(!this._tilemap[y]) continue;
+            this._width = -1;
+            this._height = -1;
 
-            for(let x = MAX_NUM_TILE_PER_AXIS - 1; x >= 0; x--)
+            for(let y = MAX_NUM_TILE_PER_AXIS - 1; y >= 0; y--)
             {
-                if(!this._tilemap[y][x]) continue;
+                if(!this._tilemap[y]) continue;
 
-                const tile = this._tilemap[y][x];
-
-                if(tile.height !== 'x')
+                for(let x = MAX_NUM_TILE_PER_AXIS - 1; x >= 0; x--)
                 {
-                    if((x + 1) > this._width)
-                        this._width = x + 1;
+                    if(!this._tilemap[y][x]) continue;
 
-                    if((y + 1) > this._height)
-                        this._height = y + 1;
+                    const tile = this._tilemap[y][x];
+
+                    if(tile.height !== 'x')
+                    {
+                        if((x + 1) > this._width)
+                            this._width = x + 1;
+
+                        if((y + 1) > this._height)
+                            this._height = y + 1;
+                    }
                 }
             }
         }
@@ -484,12 +489,6 @@ export class FloorplanEditor
                 if(!tile || tile.isBlocked) continue;
 
                 tile.height = shouldUnset ? 'x' : this._actionSettings.currentHeight;
-
-                if(!shouldUnset)
-                {
-                    if((x + 1) > this._width) this._width = x + 1;
-                    if((y + 1) > this._height) this._height = y + 1;
-                }
             }
         }
 
