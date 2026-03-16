@@ -4,6 +4,7 @@ export * from './avatar';
 export * from './bots';
 export * from './callforhelp';
 export * from './camera';
+export * from './commands';
 export * from './campaign';
 export * from './catalog';
 export * from './client';
