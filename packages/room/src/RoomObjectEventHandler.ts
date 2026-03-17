@@ -1,5 +1,5 @@
 import { IFurnitureStackingHeightMap, ILegacyWallGeometry, IObjectData, IRoomCanvasMouseListener, IRoomEngineServices, IRoomGeometry, IRoomObject, IRoomObjectController, IRoomObjectEventManager, ISelectedRoomObjectData, IVector3D, MouseEventType, RoomObjectCategory, RoomObjectOperationType, RoomObjectPlacementSource, RoomObjectType, RoomObjectUserType, RoomObjectVariable } from '@nitrots/api';
-import { BotPlaceComposer, ClickFurniMessageComposer, FurnitureColorWheelComposer, FurnitureDiceActivateComposer, FurnitureDiceDeactivateComposer, FurnitureFloorUpdateComposer, FurnitureGroupInfoComposer, FurnitureMultiStateComposer, FurnitureOneWayDoorComposer, FurniturePickupComposer, FurniturePlaceComposer, FurniturePostItPlaceComposer, FurnitureRandomStateComposer, FurnitureWallMultiStateComposer, FurnitureWallUpdateComposer, GetCommunication, GetItemDataComposer, GetResolutionAchievementsMessageComposer, PetMoveComposer, PetPlaceComposer, RemoveWallItemComposer, RoomUnitLookComposer, RoomUnitWalkComposer, SetItemDataMessageComposer, SetObjectDataMessageComposer } from '@nitrots/communication';
+import { BotPlaceComposer, ClickFurniMessageComposer, ClickUserMessageComposer, FurnitureColorWheelComposer, FurnitureDiceActivateComposer, FurnitureDiceDeactivateComposer, FurnitureFloorUpdateComposer, FurnitureGroupInfoComposer, FurnitureMultiStateComposer, FurnitureOneWayDoorComposer, FurniturePickupComposer, FurniturePlaceComposer, FurniturePostItPlaceComposer, FurnitureRandomStateComposer, FurnitureWallMultiStateComposer, FurnitureWallUpdateComposer, GetCommunication, GetItemDataComposer, GetResolutionAchievementsMessageComposer, PetMoveComposer, PetPlaceComposer, RemoveWallItemComposer, RoomUnitLookComposer, RoomUnitWalkComposer, SetItemDataMessageComposer, SetObjectDataMessageComposer } from '@nitrots/communication';
 import { GetConfiguration } from '@nitrots/configuration';
 import { GetEventDispatcher, RoomEngineDimmerStateEvent, RoomEngineObjectEvent, RoomEngineObjectPlacedEvent, RoomEngineObjectPlacedOnUserEvent, RoomEngineObjectPlaySoundEvent, RoomEngineRoomAdEvent, RoomEngineSamplePlaybackEvent, RoomEngineTriggerWidgetEvent, RoomEngineUseProductEvent, RoomObjectBadgeAssetEvent, RoomObjectDataRequestEvent, RoomObjectDimmerStateUpdateEvent, RoomObjectEvent, RoomObjectFloorHoleEvent, RoomObjectFurnitureActionEvent, RoomObjectHSLColorEnableEvent, RoomObjectHSLColorEnabledEvent, RoomObjectMouseEvent, RoomObjectMoveEvent, RoomObjectPlaySoundIdEvent, RoomObjectRoomAdEvent, RoomObjectSamplePlaybackEvent, RoomObjectSoundMachineEvent, RoomObjectStateChangedEvent, RoomObjectTileMouseEvent, RoomObjectWallMouseEvent, RoomObjectWidgetRequestEvent, RoomSpriteMouseEvent } from '@nitrots/events';
 import { GetRoomSessionManager, GetSessionDataManager } from '@nitrots/session';
@@ -297,7 +297,7 @@ export class RoomObjectEventHandler implements IRoomCanvasMouseListener, IRoomOb
         }
     }
 
-    private clickRoomObject(event: RoomObjectMouseEvent): void
+    private clickRoomObject(event: RoomObjectMouseEvent, operation: string): void
     {
         if(!event || event.altKey || event.ctrlKey || event.shiftKey) return;
 
@@ -319,19 +319,24 @@ export class RoomObjectEventHandler implements IRoomCanvasMouseListener, IRoomOb
 
             return;
         }
+
+        if((category === RoomObjectCategory.UNIT) && (operation === RoomObjectOperationType.OBJECT_UNDEFINED) && (objectType === RoomObjectUserType.USER))
+        {
+            GetCommunication().connection.send(new ClickUserMessageComposer(objectId));
+        }
     }
 
     private handleRoomObjectMouseClickEvent(event: RoomObjectMouseEvent, roomId: number): void
     {
         if(!event) return;
 
-        this.clickRoomObject(event);
-
         let operation = RoomObjectOperationType.OBJECT_UNDEFINED;
 
         const selectedData = this.getSelectedRoomObjectData(roomId);
 
         if(selectedData) operation = selectedData.operation;
+
+        this.clickRoomObject(event, operation);
 
         let didWalk = false;
         let didMove = false;
