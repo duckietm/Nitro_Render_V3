@@ -1,6 +1,9 @@
 import { IMessageComposer } from '@nitrots/api';
-import { TextureUtils } from '@nitrots/utils';
+import { NitroLogger, TextureUtils } from '@nitrots/utils';
 import { RenderTexture } from 'pixi.js';
+
+const MAX_IMAGE_BYTES = 2 * 1024 * 1024;
+const PNG_MAGIC_BYTES = [0x89, 0x50, 0x4E, 0x47];
 
 export class RenderRoomMessageComposer implements IMessageComposer<ConstructorParameters<typeof RenderRoomMessageComposer>>
 {
@@ -27,16 +30,63 @@ export class RenderRoomMessageComposer implements IMessageComposer<ConstructorPa
 
         if(!url) return;
 
-        const base64Data = url.split(',')[1];
-        const binaryData = Uint8Array.from(atob(base64Data), c => c.charCodeAt(0));
-
-        this._data.push(binaryData.byteLength, binaryData.buffer);
+        this.processBase64(url);
     }
 
     public assignBase64(base64: string): void
     {
+        this.processBase64(base64);
+    }
+
+    private processBase64(base64: string): void
+    {
+        if(!base64 || !base64.includes(','))
+        {
+            NitroLogger.error('Camera: invalid base64 data URL');
+            return;
+        }
+
+        if(!base64.startsWith('data:image/png'))
+        {
+            NitroLogger.error('Camera: rejected non-PNG image data');
+            return;
+        }
+
         const base64Data = base64.split(',')[1];
-        const binaryData = Uint8Array.from(atob(base64Data), c => c.charCodeAt(0));
+
+        if(!base64Data || !base64Data.length)
+        {
+            NitroLogger.error('Camera: empty base64 payload');
+            return;
+        }
+
+        let binaryData: Uint8Array;
+
+        try
+        {
+            binaryData = Uint8Array.from(atob(base64Data), c => c.charCodeAt(0));
+        }
+        catch(e)
+        {
+            NitroLogger.error('Camera: failed to decode base64 data');
+            return;
+        }
+
+        if(binaryData.byteLength > MAX_IMAGE_BYTES)
+        {
+            NitroLogger.error(`Camera: image too large (${binaryData.byteLength} bytes, max ${MAX_IMAGE_BYTES})`);
+            return;
+        }
+
+        if(binaryData.length < 4
+            || binaryData[0] !== PNG_MAGIC_BYTES[0]
+            || binaryData[1] !== PNG_MAGIC_BYTES[1]
+            || binaryData[2] !== PNG_MAGIC_BYTES[2]
+            || binaryData[3] !== PNG_MAGIC_BYTES[3])
+        {
+            NitroLogger.error('Camera: binary data does not have valid PNG header');
+            return;
+        }
 
         this._data.push(binaryData.byteLength, binaryData.buffer);
     }

@@ -3,7 +3,7 @@ import { GetAssetManager } from '@nitrots/assets';
 import { GetConfiguration } from '@nitrots/configuration';
 import { GetEventDispatcher, RoomCameraWidgetManagerEvent } from '@nitrots/events';
 import { TextureUtils } from '@nitrots/utils';
-import { BLEND_MODES, ColorMatrix, ColorMatrixFilter, Container, Filter, Sprite, Texture } from 'pixi.js';
+import { BLEND_MODES, ColorMatrix, ColorMatrixFilter, Container, Filter, RenderTexture, Sprite, Texture } from 'pixi.js';
 import { RoomCameraWidgetEffect } from './RoomCameraWidgetEffect';
 
 const COLOR_MATRIX_OFFSET_INDICES = [4, 9, 14, 19] as const;
@@ -112,7 +112,12 @@ export class RoomCameraWidgetManager implements IRoomCameraWidgetManager
 
         container.filters = filters;
 
-        return await TextureUtils.generateImage(container);
+        const resolution = texture.source.resolution || 1;
+        const renderTexture = RenderTexture.create({ width: texture.width, height: texture.height, resolution });
+
+        TextureUtils.writeToTexture(container, renderTexture);
+
+        return await TextureUtils.generateImage(renderTexture);
     }
 
     public get effects(): Map<string, IRoomCameraWidgetEffect>

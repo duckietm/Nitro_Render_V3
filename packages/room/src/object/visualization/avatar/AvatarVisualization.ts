@@ -30,7 +30,7 @@ export class AvatarVisualization extends RoomObjectSpriteVisualization implement
     private static BASE_Y_SCALE: number = 1000;
     private static AVATAR_SPRITE_DEFAULT_DEPTH: number = -0.01;
     private static AVATAR_OWN_DEPTH_ADJUST: number = 0.001;
-    private static AVATAR_SPRITE_LAYING_DEPTH: number = 0.2;
+    private static AVATAR_SPRITE_LAYING_DEPTH: number = 0.002;
 
     protected _data: AvatarVisualizationData;
 
