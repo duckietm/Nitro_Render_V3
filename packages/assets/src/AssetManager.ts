@@ -77,18 +77,9 @@ export class AssetManager implements IAssetManager
     {
         if(!urls || !urls.length) return Promise.resolve(true);
 
-        try
-        {
-            await Promise.all(urls.map(url => this.downloadAsset(url)));
+        await Promise.all(urls.map(url => this.downloadAsset(url)));
 
-            return true;
-        }
-        catch (err)
-        {
-            NitroLogger.error(err);
-        }
-
-        return false;
+        return true;
     }
 
     public async downloadAsset(url: string): Promise<boolean>
@@ -123,9 +114,18 @@ export class AssetManager implements IAssetManager
 
             if(url.endsWith('.nitro') || url.endsWith('.gif'))
             {
-                const response = await fetch(url);
+                let response: Response;
 
-                if(!response || response.status !== 200) return false;
+                try
+                {
+                    response = await fetch(url);
+                }
+                catch(fetchErr)
+                {
+                    throw new Error(`Could not fetch "${ url }" — is the URL correct and the server reachable? (${ fetchErr.message })`);
+                }
+
+                if(!response || response.status !== 200) throw new Error(`Failed to load "${ url }" — server returned HTTP ${ response?.status ?? 'no response' }`);
 
                 const arrayBuffer = await response.arrayBuffer();
 
@@ -137,19 +137,47 @@ export class AssetManager implements IAssetManager
                 }
                 else
                 {
-                    const animatedGif = AnimatedGIF.fromBuffer(arrayBuffer);
-                    const texture = animatedGif.texture;
+                    try
+                    {
+                        const animatedGif = AnimatedGIF.fromBuffer(arrayBuffer);
+                        const texture = animatedGif.texture;
 
-                    if(texture) this.setTexture(url, texture);
+                        if(texture) this.setTexture(url, texture);
+                    }
+                    catch(gifErr)
+                    {
+                        const texture = await Assets.load<Texture>(url);
+
+                        if(texture) this.setTexture(url, texture);
+                    }
                 }
             }
             else if(url.endsWith('.json'))
             {
-                const response = await fetch(url);
+                let response: Response;
 
-                if(!response || response.status !== 200) return false;
+                try
+                {
+                    response = await fetch(url);
+                }
+                catch(fetchErr)
+                {
+                    throw new Error(`Could not fetch "${ url }" — is the URL correct and the server reachable? (${ fetchErr.message })`);
+                }
 
-                const data = await response.json() as IAssetData;
+                if(!response || response.status !== 200) throw new Error(`Failed to load "${ url }" — server returned HTTP ${ response?.status ?? 'no response' }`);
+
+                let data: IAssetData;
+
+                try
+                {
+                    data = await response.json() as IAssetData;
+                }
+                catch(parseErr)
+                {
+                    throw new Error(`Invalid JSON in "${ url }" — the URL may be wrong and returning an HTML page instead of JSON (${ parseErr.message })`);
+                }
+
                 let texture: Texture = null;
                 const imagePath = data?.spritesheet?.meta?.image;
                 const fallbackImagePath = ((data?.name && data.name.length > 0)
@@ -174,9 +202,7 @@ export class AssetManager implements IAssetManager
         }
         catch (err)
         {
-            NitroLogger.error(err);
-
-            return false;
+            throw new Error(`Asset loading failed for "${ url }": ${ err.message || err }`);
         }
     }
 

@@ -70,13 +70,29 @@ export class AvatarRenderManager implements IAvatarRenderManager
 
         const url = GetConfiguration().getValue<string>('avatar.actions.url');
 
-        if(!url || !url.length) throw new Error('Invalid avatar action url');
+        if(!url || !url.length) throw new Error('Missing "avatar.actions.url" in config — add the URL to your renderer-config.json');
 
-        const response = await fetch(url);
+        let response: Response;
 
-        if(response.status !== 200) throw new Error('Invalid avatar action file');
+        try
+        {
+            response = await fetch(url);
+        }
+        catch(fetchErr)
+        {
+            throw new Error(`Could not fetch avatar actions from "${ url }" — check "avatar.actions.url" in renderer-config.json (${ fetchErr.message })`);
+        }
 
-        this._structure.updateActions(await response.json());
+        if(response.status !== 200) throw new Error(`Failed to load avatar actions from "${ url }" — server returned HTTP ${ response.status }. Check "avatar.actions.url" in renderer-config.json`);
+
+        try
+        {
+            this._structure.updateActions(await response.json());
+        }
+        catch(parseErr)
+        {
+            throw new Error(`Invalid JSON from "${ url }" — the URL may be wrong and returning an HTML page instead of JSON. Check "avatar.actions.url" in renderer-config.json (${ parseErr.message })`);
+        }
     }
 
     private async loadFigureData(): Promise<void>
@@ -87,13 +103,29 @@ export class AvatarRenderManager implements IAvatarRenderManager
 
         const url = GetConfiguration().getValue<string>('avatar.figuredata.url');
 
-        if(!url || !url.length) throw new Error('Invalid figure data url');
+        if(!url || !url.length) throw new Error('Missing "avatar.figuredata.url" in config — add the URL to your renderer-config.json');
 
-        const response = await fetch(url);
+        let response: Response;
 
-        if(response.status !== 200) throw new Error('Invalid figure data file');
+        try
+        {
+            response = await fetch(url);
+        }
+        catch(fetchErr)
+        {
+            throw new Error(`Could not fetch figure data from "${ url }" — check "avatar.figuredata.url" in renderer-config.json (${ fetchErr.message })`);
+        }
 
-        this._structure.figureData.appendJSON(await response.json());
+        if(response.status !== 200) throw new Error(`Failed to load figure data from "${ url }" — server returned HTTP ${ response.status }. Check "avatar.figuredata.url" in renderer-config.json`);
+
+        try
+        {
+            this._structure.figureData.appendJSON(await response.json());
+        }
+        catch(parseErr)
+        {
+            throw new Error(`Invalid JSON from "${ url }" — the URL may be wrong and returning an HTML page instead of JSON. Check "avatar.figuredata.url" in renderer-config.json (${ parseErr.message })`);
+        }
 
         this._structure.init();
     }

@@ -7,5 +7,6 @@ export interface IRoomSessionManager
     createSession(roomId: number, password?: string): boolean;
     startSession(session: IRoomSession): boolean;
     removeSession(id: number, openLandingView?: boolean): void;
+    tryRestoreSession(): boolean;
     viewerSession: IRoomSession;
 }

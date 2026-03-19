@@ -29,13 +29,31 @@ export class EffectAssetDownloadManager
 
         const url = GetConfiguration().getValue<string>('avatar.effectmap.url');
 
-        if(!url || !url.length) throw new Error('Invalid effect map url');
+        if(!url || !url.length) throw new Error('Missing "avatar.effectmap.url" in config — add the effect map URL to your renderer-config.json');
 
-        const response = await fetch(url);
+        let response: Response;
 
-        if(response.status !== 200) throw new Error('Invalid effect map file');
+        try
+        {
+            response = await fetch(url);
+        }
+        catch(fetchErr)
+        {
+            throw new Error(`Could not fetch effect map from "${ url }" — check "avatar.effectmap.url" in renderer-config.json (${ fetchErr.message })`);
+        }
 
-        const responseData = await response.json();
+        if(response.status !== 200) throw new Error(`Failed to load effect map from "${ url }" — server returned HTTP ${ response.status }. Check "avatar.effectmap.url" in renderer-config.json`);
+
+        let responseData: any;
+
+        try
+        {
+            responseData = await response.json();
+        }
+        catch(parseErr)
+        {
+            throw new Error(`Invalid JSON in effect map "${ url }" — the URL may be wrong. Check "avatar.effectmap.url" in renderer-config.json (${ parseErr.message })`);
+        }
 
         this.processEffectMap(responseData.effects);
 

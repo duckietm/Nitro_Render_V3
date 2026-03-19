@@ -1,7 +1,7 @@
 import { ICommunicationManager, IConnection, IMessageConfiguration, IMessageEvent } from '@nitrots/api';
 import { GetConfiguration } from '@nitrots/configuration';
-import { GetEventDispatcher, NitroEventType } from '@nitrots/events';
-import { GetTickerTime } from '@nitrots/utils';
+import { GetEventDispatcher, NitroEvent, NitroEventType } from '@nitrots/events';
+import { GetTickerTime, NitroLogger } from '@nitrots/utils';
 import { NitroMessages } from './NitroMessages';
 import { SocketConnection } from './SocketConnection';
 import { AuthenticatedEvent, ClientHelloMessageComposer, ClientPingEvent, InfoRetrieveMessageComposer, PongMessageComposer, SSOTicketMessageComposer, UniqueIDMessageComposer } from './messages';
@@ -17,7 +17,11 @@ export class CommunicationManager implements ICommunicationManager
     private _socketClosedCallback: () => void = null;
     private _socketOpenedCallback: () => void = null;
     private _socketErrorCallback: () => void = null;
-	
+    private _socketReconnectedCallback: () => void = null;
+
+    private _machineId: string = null;
+    private _initResolved: boolean = false;
+
 	private getGpu(): string {
         const e = document.createElement('canvas');
         let t, s, i, r;
@@ -41,7 +45,7 @@ export class CommunicationManager implements ICommunicationManager
             return '<mathroutines>Error</mathroutines>';
         }
     }
-	
+
 	private getCanvas(): any {
 		const e = document.createElement('canvas'), t = e.getContext('2d'), userAgent = navigator.userAgent, screenInfo = '${window.screen.width}x${window.screen.height}', currentDate = new Date().toString(), s = 'ThiosIsVerrySeCuRe02938883721moreStuff! | ${userAgent} | ${screenInfo} | ${currentDate}';
 		t.textBaseline = 'top';
@@ -67,22 +71,31 @@ export class CommunicationManager implements ICommunicationManager
 		}
 		return r;
 	}
-	
+
 	private generateMachineID(): string {
         const fp = new ClientJS();
         const uniqueId = fp.getCustomFingerprint(
-            fp.getAvailableResolution(), 
+            fp.getAvailableResolution(),
             fp.getOS(),
-            fp.getCPU(), 
-            fp.getColorDepth(), 
-            this.getGpu(), 
-            fp.getSilverlightVersion(), 
-            fp.getOSVersion(), 
-            this.getMathResult(), 
-            fp.getCanvasPrint(), 
+            fp.getCPU(),
+            fp.getColorDepth(),
+            this.getGpu(),
+            fp.getSilverlightVersion(),
+            fp.getOSVersion(),
+            this.getMathResult(),
+            fp.getCanvasPrint(),
             this.getCanvas()
         );
         return uniqueId == null ? 'FAILED' : `IID-${uniqueId}`;
+    }
+
+    private sendHandshake(): void
+    {
+        if(!this._machineId) this._machineId = this.generateMachineID();
+
+        this._connection.send(new ClientHelloMessageComposer(null, null, null, null));
+        this._connection.send(new SSOTicketMessageComposer(GetConfiguration().getValue('sso.ticket', null), GetTickerTime()));
+        this._connection.send(new UniqueIDMessageComposer(this._machineId, '', ''));
     }
 
     constructor()
@@ -99,6 +112,17 @@ export class CommunicationManager implements ICommunicationManager
         };
         GetEventDispatcher().addEventListener(NitroEventType.SOCKET_CLOSED, this._socketClosedCallback);
 
+        // Handle reconnection - re-authenticate when socket reconnects
+        this._socketReconnectedCallback = () =>
+        {
+            NitroLogger.log('[CommunicationManager] Socket reconnected, re-authenticating...');
+
+            if(GetConfiguration().getValue<boolean>('system.pong.manually', false)) this.startPong();
+
+            this.sendHandshake();
+        };
+        GetEventDispatcher().addEventListener(NitroEventType.SOCKET_RECONNECTED, this._socketReconnectedCallback);
+
         return new Promise((resolve, reject) =>
         {
             // Store callback for cleanup
@@ -106,18 +130,14 @@ export class CommunicationManager implements ICommunicationManager
             {
                 if(GetConfiguration().getValue<boolean>('system.pong.manually', false)) this.startPong();
 
-				const machineId = this.generateMachineID();
-
-                this._connection.send(new ClientHelloMessageComposer(null, null, null, null));
-                this._connection.send(new SSOTicketMessageComposer(GetConfiguration().getValue('sso.ticket', null), GetTickerTime()));
-				this._connection.send(new UniqueIDMessageComposer(machineId, '', ''));
+                this.sendHandshake();
             };
             GetEventDispatcher().addEventListener(NitroEventType.SOCKET_OPENED, this._socketOpenedCallback);
 
             // Store callback for cleanup
             this._socketErrorCallback = () =>
             {
-                reject();
+                if(!this._initResolved) reject();
             };
             GetEventDispatcher().addEventListener(NitroEventType.SOCKET_ERROR, this._socketErrorCallback);
 
@@ -125,11 +145,30 @@ export class CommunicationManager implements ICommunicationManager
             const pingEvent = new ClientPingEvent((event: ClientPingEvent) => this.sendPong());
             const authEvent = new AuthenticatedEvent((event: AuthenticatedEvent) =>
             {
+                const isReconnect = this._initResolved;
+
+                NitroLogger.log('[CommunicationManager] AuthenticatedEvent received (isReconnect=' + isReconnect + ')');
+
                 this._connection.authenticated();
 
-                resolve();
+                if(!this._initResolved)
+                {
+                    this._initResolved = true;
+                    resolve();
+                }
+
+                if(isReconnect)
+                {
+                    this._connection.ready();
+                }
 
                 event.connection.send(new InfoRetrieveMessageComposer());
+
+                if(isReconnect)
+                {
+                    NitroLogger.log('[CommunicationManager] Dispatching SOCKET_REAUTHENTICATED');
+                    GetEventDispatcher().dispatchEvent(new NitroEvent(NitroEventType.SOCKET_REAUTHENTICATED));
+                }
             });
 
             this._messageEvents.push(pingEvent, authEvent);
@@ -162,6 +201,12 @@ export class CommunicationManager implements ICommunicationManager
         {
             GetEventDispatcher().removeEventListener(NitroEventType.SOCKET_ERROR, this._socketErrorCallback);
             this._socketErrorCallback = null;
+        }
+
+        if(this._socketReconnectedCallback)
+        {
+            GetEventDispatcher().removeEventListener(NitroEventType.SOCKET_RECONNECTED, this._socketReconnectedCallback);
+            this._socketReconnectedCallback = null;
         }
 
         // Remove message events

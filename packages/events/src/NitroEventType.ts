@@ -8,6 +8,10 @@ export class NitroEventType
     public static readonly SOCKET_CLOSED = 'SOCKET_CLOSED';
     public static readonly SOCKET_ERROR = 'SOCKET_ERROR';
     public static readonly SOCKET_CONNECTED = 'SOCKET_CONNECTED';
+    public static readonly SOCKET_RECONNECTING = 'SOCKET_RECONNECTING';
+    public static readonly SOCKET_RECONNECTED = 'SOCKET_RECONNECTED';
+    public static readonly SOCKET_RECONNECT_FAILED = 'SOCKET_RECONNECT_FAILED';
+    public static readonly SOCKET_REAUTHENTICATED = 'SOCKET_REAUTHENTICATED';
     public static readonly AVATAR_ASSET_DOWNLOADED = 'AVATAR_ASSET_DOWNLOADED';
     public static readonly AVATAR_ASSET_LOADED = 'AVATAR_ASSET_LOADED';
     public static readonly AVATAR_EFFECT_DOWNLOADED = 'AVATAR_EFFECT_DOWNLOADED';

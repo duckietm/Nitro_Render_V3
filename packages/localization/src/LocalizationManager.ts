@@ -16,7 +16,7 @@ export class LocalizationManager implements ILocalizationManager
         {
             const urls = GetConfiguration().getValue<string[]>('external.texts.url').slice();
 
-            if(!urls || !urls.length) throw new Error('Invalid localization urls');
+            if(!urls || !urls.length) throw new Error('Missing "external.texts.url" in config — add the localization URL to your ui-config.json');
 
             for(let url of urls)
             {
@@ -24,11 +24,31 @@ export class LocalizationManager implements ILocalizationManager
 
                 url = GetConfiguration().interpolate(url);
 
-                const response = await fetch(url);
+                let response: Response;
 
-                if(response.status !== 200) throw new Error('Invalid localization file');
+                try
+                {
+                    response = await fetch(url);
+                }
+                catch(fetchErr)
+                {
+                    throw new Error(`Could not fetch localization file "${ url }" — check "external.texts.url" in ui-config.json (${ fetchErr.message })`);
+                }
 
-                this.parseLocalization(await response.json());
+                if(response.status !== 200) throw new Error(`Failed to load localization file "${ url }" — server returned HTTP ${ response.status }. Check "external.texts.url" in ui-config.json`);
+
+                let data: any;
+
+                try
+                {
+                    data = await response.json();
+                }
+                catch(parseErr)
+                {
+                    throw new Error(`Invalid JSON in localization file "${ url }" — the URL may be wrong. Check "external.texts.url" in ui-config.json (${ parseErr.message })`);
+                }
+
+                this.parseLocalization(data);
             }
 
             GetCommunication().registerMessageEvent(new BadgePointLimitsEvent(this.onBadgePointLimitsEvent.bind(this)));
@@ -36,7 +56,7 @@ export class LocalizationManager implements ILocalizationManager
 
         catch (err)
         {
-            throw new Error(err);
+            throw new Error(err.message || String(err));
         }
     }
 

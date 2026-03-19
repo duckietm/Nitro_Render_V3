@@ -22,27 +22,52 @@ export class ConfigurationManager implements IConfigurationManager
         try
         {
             this.resetConfiguration();
-            this.parseConfiguration(this.getDefaultConfig(), true);
+
+            const defaultConfig = this.getDefaultConfig();
+
+            if(!defaultConfig) throw new Error('Missing NitroConfig: make sure window.NitroConfig is defined in index.html');
+
+            this.parseConfiguration(defaultConfig, true);
 
             const configurationUrls = this.getValue<string[]>('config.urls').slice();
 
-            if(!configurationUrls || !configurationUrls.length) throw new Error('Invalid configuration urls');
+            if(!configurationUrls || !configurationUrls.length) throw new Error('No config.urls defined in NitroConfig — expected an array like ["/renderer-config.json", "/ui-config.json"]');
 
             for(const url of configurationUrls)
             {
                 if(!url || !url.length) return;
 
-                const response = await fetch(url);
+                let response: Response;
 
-                if(response.status !== 200) throw new Error('Invalid configuration file');
+                try
+                {
+                    response = await fetch(url);
+                }
+                catch(fetchError)
+                {
+                    throw new Error(`Failed to fetch config "${ url }" — check that the file exists and the server is reachable (${ fetchError.message })`);
+                }
 
-                this.parseConfiguration(await response.json());
+                if(response.status !== 200) throw new Error(`Failed to load config "${ url }" — server returned HTTP ${ response.status }`);
+
+                let json: any;
+
+                try
+                {
+                    json = await response.json();
+                }
+                catch(parseError)
+                {
+                    throw new Error(`Invalid JSON in config "${ url }" — check for syntax errors like trailing commas or missing quotes (${ parseError.message })`);
+                }
+
+                this.parseConfiguration(json);
             }
         }
 
         catch (err)
         {
-            throw new Error(err);
+            throw new Error(err.message || String(err));
         }
     }
 
