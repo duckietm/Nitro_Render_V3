@@ -15,13 +15,31 @@ export class ProductDataLoader
     {
         const url = GetConfiguration().getValue<string>('productdata.url');
 
-        if(!url || !url.length) throw new Error('invalid product data url');
+        if(!url || !url.length) throw new Error('Missing "productdata.url" in config — add the product data URL to your renderer-config.json');
 
-        const response = await fetch(url);
+        let response: Response;
 
-        if(response.status !== 200) throw new Error('Invalid product data file');
+        try
+        {
+            response = await fetch(url);
+        }
+        catch(fetchErr)
+        {
+            throw new Error(`Could not fetch product data from "${ url }" — check "productdata.url" in renderer-config.json (${ fetchErr.message })`);
+        }
 
-        const responseData = await response.json();
+        if(response.status !== 200) throw new Error(`Failed to load product data from "${ url }" — server returned HTTP ${ response.status }. Check "productdata.url" in renderer-config.json`);
+
+        let responseData: any;
+
+        try
+        {
+            responseData = await response.json();
+        }
+        catch(parseErr)
+        {
+            throw new Error(`Invalid JSON in product data "${ url }" — the URL may be wrong. Check "productdata.url" in renderer-config.json (${ parseErr.message })`);
+        }
 
         this.parseProducts(responseData.productdata);
     }

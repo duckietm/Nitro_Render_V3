@@ -18,13 +18,31 @@ export class FurnitureDataLoader
     {
         const url = GetConfiguration().getValue<string>('furnidata.url');
 
-        if(!url || !url.length) throw new Error('invalid furni data url');
+        if(!url || !url.length) throw new Error('Missing "furnidata.url" in config — add the furniture data URL to your renderer-config.json');
 
-        const response = await fetch(url);
+        let response: Response;
 
-        if(response.status !== 200) throw new Error('Invalid furni data file');
+        try
+        {
+            response = await fetch(url);
+        }
+        catch(fetchErr)
+        {
+            throw new Error(`Could not fetch furniture data from "${ url }" — check "furnidata.url" in renderer-config.json (${ fetchErr.message })`);
+        }
 
-        const responseData = await response.json();
+        if(response.status !== 200) throw new Error(`Failed to load furniture data from "${ url }" — server returned HTTP ${ response.status }. Check "furnidata.url" in renderer-config.json`);
+
+        let responseData: any;
+
+        try
+        {
+            responseData = await response.json();
+        }
+        catch(parseErr)
+        {
+            throw new Error(`Invalid JSON in furniture data "${ url }" — the URL may be wrong. Check "furnidata.url" in renderer-config.json (${ parseErr.message })`);
+        }
 
         if(responseData.roomitemtypes) this.parseFloorItems(responseData.roomitemtypes);
 

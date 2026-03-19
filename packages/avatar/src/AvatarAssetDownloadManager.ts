@@ -29,13 +29,31 @@ export class AvatarAssetDownloadManager
 
         const url = GetConfiguration().getValue<string>('avatar.figuremap.url');
 
-        if(!url || !url.length) throw new Error('Invalid figure map url');
+        if(!url || !url.length) throw new Error('Missing "avatar.figuremap.url" in config — add the figure map URL to your renderer-config.json');
 
-        const response = await fetch(url);
+        let response: Response;
 
-        if(response.status !== 200) throw new Error('Invalid figure map file');
+        try
+        {
+            response = await fetch(url);
+        }
+        catch(fetchErr)
+        {
+            throw new Error(`Could not fetch figure map from "${ url }" — check "avatar.figuremap.url" in renderer-config.json (${ fetchErr.message })`);
+        }
 
-        const responseData = await response.json();
+        if(response.status !== 200) throw new Error(`Failed to load figure map from "${ url }" — server returned HTTP ${ response.status }. Check "avatar.figuremap.url" in renderer-config.json`);
+
+        let responseData: any;
+
+        try
+        {
+            responseData = await response.json();
+        }
+        catch(parseErr)
+        {
+            throw new Error(`Invalid JSON in figure map "${ url }" — the URL may be wrong. Check "avatar.figuremap.url" in renderer-config.json (${ parseErr.message })`);
+        }
 
         this.processFigureMap(responseData.libraries);
 
