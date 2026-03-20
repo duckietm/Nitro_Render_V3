@@ -9,6 +9,10 @@ export class RoomUnitChatParser implements IMessageParser
     private _urls: string[];
 	private _chatColours: string;
     private _messageLength: number;
+    private _prefixText: string;
+    private _prefixColor: string;
+    private _prefixIcon: string;
+    private _prefixEffect: string;
 
     public flush(): boolean
     {
@@ -19,6 +23,10 @@ export class RoomUnitChatParser implements IMessageParser
         this._urls = [];
 		this._chatColours = null;
         this._messageLength = 0;
+        this._prefixText = '';
+        this._prefixColor = '';
+        this._prefixIcon = '';
+        this._prefixEffect = '';
 
         return true;
     }
@@ -33,9 +41,13 @@ export class RoomUnitChatParser implements IMessageParser
         this._bubble = wrapper.readInt();
 
         this.parseUrls(wrapper);
-		
+
 		this._chatColours = wrapper.readString();
         this._messageLength = wrapper.readInt();
+        this._prefixText = wrapper.readString();
+        this._prefixColor = wrapper.readString();
+        this._prefixIcon = wrapper.readString();
+        this._prefixEffect = wrapper.readString();
 
         return true;
     }
@@ -82,7 +94,7 @@ export class RoomUnitChatParser implements IMessageParser
     {
         return this._urls;
     }
-	
+
 	public get chatColours(): string
     {
         return this._chatColours;
@@ -91,5 +103,25 @@ export class RoomUnitChatParser implements IMessageParser
     public get messageLength(): number
     {
         return this._messageLength;
+    }
+
+    public get prefixText(): string
+    {
+        return this._prefixText;
+    }
+
+    public get prefixColor(): string
+    {
+        return this._prefixColor;
+    }
+
+    public get prefixIcon(): string
+    {
+        return this._prefixIcon;
+    }
+
+    public get prefixEffect(): string
+    {
+        return this._prefixEffect;
     }
 }

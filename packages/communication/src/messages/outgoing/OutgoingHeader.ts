@@ -477,4 +477,10 @@ export class OutgoingHeader
 	public static DELETE_ITEM = 10018;
 	public static DELETE_PET = 10030;
 	public static DELETE_BADGE = 10031;
+
+    // Custom Prefixes
+    public static REQUEST_PREFIXES = 7011;
+    public static SET_ACTIVE_PREFIX = 7012;
+    public static DELETE_PREFIX = 7013;
+    public static PURCHASE_PREFIX = 7014;
 }

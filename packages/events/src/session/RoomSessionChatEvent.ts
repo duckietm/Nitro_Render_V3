@@ -24,8 +24,12 @@ export class RoomSessionChatEvent extends RoomSessionEvent
     private _links: string[];
     private _extraParam: number;
     private _style: number;
+    private _prefixText: string;
+    private _prefixColor: string;
+    private _prefixIcon: string;
+    private _prefixEffect: string;
 
-    constructor(type: string, session: IRoomSession, objectId: number, message: string, chatType: number, style: number = 0, chatColours: string[], links: string[] = null, extraParam: number = -1)
+    constructor(type: string, session: IRoomSession, objectId: number, message: string, chatType: number, style: number = 0, chatColours: string[], links: string[] = null, extraParam: number = -1, prefixText: string = '', prefixColor: string = '', prefixIcon: string = '', prefixEffect: string = '')
     {
         super(type, session);
 
@@ -36,6 +40,10 @@ export class RoomSessionChatEvent extends RoomSessionEvent
         this._links = links;
         this._extraParam = extraParam;
         this._style = style;
+        this._prefixText = prefixText;
+        this._prefixColor = prefixColor;
+        this._prefixIcon = prefixIcon;
+        this._prefixEffect = prefixEffect;
     }
 
     public get objectId(): number
@@ -67,9 +75,29 @@ export class RoomSessionChatEvent extends RoomSessionEvent
     {
         return this._style;
     }
-	
+
 	public get chatColours(): string[]
     {
         return this._chatColours;
+    }
+
+    public get prefixText(): string
+    {
+        return this._prefixText;
+    }
+
+    public get prefixColor(): string
+    {
+        return this._prefixColor;
+    }
+
+    public get prefixIcon(): string
+    {
+        return this._prefixIcon;
+    }
+
+    public get prefixEffect(): string
+    {
+        return this._prefixEffect;
     }
 }

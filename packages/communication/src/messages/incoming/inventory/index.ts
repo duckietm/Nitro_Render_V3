@@ -5,4 +5,5 @@ export * from './clothes';
 export * from './furni';
 export * from './furni/gifts';
 export * from './pets';
+export * from './prefixes';
 export * from './trading';

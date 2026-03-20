@@ -475,4 +475,9 @@ export class IncomingHeader
     public static RENTABLE_FURNI_RENT_OR_BUYOUT_OFFER = 35;
     public static HANDSHAKE_IDENTITY_ACCOUNT = 3523;
     public static AVAILABLE_COMMANDS = 4050;
+
+    // Custom Prefixes
+    public static USER_PREFIXES = 7001;
+    public static PREFIX_RECEIVED = 7002;
+    public static ACTIVE_PREFIX_UPDATED = 7003;
 }

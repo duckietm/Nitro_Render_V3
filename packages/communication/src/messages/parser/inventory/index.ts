@@ -4,5 +4,6 @@ export * from './badges';
 export * from './clothing';
 export * from './furniture';
 export * from './pets';
+export * from './prefixes';
 export * from './purse';
 export * from './trading';
