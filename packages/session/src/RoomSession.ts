@@ -9,6 +9,8 @@ export class RoomSession implements IRoomSession
 
     private _roomId: number = 0;
     private _password: string = null;
+    private _spawnX: number = -1;
+    private _spawnY: number = -1;
     private _state: string = RoomSessionEvent.CREATED;
     private _tradeMode: number = RoomTradingLevelEnum.NO_TRADING;
     private _doorMode: number = 0;
@@ -57,7 +59,7 @@ export class RoomSession implements IRoomSession
     {
         if(!GetCommunication().connection) return false;
 
-        GetCommunication().connection.send(new RoomEnterComposer(this._roomId, this._password));
+        GetCommunication().connection.send(new RoomEnterComposer(this._roomId, this._password, this._spawnX, this._spawnY));
 
         return true;
     }
@@ -324,6 +326,26 @@ export class RoomSession implements IRoomSession
     public set password(password: string)
     {
         this._password = password;
+    }
+
+    public get spawnX(): number
+    {
+        return this._spawnX;
+    }
+
+    public set spawnX(x: number)
+    {
+        this._spawnX = x;
+    }
+
+    public get spawnY(): number
+    {
+        return this._spawnY;
+    }
+
+    public set spawnY(y: number)
+    {
+        this._spawnY = y;
     }
 
     public get state(): string
