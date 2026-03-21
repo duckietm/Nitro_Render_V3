@@ -10,6 +10,7 @@ import { SelectedRoomObjectData } from './utils';
 
 export class RoomObjectEventHandler implements IRoomCanvasMouseListener, IRoomObjectEventManager
 {
+    private static readonly CLICK_USER_LOOK_DELAY_MS = 120;
     private _eventIds: Map<number, Map<string, string>> = new Map();
 
     private _selectedAvatarId: number = -1;
@@ -17,6 +18,7 @@ export class RoomObjectEventHandler implements IRoomCanvasMouseListener, IRoomOb
     private _selectedObjectCategory: number = -2;
     private _whereYouClickIsWhereYouGo: boolean = true;
     private _objectPlacementSource: string = null;
+    private _pendingAvatarLookTimeout: ReturnType<typeof setTimeout> = null;
 
     constructor(
         private readonly _roomEngine: IRoomEngineServices)
@@ -2080,6 +2082,8 @@ export class RoomObjectEventHandler implements IRoomCanvasMouseListener, IRoomOb
     {
         if(!this._roomEngine) return;
 
+        this.clearPendingAvatarLook();
+
         const _local_4 = RoomObjectCategory.UNIT;
         const _local_5 = this._roomEngine.getRoomObject(k, this._selectedAvatarId, _local_4);
 
@@ -2100,15 +2104,26 @@ export class RoomObjectEventHandler implements IRoomCanvasMouseListener, IRoomOb
             {
                 _local_5.logic.processUpdateMessage(new ObjectAvatarSelectedMessage(true));
 
-                _local_6 = true;
+                  _local_6 = true;
 
-                this._selectedAvatarId = _arg_2;
+                  this._selectedAvatarId = _arg_2;
 
-                const location = _local_5.getLocation();
+                  const location = _local_5.getLocation();
 
-                if(location) GetCommunication().connection.send(new RoomUnitLookComposer(~~(location.x), ~~(location.y)));
-            }
-        }
+                  if(location)
+                  {
+                      this._pendingAvatarLookTimeout = setTimeout(() =>
+                      {
+                          this._pendingAvatarLookTimeout = null;
+
+                          if(this.shouldSuppressAvatarLook()) return;
+                          if(this._selectedAvatarId !== _arg_2) return;
+
+                          GetCommunication().connection.send(new RoomUnitLookComposer(~~(location.x), ~~(location.y)));
+                      }, RoomObjectEventHandler.CLICK_USER_LOOK_DELAY_MS);
+                  }
+              }
+          }
 
         const selectionArrow = this._roomEngine.getRoomObjectSelectionArrow(k);
 
@@ -2117,6 +2132,26 @@ export class RoomObjectEventHandler implements IRoomCanvasMouseListener, IRoomOb
             if(_local_6 && !this._roomEngine.isPlayingGame()) selectionArrow.logic.processUpdateMessage(new ObjectVisibilityUpdateMessage(ObjectVisibilityUpdateMessage.ENABLED));
             else selectionArrow.logic.processUpdateMessage(new ObjectVisibilityUpdateMessage(ObjectVisibilityUpdateMessage.DISABLED));
         }
+    }
+
+    public clearSelectedAvatar(roomId: number): void
+    {
+        this.setSelectedAvatar(roomId, 0, false);
+    }
+
+    private clearPendingAvatarLook(): void
+    {
+        if(!this._pendingAvatarLookTimeout) return;
+
+        clearTimeout(this._pendingAvatarLookTimeout);
+        this._pendingAvatarLookTimeout = null;
+    }
+
+    private shouldSuppressAvatarLook(): boolean
+    {
+        const control = (globalThis as any).__nitroAvatarClickControl;
+
+        return !!control && (control.suppressRotateUntil > Date.now());
     }
 
     private resetSelectedObjectData(roomId: number): void

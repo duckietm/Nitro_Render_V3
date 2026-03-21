@@ -65,6 +65,7 @@ export interface IRoomEngine
     getFurnitureWallName(typeId: number, extra?: string): string;
     selectRoomObject(roomId: number, objectId: number, objectCategory: number): void;
     setSelectedAvatar(roomId: number, objectId: number): void;
+    clearSelectedAvatar(roomId: number): void;
     cancelRoomObjectInsert(): void;
     getPetColorResult(petIndex: number, paletteIndex: number): IPetColorResult;
     getPetColorResultsForTag(petIndex: number, tagName: string): IPetColorResult[];
