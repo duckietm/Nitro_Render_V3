@@ -63,13 +63,14 @@ export class WiredFilter extends Filter
 
             void main(void) {
                 vec4 currentColor = texture(uTexture, vTextureCoord);
-                vec3 colorLine = uLineColor * currentColor.a;
-                vec3 colorOverlay = uColor * currentColor.a;
+                vec3 colorLine = uLineColor;
+                vec3 colorOverlay = uColor;
 
                 if(currentColor.r == 0.0 && currentColor.g == 0.0 && currentColor.b == 0.0 && currentColor.a > 0.0) {
                     finalColor = vec4(colorLine.r, colorLine.g, colorLine.b, currentColor.a);
                 } else if(currentColor.a > 0.0) {
-                    finalColor = vec4(colorOverlay.r, colorOverlay.g, colorOverlay.b, currentColor.a);
+                    vec3 blendedOverlay = mix(currentColor.rgb, colorOverlay, 0.28);
+                    finalColor = vec4(blendedOverlay.r, blendedOverlay.g, blendedOverlay.b, currentColor.a);
                 }
             }
             `,

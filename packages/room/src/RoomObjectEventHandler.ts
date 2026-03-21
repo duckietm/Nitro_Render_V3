@@ -1,5 +1,5 @@
 import { IFurnitureStackingHeightMap, ILegacyWallGeometry, IObjectData, IRoomCanvasMouseListener, IRoomEngineServices, IRoomGeometry, IRoomObject, IRoomObjectController, IRoomObjectEventManager, ISelectedRoomObjectData, IVector3D, MouseEventType, RoomObjectCategory, RoomObjectOperationType, RoomObjectPlacementSource, RoomObjectType, RoomObjectUserType, RoomObjectVariable } from '@nitrots/api';
-import { BotPlaceComposer, ClickFurniMessageComposer, FurnitureColorWheelComposer, FurnitureDiceActivateComposer, FurnitureDiceDeactivateComposer, FurnitureFloorUpdateComposer, FurnitureGroupInfoComposer, FurnitureMultiStateComposer, FurnitureOneWayDoorComposer, FurniturePickupComposer, FurniturePlaceComposer, FurniturePostItPlaceComposer, FurnitureRandomStateComposer, FurnitureWallMultiStateComposer, FurnitureWallUpdateComposer, GetCommunication, GetItemDataComposer, GetResolutionAchievementsMessageComposer, PetMoveComposer, PetPlaceComposer, RemoveWallItemComposer, RoomUnitLookComposer, RoomUnitWalkComposer, SetItemDataMessageComposer, SetObjectDataMessageComposer } from '@nitrots/communication';
+import { BotPlaceComposer, ClickFurniMessageComposer, ClickUserMessageComposer, FurnitureColorWheelComposer, FurnitureDiceActivateComposer, FurnitureDiceDeactivateComposer, FurnitureFloorUpdateComposer, FurnitureGroupInfoComposer, FurnitureMultiStateComposer, FurnitureOneWayDoorComposer, FurniturePickupComposer, FurniturePlaceComposer, FurniturePostItPlaceComposer, FurnitureRandomStateComposer, FurnitureWallMultiStateComposer, FurnitureWallUpdateComposer, GetCommunication, GetItemDataComposer, GetResolutionAchievementsMessageComposer, PetMoveComposer, PetPlaceComposer, RemoveWallItemComposer, RoomUnitLookComposer, RoomUnitWalkComposer, SetItemDataMessageComposer, SetObjectDataMessageComposer } from '@nitrots/communication';
 import { GetConfiguration } from '@nitrots/configuration';
 import { GetEventDispatcher, RoomEngineDimmerStateEvent, RoomEngineObjectEvent, RoomEngineObjectPlacedEvent, RoomEngineObjectPlacedOnUserEvent, RoomEngineObjectPlaySoundEvent, RoomEngineRoomAdEvent, RoomEngineSamplePlaybackEvent, RoomEngineTriggerWidgetEvent, RoomEngineUseProductEvent, RoomObjectBadgeAssetEvent, RoomObjectDataRequestEvent, RoomObjectDimmerStateUpdateEvent, RoomObjectEvent, RoomObjectFloorHoleEvent, RoomObjectFurnitureActionEvent, RoomObjectHSLColorEnableEvent, RoomObjectHSLColorEnabledEvent, RoomObjectMouseEvent, RoomObjectMoveEvent, RoomObjectPlaySoundIdEvent, RoomObjectRoomAdEvent, RoomObjectSamplePlaybackEvent, RoomObjectSoundMachineEvent, RoomObjectStateChangedEvent, RoomObjectTileMouseEvent, RoomObjectWallMouseEvent, RoomObjectWidgetRequestEvent, RoomSpriteMouseEvent } from '@nitrots/events';
 import { GetRoomSessionManager, GetSessionDataManager } from '@nitrots/session';
@@ -10,6 +10,7 @@ import { SelectedRoomObjectData } from './utils';
 
 export class RoomObjectEventHandler implements IRoomCanvasMouseListener, IRoomObjectEventManager
 {
+    private static readonly CLICK_USER_LOOK_DELAY_MS = 120;
     private _eventIds: Map<number, Map<string, string>> = new Map();
 
     private _selectedAvatarId: number = -1;
@@ -17,6 +18,7 @@ export class RoomObjectEventHandler implements IRoomCanvasMouseListener, IRoomOb
     private _selectedObjectCategory: number = -2;
     private _whereYouClickIsWhereYouGo: boolean = true;
     private _objectPlacementSource: string = null;
+    private _pendingAvatarLookTimeout: ReturnType<typeof setTimeout> = null;
 
     constructor(
         private readonly _roomEngine: IRoomEngineServices)
@@ -297,7 +299,7 @@ export class RoomObjectEventHandler implements IRoomCanvasMouseListener, IRoomOb
         }
     }
 
-    private clickRoomObject(event: RoomObjectMouseEvent): void
+    private clickRoomObject(event: RoomObjectMouseEvent, operation: string): void
     {
         if(!event || event.altKey || event.ctrlKey || event.shiftKey) return;
 
@@ -319,19 +321,24 @@ export class RoomObjectEventHandler implements IRoomCanvasMouseListener, IRoomOb
 
             return;
         }
+
+        if((category === RoomObjectCategory.UNIT) && (operation === RoomObjectOperationType.OBJECT_UNDEFINED) && (objectType === RoomObjectUserType.USER))
+        {
+            GetCommunication().connection.send(new ClickUserMessageComposer(objectId));
+        }
     }
 
     private handleRoomObjectMouseClickEvent(event: RoomObjectMouseEvent, roomId: number): void
     {
         if(!event) return;
 
-        this.clickRoomObject(event);
-
         let operation = RoomObjectOperationType.OBJECT_UNDEFINED;
 
         const selectedData = this.getSelectedRoomObjectData(roomId);
 
         if(selectedData) operation = selectedData.operation;
+
+        this.clickRoomObject(event, operation);
 
         let didWalk = false;
         let didMove = false;
@@ -2075,6 +2082,8 @@ export class RoomObjectEventHandler implements IRoomCanvasMouseListener, IRoomOb
     {
         if(!this._roomEngine) return;
 
+        this.clearPendingAvatarLook();
+
         const _local_4 = RoomObjectCategory.UNIT;
         const _local_5 = this._roomEngine.getRoomObject(k, this._selectedAvatarId, _local_4);
 
@@ -2095,15 +2104,26 @@ export class RoomObjectEventHandler implements IRoomCanvasMouseListener, IRoomOb
             {
                 _local_5.logic.processUpdateMessage(new ObjectAvatarSelectedMessage(true));
 
-                _local_6 = true;
+                  _local_6 = true;
 
-                this._selectedAvatarId = _arg_2;
+                  this._selectedAvatarId = _arg_2;
 
-                const location = _local_5.getLocation();
+                  const location = _local_5.getLocation();
 
-                if(location) GetCommunication().connection.send(new RoomUnitLookComposer(~~(location.x), ~~(location.y)));
-            }
-        }
+                  if(location)
+                  {
+                      this._pendingAvatarLookTimeout = setTimeout(() =>
+                      {
+                          this._pendingAvatarLookTimeout = null;
+
+                          if(this.shouldSuppressAvatarLook()) return;
+                          if(this._selectedAvatarId !== _arg_2) return;
+
+                          GetCommunication().connection.send(new RoomUnitLookComposer(~~(location.x), ~~(location.y)));
+                      }, RoomObjectEventHandler.CLICK_USER_LOOK_DELAY_MS);
+                  }
+              }
+          }
 
         const selectionArrow = this._roomEngine.getRoomObjectSelectionArrow(k);
 
@@ -2112,6 +2132,26 @@ export class RoomObjectEventHandler implements IRoomCanvasMouseListener, IRoomOb
             if(_local_6 && !this._roomEngine.isPlayingGame()) selectionArrow.logic.processUpdateMessage(new ObjectVisibilityUpdateMessage(ObjectVisibilityUpdateMessage.ENABLED));
             else selectionArrow.logic.processUpdateMessage(new ObjectVisibilityUpdateMessage(ObjectVisibilityUpdateMessage.DISABLED));
         }
+    }
+
+    public clearSelectedAvatar(roomId: number): void
+    {
+        this.setSelectedAvatar(roomId, 0, false);
+    }
+
+    private clearPendingAvatarLook(): void
+    {
+        if(!this._pendingAvatarLookTimeout) return;
+
+        clearTimeout(this._pendingAvatarLookTimeout);
+        this._pendingAvatarLookTimeout = null;
+    }
+
+    private shouldSuppressAvatarLook(): boolean
+    {
+        const control = (globalThis as any).__nitroAvatarClickControl;
+
+        return !!control && (control.suppressRotateUntil > Date.now());
     }
 
     private resetSelectedObjectData(roomId: number): void

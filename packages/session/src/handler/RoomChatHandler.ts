@@ -54,7 +54,7 @@ export class RoomChatHandler extends BaseHandler
 
         if(!parser) return;
 
-        GetEventDispatcher().dispatchEvent(new RoomSessionChatEvent(RoomSessionChatEvent.CHAT_EVENT, session, parser.giverUserId, '', RoomSessionChatEvent.CHAT_TYPE_HAND_ITEM_RECEIVED, SystemChatStyleEnum.GENERIC, [], parser.handItemType));
+        GetEventDispatcher().dispatchEvent(new RoomSessionChatEvent(RoomSessionChatEvent.CHAT_EVENT, session, parser.giverUserId, '', RoomSessionChatEvent.CHAT_TYPE_HAND_ITEM_RECEIVED, SystemChatStyleEnum.GENERIC, [], null, parser.handItemType));
     }
 
     private onRespectReceivedEvent(event: RespectReceivedEvent): void
@@ -136,7 +136,7 @@ export class RoomChatHandler extends BaseHandler
                 break;
         }
 
-        GetEventDispatcher().dispatchEvent(new RoomSessionChatEvent(RoomSessionChatEvent.CHAT_EVENT, session, petData.roomIndex, '', chatType, SystemChatStyleEnum.GENERIC, null, userRoomIndex));
+        GetEventDispatcher().dispatchEvent(new RoomSessionChatEvent(RoomSessionChatEvent.CHAT_EVENT, session, petData.roomIndex, '', chatType, SystemChatStyleEnum.GENERIC, [], null, userRoomIndex));
     }
 
     private onFloodControlEvent(event: FloodControlEvent): void
@@ -168,6 +168,6 @@ export class RoomChatHandler extends BaseHandler
 
         if(!parser) return;
 
-        GetEventDispatcher().dispatchEvent(new RoomSessionChatEvent(RoomSessionChatEvent.CHAT_EVENT, session, session.ownRoomIndex, '', RoomSessionChatEvent.CHAT_TYPE_MUTE_REMAINING, SystemChatStyleEnum.GENERIC, [], parser.seconds));
+        GetEventDispatcher().dispatchEvent(new RoomSessionChatEvent(RoomSessionChatEvent.CHAT_EVENT, session, session.ownRoomIndex, '', RoomSessionChatEvent.CHAT_TYPE_MUTE_REMAINING, SystemChatStyleEnum.GENERIC, [], null, parser.seconds));
     }
 }
