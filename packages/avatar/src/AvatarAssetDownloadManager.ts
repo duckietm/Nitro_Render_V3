@@ -97,7 +97,7 @@ export class AvatarAssetDownloadManager
 
             const downloadLibrary = new AvatarAssetDownloadLibrary(libraryName, revision, downloadUrl, this._assets);
 
-            for(const part of library.parts)
+            for(const part of (library.parts || []))
             {
                 const id = (part.id as string);
                 const type = (part.type as string);

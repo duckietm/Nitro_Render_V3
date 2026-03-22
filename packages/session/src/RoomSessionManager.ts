@@ -226,12 +226,10 @@ export class RoomSessionManager implements IRoomSessionManager, IRoomHandlerList
         {
             NitroLogger.log('[RoomSessionManager] Existing session found for room ' + roomId + ' — sending room enter request');
 
-            // Re-send room enter request to the server. This handles two cases:
-            // 1. Session resume (habbo still in room on server): server treats it
-            //    as a no-op or re-entry to the same room — harmless.
-            // 2. Server restart (habbo not in any room): server places the habbo
-            //    in the room so the client view matches server state.
-            GetCommunication().connection.send(new RoomEnterComposer(roomId, password));
+            // Re-send room enter request to the server with saved spawn coordinates.
+            // The server will place the habbo directly at the saved position
+            // instead of the door tile, providing a seamless reconnection experience.
+            GetCommunication().connection.send(new RoomEnterComposer(roomId, password, this._savedPosX, this._savedPosY));
 
             // Keep the guard up briefly to absorb any stray server-side redirects
             // (DesktopViewEvent, etc.) from the login packet sequence, then drop it.
@@ -256,9 +254,9 @@ export class RoomSessionManager implements IRoomSessionManager, IRoomHandlerList
         this._sessions.clear();
         this._viewerSession = null;
 
-        // Send the room enter request. The guard stays active to block
-        // DesktopViewEvent / home room redirects from the server's login sequence.
-        this.createSession(roomId, password);
+        // Send the room enter request with saved spawn coordinates. The server
+        // will place the habbo at the saved position instead of the door tile.
+        this.createSession(roomId, password, this._savedPosX, this._savedPosY);
 
         // Keep the guard up for a generous window to absorb any DesktopViewEvent
         // or other server-side redirects that arrive after authentication.
@@ -299,13 +297,32 @@ export class RoomSessionManager implements IRoomSessionManager, IRoomHandlerList
 
             const password = sessionStorage.getItem(STORAGE_KEY_ROOM_PASSWORD) || null;
 
-            NitroLogger.log('[RoomSessionManager] Restoring session for room ' + roomId + ' from sessionStorage');
+            // Read saved position for page-reload restore
+            let spawnX = -1;
+            let spawnY = -1;
+
+            try
+            {
+                const posX = sessionStorage.getItem(STORAGE_KEY_POS_X);
+                const posY = sessionStorage.getItem(STORAGE_KEY_POS_Y);
+
+                if(posX && posY)
+                {
+                    spawnX = parseInt(posX, 10);
+                    spawnY = parseInt(posY, 10);
+
+                    if(isNaN(spawnX) || isNaN(spawnY)) { spawnX = -1; spawnY = -1; }
+                }
+            }
+            catch(e) { /* ignore */ }
+
+            NitroLogger.log('[RoomSessionManager] Restoring session for room ' + roomId + ' from sessionStorage (spawn: ' + spawnX + ', ' + spawnY + ')');
 
             // Set the guard so DesktopViewEvent from the server's login sequence
             // doesn't kick us to hotel view before we enter the room
             this._isReconnecting = true;
 
-            this.createSession(roomId, password);
+            this.createSession(roomId, password, spawnX, spawnY);
 
             // Drop the guard when room entry succeeds or after timeout
             this.clearGuardTimer();
@@ -364,7 +381,7 @@ export class RoomSessionManager implements IRoomSessionManager, IRoomHandlerList
             sessionStorage.removeItem(STORAGE_KEY_ROOM_PASSWORD);
             // Note: position keys (POS_X, POS_Y) are NOT cleared here.
             // They persist across the disconnect→reconnect cycle and are
-            // consumed by walkToSavedPosition() after successful re-entry.
+            // sent to the server as spawn coordinates during re-entry.
         }
         catch(e)
         {
@@ -378,7 +395,6 @@ export class RoomSessionManager implements IRoomSessionManager, IRoomHandlerList
         {
             sessionStorage.removeItem(STORAGE_KEY_POS_X);
             sessionStorage.removeItem(STORAGE_KEY_POS_Y);
-            sessionStorage.removeItem('nitro.session.posLocked');
         }
         catch(e)
         {
@@ -398,9 +414,6 @@ export class RoomSessionManager implements IRoomSessionManager, IRoomHandlerList
             this._savedPosX = parseInt(posX, 10);
             this._savedPosY = parseInt(posY, 10);
 
-            // Lock position saving so room re-entry doesn't overwrite saved position
-            sessionStorage.setItem('nitro.session.posLocked', '1');
-
             NitroLogger.log('[RoomSessionManager] Snapshot saved position (' + this._savedPosX + ', ' + this._savedPosY + ')');
         }
         catch(e)
@@ -408,24 +421,6 @@ export class RoomSessionManager implements IRoomSessionManager, IRoomHandlerList
             this._savedPosX = -1;
             this._savedPosY = -1;
         }
-    }
-
-    private walkToSavedPosition(): void
-    {
-        const x = this._savedPosX;
-        const y = this._savedPosY;
-
-        // Reset after use
-        this._savedPosX = -1;
-        this._savedPosY = -1;
-
-        // Unlock position saving so normal movement is tracked again
-        try { sessionStorage.removeItem('nitro.session.posLocked'); } catch(e) { /* ignore */ }
-
-        if(x < 0 || y < 0 || isNaN(x) || isNaN(y)) return;
-
-        NitroLogger.log('[RoomSessionManager] Walking to saved position (' + x + ', ' + y + ')');
-        GetCommunication().connection.send(new RoomUnitWalkComposer(x, y));
     }
 
     private setHandlers(session: IRoomSession): void
@@ -458,12 +453,14 @@ export class RoomSessionManager implements IRoomSessionManager, IRoomHandlerList
         return existing;
     }
 
-    public createSession(roomId: number, password: string = null): boolean
+    public createSession(roomId: number, password: string = null, spawnX: number = -1, spawnY: number = -1): boolean
     {
         const session = new RoomSession();
 
         session.roomId = roomId;
         session.password = password;
+        session.spawnX = spawnX;
+        session.spawnY = spawnY;
 
         return this.addSession(session);
     }
@@ -579,9 +576,16 @@ export class RoomSessionManager implements IRoomSessionManager, IRoomHandlerList
                 {
                     NitroLogger.log('[RoomSessionManager] Room ready confirmed - dropping guard in 3s');
 
-                    // Walk to the saved position (where the user was before disconnect).
-                    // Delay briefly so the server finishes placing the avatar in the room.
-                    setTimeout(() => this.walkToSavedPosition(), 1000);
+                    // If we have saved spawn coordinates, send a walk command so the
+                    // avatar moves to their previous position. This handles the EMU-restart
+                    // case where the server has no ghost session and spawns at the door.
+                    if(this._savedPosX >= 0 && this._savedPosY >= 0)
+                    {
+                        NitroLogger.log('[RoomSessionManager] Walking to saved position (' + this._savedPosX + ', ' + this._savedPosY + ')');
+                        GetCommunication().connection.send(new RoomUnitWalkComposer(this._savedPosX, this._savedPosY));
+                        this._savedPosX = -1;
+                        this._savedPosY = -1;
+                    }
 
                     this.clearGuardTimer();
                     this._reconnectGuardTimer = setTimeout(() =>

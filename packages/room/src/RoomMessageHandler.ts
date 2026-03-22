@@ -737,18 +737,13 @@ export class RoomMessageHandler
             this._roomEngine.updateRoomObjectUserLocation(this._currentRoomId, status.id, location, goal, status.canStandUp, height, direction, status.headDirection);
             this._roomEngine.updateRoomObjectUserFlatControl(this._currentRoomId, status.id, null);
 
-            // Save own user's position for reconnection (only when not locked by reconnect flow)
+            // Save own user's position for reconnection
             if(status.id === this._ownRoomIndex)
             {
                 try
                 {
-                    const locked = sessionStorage.getItem('nitro.session.posLocked');
-
-                    if(!locked)
-                    {
-                        sessionStorage.setItem('nitro.session.lastPosX', status.x.toString());
-                        sessionStorage.setItem('nitro.session.lastPosY', status.y.toString());
-                    }
+                    sessionStorage.setItem('nitro.session.lastPosX', status.x.toString());
+                    sessionStorage.setItem('nitro.session.lastPosY', status.y.toString());
                 }
                 catch(e) { /* ignore */ }
             }

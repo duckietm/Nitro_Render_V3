@@ -2285,8 +2285,6 @@ export class RoomEngine implements IRoomEngine, IRoomCreator, IRoomEngineService
 
     private handleRoomDragging(canvas: IRoomRenderingCanvas, x: number, y: number, type: string, altKey: boolean, ctrlKey: boolean, shiftKey: boolean): boolean
     {
-        if(this.isPlayingGame()) return false;
-
         if(this._areaSelectionManager.areaSelectionState === RoomAreaSelectionManager.SELECTING)
         {
             this._activeRoomIsDragged = false;
@@ -2521,9 +2519,16 @@ export class RoomEngine implements IRoomEngine, IRoomCreator, IRoomEngineService
 
     public setSelectedAvatar(roomId: number, objectId: number): void
     {
-        if(this._roomObjectEventHandler) return;
+        if(!this._roomObjectEventHandler) return;
 
         this._roomObjectEventHandler.setSelectedAvatar(roomId, objectId, true);
+    }
+
+    public clearSelectedAvatar(roomId: number): void
+    {
+        if(!this._roomObjectEventHandler) return;
+
+        this._roomObjectEventHandler.clearSelectedAvatar(roomId);
     }
 
     public cancelRoomObjectInsert(): void

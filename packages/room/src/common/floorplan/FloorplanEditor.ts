@@ -25,6 +25,8 @@ export class FloorplanEditor
 
     private _image: HTMLImageElement;
 
+    public onTilemapChange: (() => void) | null = null;
+
     constructor()
     {
         const width = TILE_SIZE * MAX_NUM_TILE_PER_AXIS + 20;
@@ -297,6 +299,8 @@ export class FloorplanEditor
         }
 
         this.renderSquareSelectionPreview();
+
+        if(this.onTilemapChange) this.onTilemapChange();
     }
 
     private renderSquareSelectionPreview(): void
@@ -473,6 +477,7 @@ export class FloorplanEditor
         this._squareSelectStart = null;
         this._squareSelectEnd = null;
         this.clearCanvas();
+        this.onTilemapChange = null;
     }
 
 

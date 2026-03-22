@@ -7,6 +7,7 @@ export class IncomingHeader
     public static ACHIEVEMENT_LIST = 305;
     public static AUTHENTICATED = 2491;
     public static AUTHENTICATION = -1;
+	public static AVAILABLE_COMMANDS = 4050;
     public static AVAILABILITY_STATUS = 2033;
     public static BUILDERS_CLUB_EXPIRED = 1452;
     public static CLUB_OFFERS = 2405;

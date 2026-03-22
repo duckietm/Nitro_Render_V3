@@ -93,6 +93,9 @@ export class NitroMessages implements IMessageConfiguration
         this._events.set(IncomingHeader.TARGET_OFFER_NOT_FOUND, TargetedOfferNotFoundEvent);
         this._events.set(IncomingHeader.REDEEM_VOUCHER_ERROR, VoucherRedeemErrorMessageEvent);
         this._events.set(IncomingHeader.REDEEM_VOUCHER_OK, VoucherRedeemOkMessageEvent);
+		
+		// COMMANDS
+        this._events.set(IncomingHeader.AVAILABLE_COMMANDS, AvailableCommandsEvent);
 
         // CLIENT
         this._events.set(IncomingHeader.CLIENT_PING, ClientPingEvent);
@@ -587,6 +590,7 @@ export class NitroMessages implements IMessageConfiguration
     {
         // CUSTOM PACKETS
         this._composers.set(OutgoingHeader.CLICK_FURNI, ClickFurniMessageComposer);
+        this._composers.set(OutgoingHeader.CLICK_USER, ClickUserMessageComposer);
 
         // AUTHENTICATION
         this._composers.set(OutgoingHeader.AUTHENTICATION, AuthenticationMessageComposer);
