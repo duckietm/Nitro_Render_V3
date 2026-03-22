@@ -1,4 +1,5 @@
 export * from './BonusRareInfoMessageParser';
+export * from './CatalogAdminResultMessageParser';
 export * from './BuildersClubFurniCountMessageParser';
 export * from './BuildersClubSubscriptionStatusMessageParser';
 export * from './BundleDiscountRuleset';
