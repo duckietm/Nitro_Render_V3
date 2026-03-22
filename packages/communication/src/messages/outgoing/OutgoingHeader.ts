@@ -484,4 +484,8 @@ export class OutgoingHeader
     public static SET_ACTIVE_PREFIX = 7012;
     public static DELETE_PREFIX = 7013;
     public static PURCHASE_PREFIX = 7014;
+
+    // UI Settings
+    public static UI_SETTINGS_SAVE = 10047;
+    public static UI_SETTINGS_LOAD = 10048;
 }

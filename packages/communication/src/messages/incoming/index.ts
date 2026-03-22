@@ -74,4 +74,5 @@ export * from './user/inventory';
 export * from './user/inventory/currency';
 export * from './user/inventory/subscription';
 export * from './user/wardrobe';
+export * from './uisettings';
 export * from './userclassification';

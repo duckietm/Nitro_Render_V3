@@ -481,4 +481,7 @@ export class IncomingHeader
     public static USER_PREFIXES = 7001;
     public static PREFIX_RECEIVED = 7002;
     public static ACTIVE_PREFIX_UPDATED = 7003;
+
+    // UI Settings
+    public static UI_SETTINGS_DATA = 10047;
 }
