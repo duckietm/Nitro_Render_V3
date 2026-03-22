@@ -29,6 +29,14 @@ export class RoomAreaSelectionManager implements IRoomAreaSelectionManager
     private _callback: (rootX: number, rootY: number, width: number, height: number) => void;
     private _highlightType: string = RoomAreaSelectionManager.HIGHLIGHT_BRIGHTEN;
 
+    private resetHighlightBounds(): void
+    {
+        this._highlightRootX = 0;
+        this._highlightRootY = 0;
+        this._highlightWidth = 0;
+        this._highlightHeight = 0;
+    }
+
     constructor(roomEngine: IRoomEngine)
     {
         this._roomEngine = roomEngine;
@@ -191,6 +199,7 @@ export class RoomAreaSelectionManager implements IRoomAreaSelectionManager
         if(this._state === RoomAreaSelectionManager.NOT_ACTIVE) return;
 
         this.clearHighlightSilent();
+        this.resetHighlightBounds();
 
         this._state = RoomAreaSelectionManager.NOT_SELECTING_AREA;
 
@@ -233,6 +242,7 @@ export class RoomAreaSelectionManager implements IRoomAreaSelectionManager
 
         this._callback = callback;
         this._highlightType = highlightType;
+        this.resetHighlightBounds();
 
         for(const roomObject of this.getAllFurniture())
         {

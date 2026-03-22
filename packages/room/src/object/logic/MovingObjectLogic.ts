@@ -124,6 +124,7 @@ export class MovingObjectLogic extends RoomObjectLogicBase
         if(!message || !this.object || !message.location) return;
 
         this._changeTime = this._lastUpdateTime;
+        this.updateInterval = message.duration;
 
         this._locationDelta.assign(message.targetLocation);
         this._locationDelta.subtract(this._location);

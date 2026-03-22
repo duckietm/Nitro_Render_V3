@@ -7,9 +7,9 @@ export class ObjectAvatarUpdateMessage extends ObjectMoveUpdateMessage
     private _canStandUp: boolean;
     private _baseY: number;
 
-    constructor(location: IVector3D, targetLocation: IVector3D, direction: IVector3D, headDirection: number, canStandUp: boolean, baseY: number)
+    constructor(location: IVector3D, targetLocation: IVector3D, direction: IVector3D, headDirection: number, canStandUp: boolean, baseY: number, isSlide: boolean = false, duration: number = ObjectMoveUpdateMessage.DEFAULT_DURATION)
     {
-        super(location, targetLocation, direction);
+        super(location, targetLocation, direction, isSlide, duration);
 
         this._headDirection = headDirection;
         this._canStandUp = canStandUp;

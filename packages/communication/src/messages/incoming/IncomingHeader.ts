@@ -181,6 +181,7 @@ export class IncomingHeader
     public static ROOM_RIGHTS_LIST_REMOVE = 1327;
     public static ROOM_RIGHTS_OWNER = 339;
     public static ROOM_ROLLING = 3207;
+    public static WIRED_MOVEMENTS = 3999;
     public static ROOM_SCORE = 482;
     public static ROOM_SETTINGS = 1498;
     public static ROOM_SETTINGS_CHAT = 1191;
