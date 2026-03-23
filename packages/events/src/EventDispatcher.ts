@@ -52,11 +52,9 @@ export class EventDispatcher implements IEventDispatcher
     {
         if(!event) return false;
 
-        // Debug: log SOCKET_ events to trace reconnection flow
         if(event.type && event.type.startsWith('SOCKET_'))
         {
             const listenerCount = this._listeners.get(event.type)?.length ?? 0;
-            console.log('[EventDispatcher] Dispatching ' + event.type + ' (listeners: ' + listenerCount + ')');
         }
 
         NitroLogger.events('Dispatched Event', event.type);
