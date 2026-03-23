@@ -11,19 +11,13 @@ export class SocketConnection implements IConnection
     private _codec: ICodec = new EvaWireFormat();
     private _dataBuffer: ArrayBuffer = null;
     private _isReady: boolean = false;
-
     private _pendingClientMessages: IMessageComposer<unknown[]>[] = [];
     private _pendingServerMessages: IMessageDataWrapper[] = [];
-
     private _isAuthenticated: boolean = false;
-
-    // Store callbacks for cleanup
     private _onOpenCallback: (event: Event) => void = null;
     private _onCloseCallback: (event: Event) => void = null;
     private _onErrorCallback: (event: Event) => void = null;
     private _onMessageCallback: (event: MessageEvent) => void = null;
-
-    // Reconnection state
     private _socketUrl: string = null;
     private _reconnectAttempt: number = 0;
     private _reconnectTimer: ReturnType<typeof setTimeout> = null;
@@ -51,8 +45,6 @@ export class SocketConnection implements IConnection
 
         this._socket = new WebSocket(socketUrl);
         this._socket.binaryType = 'arraybuffer';
-
-        // Store callbacks for cleanup
         this._onOpenCallback = () => this.onSocketOpened();
         this._onCloseCallback = (event: Event) => this.onSocketClosed(event as CloseEvent);
         this._onErrorCallback = () => this.onSocketError();
@@ -72,8 +64,6 @@ export class SocketConnection implements IConnection
     {
         if(this._isReconnecting)
         {
-            NitroLogger.log('[SocketConnection] Reconnected successfully after ' + this._reconnectAttempt + ' attempt(s)');
-
             this._reconnectAttempt = 0;
             this._isReconnecting = false;
 
@@ -99,8 +89,6 @@ export class SocketConnection implements IConnection
 
         if(code === 1000 || code === 1001)
         {
-            NitroLogger.log('[SocketConnection] Server closed cleanly (code ' + code + ') - not reconnecting');
-
             this._isAuthenticated = false;
             this._isReady = false;
 
@@ -122,7 +110,6 @@ export class SocketConnection implements IConnection
     {
         if(this._isReconnecting)
         {
-            NitroLogger.log('[SocketConnection] Reconnect attempt ' + this._reconnectAttempt + ' failed');
             return;
         }
 
@@ -136,8 +123,6 @@ export class SocketConnection implements IConnection
     {
         if(this._reconnectAttempt >= SocketConnection.MAX_RECONNECT_ATTEMPTS)
         {
-            NitroLogger.log('[SocketConnection] Max reconnect attempts reached (' + SocketConnection.MAX_RECONNECT_ATTEMPTS + ')');
-
             this._isReconnecting = false;
             this._wasAuthenticated = false;
 
@@ -159,8 +144,6 @@ export class SocketConnection implements IConnection
             SocketConnection.BASE_RECONNECT_DELAY_MS * Math.pow(2, this._reconnectAttempt - 1) + Math.random() * 1000,
             SocketConnection.MAX_RECONNECT_DELAY_MS
         );
-
-        NitroLogger.log('[SocketConnection] Reconnecting in ' + Math.round(delay) + 'ms (attempt ' + this._reconnectAttempt + '/' + SocketConnection.MAX_RECONNECT_ATTEMPTS + ')');
 
         GetEventDispatcher().dispatchEvent(new ReconnectEvent(
             NitroEventType.SOCKET_RECONNECTING,
@@ -189,7 +172,7 @@ export class SocketConnection implements IConnection
 
         if(this._socket.readyState === WebSocket.OPEN || this._socket.readyState === WebSocket.CONNECTING)
         {
-            try { this._socket.close(); } catch(e) { /* ignore */ }
+            try { this._socket.close(); } catch(e) {}
         }
 
         this._socket = null;
