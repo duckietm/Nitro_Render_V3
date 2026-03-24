@@ -28,7 +28,7 @@ export class CatalogPageMessageOfferData
 
         this._products = [];
 
-        let totalProducts = wrapper.readInt();
+        let totalProducts = Math.min(wrapper.readInt(), 200);
 
         while(totalProducts > 0)
         {

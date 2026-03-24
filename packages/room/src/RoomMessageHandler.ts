@@ -1,5 +1,5 @@
 import { AvatarGuideStatus, IConnection, IMessageEvent, IRoomCreator, IVector3D, LegacyDataType, ObjectRolling, PetType, RoomObjectType, RoomObjectUserType, RoomObjectVariable } from '@nitrots/api';
-import { AreaHideMessageEvent, DiceValueMessageEvent, FloorHeightMapEvent, FurnitureAliasesComposer, FurnitureAliasesEvent, FurnitureDataEvent, FurnitureFloorAddEvent, FurnitureFloorDataParser, FurnitureFloorEvent, FurnitureFloorRemoveEvent, FurnitureFloorUpdateEvent, FurnitureWallAddEvent, FurnitureWallDataParser, FurnitureWallEvent, FurnitureWallRemoveEvent, FurnitureWallUpdateEvent, GetCommunication, GetRoomEntryDataMessageComposer, GuideSessionEndedMessageEvent, GuideSessionErrorMessageEvent, GuideSessionStartedMessageEvent, IgnoreResultEvent, ItemDataUpdateMessageEvent, ObjectsDataUpdateEvent, ObjectsRollingEvent, OneWayDoorStatusMessageEvent, PetExperienceEvent, PetFigureUpdateEvent, RoomEntryTileMessageEvent, RoomEntryTileMessageParser, RoomHeightMapEvent, RoomHeightMapUpdateEvent, RoomPaintEvent, RoomReadyMessageEvent, RoomUnitChatEvent, RoomUnitChatShoutEvent, RoomUnitChatWhisperEvent, RoomUnitDanceEvent, RoomUnitEffectEvent, RoomUnitEvent, RoomUnitExpressionEvent, RoomUnitHandItemEvent, RoomUnitIdleEvent, RoomUnitInfoEvent, RoomUnitNumberEvent, RoomUnitRemoveEvent, RoomUnitStatusEvent, RoomUnitTypingEvent, RoomVisualizationSettingsEvent, UserInfoEvent, YouArePlayingGameEvent } from '@nitrots/communication';
+import { AreaHideMessageEvent, DiceValueMessageEvent, FloorHeightMapEvent, FurnitureAliasesComposer, FurnitureAliasesEvent, FurnitureDataEvent, FurnitureFloorAddEvent, FurnitureFloorDataParser, FurnitureFloorEvent, FurnitureFloorRemoveEvent, FurnitureFloorUpdateEvent, FurnitureWallAddEvent, FurnitureWallDataParser, FurnitureWallEvent, FurnitureWallRemoveEvent, FurnitureWallUpdateEvent, GetCommunication, GetRoomEntryDataMessageComposer, GuideSessionEndedMessageEvent, GuideSessionErrorMessageEvent, GuideSessionStartedMessageEvent, IgnoreResultEvent, ItemDataUpdateMessageEvent, ObjectsDataUpdateEvent, ObjectsRollingEvent, OneWayDoorStatusMessageEvent, PetExperienceEvent, PetFigureUpdateEvent, RoomEntryTileMessageEvent, RoomEntryTileMessageParser, RoomHeightMapEvent, RoomHeightMapUpdateEvent, RoomPaintEvent, RoomReadyMessageEvent, RoomUnitChatEvent, RoomUnitChatShoutEvent, RoomUnitChatWhisperEvent, RoomUnitDanceEvent, RoomUnitEffectEvent, RoomUnitEvent, RoomUnitExpressionEvent, RoomUnitHandItemEvent, RoomUnitIdleEvent, RoomUnitInfoEvent, RoomUnitNumberEvent, RoomUnitRemoveEvent, RoomUnitStatusEvent, RoomUnitStatusMessage, RoomUnitTypingEvent, RoomVisualizationSettingsEvent, UserInfoEvent, WiredMovementsEvent, WiredUserDirectionUpdateData, WiredUserMovementData, YouArePlayingGameEvent } from '@nitrots/communication';
 import { GetRoomSessionManager, GetSessionDataManager } from '@nitrots/session';
 import { Vector3d } from '@nitrots/utils';
 import { GetRoomEngine } from './GetRoomEngine';
@@ -9,11 +9,15 @@ import { FurnitureStackingHeightMap, LegacyWallGeometry } from './utils';
 
 export class RoomMessageHandler
 {
+    private static WIRED_MOVEMENT_STATUS_GRACE = 250;
+    private static WIRED_MOVEMENT_Z_EPSILON = 0.01;
+
     private _connection: IConnection = null;
     private _roomEngine: IRoomCreator = null;
     private _planeParser = new RoomPlaneParser();
     private _latestEntryTileEvent: RoomEntryTileMessageEvent = null;
     private _messageEvents: IMessageEvent[] = [];
+    private _activeWiredUserMovements = new Map<number, { expiresAt: number, targetX: number, targetY: number, targetZ: number }>();
 
     private _currentRoomId: number = 0;
     private _ownUserId: number = 0;
@@ -38,6 +42,7 @@ export class RoomMessageHandler
             new RoomVisualizationSettingsEvent(this.onRoomThicknessEvent.bind(this)),
             new RoomEntryTileMessageEvent(this.onRoomDoorEvent.bind(this)),
             new ObjectsRollingEvent(this.onRoomRollingEvent.bind(this)),
+            new WiredMovementsEvent(this.onWiredMovementsEvent.bind(this)),
             new ObjectsDataUpdateEvent(this.onObjectsDataUpdateEvent.bind(this)),
             new FurnitureAliasesEvent(this.onFurnitureAliasesEvent.bind(this)),
             new FurnitureFloorAddEvent(this.onFurnitureFloorAddEvent.bind(this)),
@@ -98,6 +103,7 @@ export class RoomMessageHandler
         this._connection = null;
         this._roomEngine = null;
         this._latestEntryTileEvent = null;
+        this._activeWiredUserMovements.clear();
     }
 
     public setRoomId(id: number): void
@@ -109,12 +115,14 @@ export class RoomMessageHandler
 
         this._currentRoomId = id;
         this._latestEntryTileEvent = null;
+        this._activeWiredUserMovements.clear();
     }
 
     public clearRoomId(): void
     {
         this._currentRoomId = 0;
         this._latestEntryTileEvent = null;
+        this._activeWiredUserMovements.clear();
     }
 
     private onUserInfoEvent(event: UserInfoEvent): void
@@ -378,27 +386,158 @@ export class RoomMessageHandler
 
         if(unitRollData)
         {
-            this._roomEngine.updateRoomObjectUserLocation(this._currentRoomId, unitRollData.id, unitRollData.location, unitRollData.targetLocation, false, 0, null, NaN, true);
+            this.applyRollingUnitMovement(unitRollData);
+        }
+    }
 
-            const object = this._roomEngine.getRoomObjectUser(this._currentRoomId, unitRollData.id);
+    private onWiredMovementsEvent(event: WiredMovementsEvent): void
+    {
+        if(!(event instanceof WiredMovementsEvent) || !event.connection || !this._roomEngine) return;
 
-            if(object && object.type !== RoomObjectUserType.MONSTER_PLANT)
+        const parser = event.getParser();
+
+        if(!parser) return;
+
+        if(parser.furniMovements?.length)
+        {
+            for(const movement of parser.furniMovements)
             {
-                let posture = 'std';
+                if(!movement) continue;
 
-                switch(unitRollData.movementType)
-                {
-                    case ObjectRolling.MOVE:
-                        posture = 'mv';
-                        break;
-                    case ObjectRolling.SLIDE:
-                        posture = 'std';
-                        break;
-                }
-
-                this._roomEngine.updateRoomObjectUserPosture(this._currentRoomId, unitRollData.id, posture);
+                this._roomEngine.rollRoomObjectFloor(
+                    this._currentRoomId,
+                    movement.id,
+                    movement.location,
+                    movement.targetLocation,
+                    movement.duration,
+                    new Vector3d(movement.rotation));
             }
         }
+
+        if(parser.userMovements?.length)
+        {
+            for(const movement of parser.userMovements)
+            {
+                if(!movement) continue;
+
+                this.applyWiredUserMovement(movement);
+            }
+        }
+
+        if(parser.userDirectionUpdates?.length)
+        {
+            for(const update of parser.userDirectionUpdates)
+            {
+                if(!update) continue;
+
+                this.applyWiredUserDirectionUpdate(update);
+            }
+        }
+    }
+
+    private applyRollingUnitMovement(movement: ObjectRolling): void
+    {
+        this._roomEngine.updateRoomObjectUserLocation(this._currentRoomId, movement.id, movement.location, movement.targetLocation, false, 0, null, NaN, true);
+
+        const object = this._roomEngine.getRoomObjectUser(this._currentRoomId, movement.id);
+
+        if(object && object.type !== RoomObjectUserType.MONSTER_PLANT)
+        {
+            const posture = (movement.movementType === ObjectRolling.MOVE) ? 'mv' : 'std';
+
+            this._roomEngine.updateRoomObjectUserPosture(this._currentRoomId, movement.id, posture);
+        }
+    }
+
+    private applyWiredUserMovement(movement: WiredUserMovementData): void
+    {
+        const isSlide = (movement.movementType === ObjectRolling.SLIDE);
+        this.trackWiredUserMovement(movement);
+
+        this._roomEngine.updateRoomObjectUserLocation(
+            this._currentRoomId,
+            movement.id,
+            movement.location,
+            movement.targetLocation,
+            false,
+            0,
+            new Vector3d(movement.bodyDirection),
+            movement.headDirection,
+            true,
+            isSlide,
+            movement.duration);
+
+        const object = this._roomEngine.getRoomObjectUser(this._currentRoomId, movement.id);
+
+        if(object && object.type !== RoomObjectUserType.MONSTER_PLANT)
+        {
+            const posture = (movement.movementType === ObjectRolling.MOVE) ? 'mv' : 'std';
+
+            this._roomEngine.updateRoomObjectUserPosture(this._currentRoomId, movement.id, posture);
+        }
+    }
+
+    private trackWiredUserMovement(movement: WiredUserMovementData): void
+    {
+        this._activeWiredUserMovements.set(movement.id, {
+            expiresAt: Date.now() + Math.max(movement.duration, 1) + RoomMessageHandler.WIRED_MOVEMENT_STATUS_GRACE,
+            targetX: movement.targetLocation.x,
+            targetY: movement.targetLocation.y,
+            targetZ: movement.targetLocation.z
+        });
+    }
+
+    private shouldSuppressWiredStatusLocation(status: RoomUnitStatusMessage): boolean
+    {
+        const activeMovement = this._activeWiredUserMovements.get(status.id);
+
+        if(!activeMovement) return false;
+
+        if(activeMovement.expiresAt <= Date.now())
+        {
+            this._activeWiredUserMovements.delete(status.id);
+
+            return false;
+        }
+
+        if(this.shouldReleaseWiredStatusLocation(status, activeMovement))
+        {
+            this._activeWiredUserMovements.delete(status.id);
+
+            return false;
+        }
+
+        return true;
+    }
+
+    private shouldReleaseWiredStatusLocation(status: RoomUnitStatusMessage, activeMovement: { expiresAt: number, targetX: number, targetY: number, targetZ: number }): boolean
+    {
+        if(!status.didMove) return false;
+
+        return !this.matchesWiredMovementTarget(status.targetX, status.targetY, status.targetZ, activeMovement);
+    }
+
+    private matchesWiredMovementTarget(x: number, y: number, z: number, activeMovement: { expiresAt: number, targetX: number, targetY: number, targetZ: number }): boolean
+    {
+        if(!activeMovement) return false;
+
+        return ((x === activeMovement.targetX)
+            && (y === activeMovement.targetY)
+            && (Math.abs(z - activeMovement.targetZ) <= RoomMessageHandler.WIRED_MOVEMENT_Z_EPSILON));
+    }
+
+    private applyWiredUserDirectionUpdate(update: WiredUserDirectionUpdateData): void
+    {
+        this._roomEngine.updateRoomObjectUserLocation(
+            this._currentRoomId,
+            update.id,
+            null,
+            null,
+            false,
+            0,
+            new Vector3d(update.bodyDirection),
+            update.headDirection,
+            true);
     }
 
     private onObjectsDataUpdateEvent(event: ObjectsDataUpdateEvent): void
@@ -734,7 +873,11 @@ export class RoomMessageHandler
 
             if(status.didMove) goal = new Vector3d(status.targetX, status.targetY, status.targetZ);
 
-            this._roomEngine.updateRoomObjectUserLocation(this._currentRoomId, status.id, location, goal, status.canStandUp, height, direction, status.headDirection);
+            if(!this.shouldSuppressWiredStatusLocation(status))
+            {
+                this._roomEngine.updateRoomObjectUserLocation(this._currentRoomId, status.id, location, goal, status.canStandUp, height, direction, status.headDirection);
+            }
+
             this._roomEngine.updateRoomObjectUserFlatControl(this._currentRoomId, status.id, null);
 
             // Save own user's position for reconnection

@@ -1816,13 +1816,13 @@ export class RoomEngine implements IRoomEngine, IRoomCreator, IRoomEngineService
         if(roomOwnObject && roomOwnObject.logic && maskUpdate) roomOwnObject.logic.processUpdateMessage(maskUpdate);
     }
 
-    public rollRoomObjectFloor(roomId: number, objectId: number, location: IVector3D, targetLocation: IVector3D): void
+    public rollRoomObjectFloor(roomId: number, objectId: number, location: IVector3D, targetLocation: IVector3D, duration: number = ObjectMoveUpdateMessage.DEFAULT_DURATION, direction: IVector3D = null): void
     {
         const object = this.getRoomObjectFloor(roomId, objectId);
 
         if(!object) return;
 
-        object.processUpdateMessage(new ObjectMoveUpdateMessage(location, targetLocation, null, !!targetLocation));
+        object.processUpdateMessage(new ObjectMoveUpdateMessage(location, targetLocation, direction, !!targetLocation, duration));
     }
 
     public updateRoomObjectWallLocation(roomId: number, objectId: number, location: IVector3D): boolean
@@ -1884,7 +1884,7 @@ export class RoomEngine implements IRoomEngine, IRoomCreator, IRoomEngineService
         return true;
     }
 
-    public updateRoomObjectUserLocation(roomId: number, objectId: number, location: IVector3D, targetLocation: IVector3D, canStandUp: boolean = false, baseY: number = 0, direction: IVector3D = null, headDirection: number = NaN, skipLocationFix: boolean = false): boolean
+    public updateRoomObjectUserLocation(roomId: number, objectId: number, location: IVector3D, targetLocation: IVector3D, canStandUp: boolean = false, baseY: number = 0, direction: IVector3D = null, headDirection: number = NaN, skipLocationFix: boolean = false, isSlide: boolean = false, duration: number = ObjectMoveUpdateMessage.DEFAULT_DURATION): boolean
     {
         const object = this.getRoomObjectUser(roomId, objectId);
 
@@ -1899,11 +1899,11 @@ export class RoomEngine implements IRoomEngine, IRoomCreator, IRoomEngineService
         const fixedLoc = skipLocationFix ? location : this.fixedUserLocation(roomId, location);
         const fixedTarget = skipLocationFix ? targetLocation : this.fixedUserLocation(roomId, targetLocation);
 
-        object.processUpdateMessage(new ObjectAvatarUpdateMessage(fixedLoc, fixedTarget, direction, headDirection, canStandUp, baseY));
+        object.processUpdateMessage(new ObjectAvatarUpdateMessage(fixedLoc, fixedTarget, direction, headDirection, canStandUp, baseY, isSlide, duration));
 
         const roomSession = this._roomSessionManager.getSession(roomId);
 
-        if(roomSession && (roomSession.ownRoomIndex === objectId))
+        if(roomSession && (roomSession.ownRoomIndex === objectId) && targetLocation)
         {
             GetEventDispatcher().dispatchEvent(new RoomToObjectOwnAvatarMoveEvent(RoomToObjectOwnAvatarMoveEvent.ROAME_MOVE_TO, targetLocation));
         }

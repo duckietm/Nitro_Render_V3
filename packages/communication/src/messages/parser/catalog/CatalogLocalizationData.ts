@@ -10,7 +10,7 @@ export class CatalogLocalizationData
         this._images = [];
         this._texts = [];
 
-        let totalImages = wrapper.readInt();
+        let totalImages = Math.min(wrapper.readInt(), 100);
 
         while(totalImages > 0)
         {
@@ -19,7 +19,7 @@ export class CatalogLocalizationData
             totalImages--;
         }
 
-        let totalTexts = wrapper.readInt();
+        let totalTexts = Math.min(wrapper.readInt(), 100);
 
         while(totalTexts > 0)
         {

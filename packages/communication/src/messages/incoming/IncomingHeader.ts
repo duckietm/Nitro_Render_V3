@@ -181,6 +181,7 @@ export class IncomingHeader
     public static ROOM_RIGHTS_LIST_REMOVE = 1327;
     public static ROOM_RIGHTS_OWNER = 339;
     public static ROOM_ROLLING = 3207;
+    public static WIRED_MOVEMENTS = 3999;
     public static ROOM_SCORE = 482;
     public static ROOM_SETTINGS = 1498;
     public static ROOM_SETTINGS_CHAT = 1191;
@@ -475,6 +476,9 @@ export class IncomingHeader
     public static WEEKLY_GAME2_LEADERBOARD = 2196;
     public static RENTABLE_FURNI_RENT_OR_BUYOUT_OFFER = 35;
     public static HANDSHAKE_IDENTITY_ACCOUNT = 3523;
+	
+	// Catalog Admin
+    public static CATALOG_ADMIN_RESULT = 10059;
 
     // Custom Prefixes
     public static USER_PREFIXES = 7001;

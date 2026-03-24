@@ -475,6 +475,17 @@ export class OutgoingHeader
     public static RENTABLE_GET_RENT_OR_BUYOUT_OFFER = 2518;
 	
 	public static FURNITURE_PICKUP_ALL = 10017;
+
+	public static CATALOG_ADMIN_SAVE_PAGE = 10050;
+    public static CATALOG_ADMIN_CREATE_PAGE = 10051;
+    public static CATALOG_ADMIN_DELETE_PAGE = 10052;
+    public static CATALOG_ADMIN_SAVE_OFFER = 10053;
+    public static CATALOG_ADMIN_CREATE_OFFER = 10054;
+    public static CATALOG_ADMIN_DELETE_OFFER = 10055;
+    public static CATALOG_ADMIN_MOVE_OFFER = 10056;
+    public static CATALOG_ADMIN_MOVE_PAGE = 10057;
+    public static CATALOG_ADMIN_PUBLISH = 10058;
+	
 	public static DELETE_ITEM = 10018;
 	public static DELETE_PET = 10030;
 	public static DELETE_BADGE = 10031;

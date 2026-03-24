@@ -37,7 +37,7 @@ export class CatalogPageMessageParser implements IMessageParser
         this._layoutCode = wrapper.readString();
         this._localization = new CatalogLocalizationData(wrapper);
 
-        let totalOffers = wrapper.readInt();
+        let totalOffers = Math.min(wrapper.readInt(), 1000);
 
         while(totalOffers > 0)
         {
@@ -51,7 +51,7 @@ export class CatalogPageMessageParser implements IMessageParser
 
         if(wrapper.bytesAvailable)
         {
-            let totalFrontPageItems = wrapper.readInt();
+            let totalFrontPageItems = Math.min(wrapper.readInt(), 100);
 
             while(totalFrontPageItems > 0)
             {

@@ -3,6 +3,7 @@ export * from './BuildersClubFurniCountMessageParser';
 export * from './BuildersClubSubscriptionStatusMessageParser';
 export * from './BundleDiscountRuleset';
 export * from './BundleDiscountRulesetMessageParser';
+export * from './CatalogAdminResultMessageParser';
 export * from './CatalogIndexMessageParser';
 export * from './CatalogLocalizationData';
 export * from './CatalogPageExpirationParser';

@@ -31,6 +31,11 @@ export class NodeData
         return true;
     }
 
+    private static readonly MAX_OFFERS: number = 1000;
+    private static readonly MAX_CHILDREN: number = 500;
+    private static _parseDepth: number = 0;
+    private static readonly MAX_DEPTH: number = 20;
+
     public parse(wrapper: IMessageDataWrapper): boolean
     {
         if(!wrapper) return false;
@@ -41,7 +46,7 @@ export class NodeData
         this._pageName = wrapper.readString();
         this._localization = wrapper.readString();
 
-        let totalOffers = wrapper.readInt();
+        let totalOffers = Math.min(wrapper.readInt(), NodeData.MAX_OFFERS);
 
         while(totalOffers > 0)
         {
@@ -50,7 +55,15 @@ export class NodeData
             totalOffers--;
         }
 
-        let totalChildren = wrapper.readInt();
+        let totalChildren = Math.min(wrapper.readInt(), NodeData.MAX_CHILDREN);
+
+        NodeData._parseDepth++;
+
+        if(NodeData._parseDepth > NodeData.MAX_DEPTH)
+        {
+            NodeData._parseDepth--;
+            return true;
+        }
 
         while(totalChildren > 0)
         {
@@ -58,6 +71,8 @@ export class NodeData
 
             totalChildren--;
         }
+
+        NodeData._parseDepth--;
 
         return true;
     }

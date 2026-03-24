@@ -67,7 +67,7 @@ export class FurniturePushableLogic extends FurnitureMultiStateLogic
             return;
         }
 
-        if(isMoveMessage && message.isSlide) this.updateInterval = MovingObjectLogic.DEFAULT_UPDATE_INTERVAL;
+        if(isMoveMessage && message.isSlide) this.updateInterval = message.duration;
 
         super.processUpdateMessage(message);
     }
