@@ -512,7 +512,10 @@ export class RoomMessageHandler
 
     private shouldReleaseWiredStatusLocation(status: RoomUnitStatusMessage, activeMovement: { expiresAt: number, targetX: number, targetY: number, targetZ: number }): boolean
     {
-        if(!status.didMove) return false;
+        if(!status.didMove)
+        {
+            return this.matchesWiredMovementTarget(status.x, status.y, (status.z + status.height), activeMovement);
+        }
 
         return !this.matchesWiredMovementTarget(status.targetX, status.targetY, status.targetZ, activeMovement);
     }
