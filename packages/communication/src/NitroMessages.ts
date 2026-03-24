@@ -582,9 +582,9 @@ export class NitroMessages implements IMessageConfiguration
         this._events.set(IncomingHeader.AREA_HIDE, AreaHideMessageEvent);
 
         // Custom Prefixes
-        this._events.set(IncomingHeader.USER_PREFIXES, UserPrefixesEvent);
-        this._events.set(IncomingHeader.PREFIX_RECEIVED, PrefixReceivedEvent);
-        this._events.set(IncomingHeader.ACTIVE_PREFIX_UPDATED, ActivePrefixUpdatedEvent);
+        // this._events.set(IncomingHeader.USER_PREFIXES, UserPrefixesEvent);
+        // this._events.set(IncomingHeader.PREFIX_RECEIVED, PrefixReceivedEvent);
+        // this._events.set(IncomingHeader.ACTIVE_PREFIX_UPDATED, ActivePrefixUpdatedEvent);
     }
 
     private registerComposers(): void
@@ -1207,10 +1207,10 @@ export class NitroMessages implements IMessageConfiguration
         this._composers.set(OutgoingHeader.RENTABLE_GET_RENT_OR_BUYOUT_OFFER, GetRentOrBuyoutOfferMessageComposer);
 
         // Custom Prefixes
-        this._composers.set(OutgoingHeader.REQUEST_PREFIXES, RequestPrefixesComposer);
-        this._composers.set(OutgoingHeader.SET_ACTIVE_PREFIX, SetActivePrefixComposer);
-        this._composers.set(OutgoingHeader.DELETE_PREFIX, DeletePrefixComposer);
-        this._composers.set(OutgoingHeader.PURCHASE_PREFIX, PurchasePrefixComposer);
+        // this._composers.set(OutgoingHeader.REQUEST_PREFIXES, RequestPrefixesComposer);
+        // this._composers.set(OutgoingHeader.SET_ACTIVE_PREFIX, SetActivePrefixComposer);
+        // this._composers.set(OutgoingHeader.DELETE_PREFIX, DeletePrefixComposer);
+        // this._composers.set(OutgoingHeader.PURCHASE_PREFIX, PurchasePrefixComposer);
     }
 
     public get events(): Map<number, Function>
