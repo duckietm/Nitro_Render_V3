@@ -12,6 +12,8 @@ export class MovingObjectLogic extends RoomObjectLogicBase
 
     private _location: Vector3d;
     private _locationDelta: Vector3d;
+    private _followObject: IRoomObjectController;
+    private _followOffset: Vector3d;
     private _lastUpdateTime: number;
     private _changeTime: number;
     private _updateInterval: number;
@@ -24,6 +26,8 @@ export class MovingObjectLogic extends RoomObjectLogicBase
 
         this._location = new Vector3d();
         this._locationDelta = new Vector3d();
+        this._followObject = null;
+        this._followOffset = new Vector3d();
         this._lastUpdateTime = 0;
         this._changeTime = 0;
         this._updateInterval = MovingObjectLogic.DEFAULT_UPDATE_INTERVAL;
@@ -75,7 +79,12 @@ export class MovingObjectLogic extends RoomObjectLogicBase
 
             if(difference > this._updateInterval) difference = this._updateInterval;
 
-            if(this._locationDelta.length > 0)
+            if(this._followObject)
+            {
+                vector.assign(this._followObject.getLocation());
+                vector.add(this._followOffset);
+            }
+            else if(this._locationDelta.length > 0)
             {
                 vector.assign(this._locationDelta);
                 vector.multiply((difference / this._updateInterval));
@@ -92,6 +101,13 @@ export class MovingObjectLogic extends RoomObjectLogicBase
 
             if(difference === this._updateInterval)
             {
+                if(this._followObject)
+                {
+                    this._location.assign(this.object.getLocation());
+                    this._followObject = null;
+                    this._followOffset.assign(new Vector3d());
+                }
+
                 this._locationDelta.x = 0;
                 this._locationDelta.y = 0;
                 this._locationDelta.z = 0;
@@ -112,6 +128,18 @@ export class MovingObjectLogic extends RoomObjectLogicBase
     {
         if(!message) return;
 
+        if(message instanceof ObjectMoveUpdateMessage)
+        {
+            const requiresCustomMoveHandling = !!message.anchorObject || (message.elapsed > 0);
+
+            if(requiresCustomMoveHandling)
+            {
+                if(this.object && message.direction) this.object.setDirection(message.direction);
+
+                return this.processMoveMessage(message);
+            }
+        }
+
         super.processUpdateMessage(message);
 
         if(message.location) this._location.assign(message.location);
@@ -123,11 +151,61 @@ export class MovingObjectLogic extends RoomObjectLogicBase
     {
         if(!message || !this.object || !message.location) return;
 
-        this._changeTime = this._lastUpdateTime;
+        const hadActiveInterpolation = this.isInterpolating();
+        const startLocation = hadActiveInterpolation
+            ? this.object.getLocation()
+            : message.location;
+        const elapsed = Math.max(0, Math.min(message.duration, message.elapsed));
+
+        this._location.assign(startLocation);
+        this.object.setLocation(this._location);
+        this._followObject = message.anchorObject;
+
+        if(message.anchorOffset) this._followOffset.assign(message.anchorOffset);
+        else this._followOffset.assign(new Vector3d());
+
+        this._changeTime = (this._lastUpdateTime - elapsed);
         this.updateInterval = message.duration;
 
         this._locationDelta.assign(message.targetLocation);
         this._locationDelta.subtract(this._location);
+
+        if(this._followObject)
+        {
+            const vector = MovingObjectLogic.TEMP_VECTOR;
+
+            vector.assign(this._followObject.getLocation());
+            vector.add(this._followOffset);
+
+            const locationOffset = this.getLocationOffset();
+
+            if(locationOffset) vector.add(locationOffset);
+
+            this.object.setLocation(vector);
+        }
+        else if(elapsed > 0)
+        {
+            const vector = MovingObjectLogic.TEMP_VECTOR;
+
+            vector.assign(this._locationDelta);
+            vector.multiply((elapsed / this._updateInterval));
+            vector.add(this._location);
+
+            const locationOffset = this.getLocationOffset();
+
+            if(locationOffset) vector.add(locationOffset);
+
+            this.object.setLocation(vector);
+        }
+        else if(hadActiveInterpolation && message.isSlide)
+        {
+            this.object.setLocation(this._location);
+        }
+    }
+
+    private isInterpolating(): boolean
+    {
+        return (this._locationDelta.length > 0) && ((this.time - this._changeTime) < this._updateInterval);
     }
 
     protected getLocationOffset(): IVector3D

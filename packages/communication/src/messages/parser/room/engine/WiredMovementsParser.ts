@@ -38,7 +38,7 @@ export class WiredUserMovementData extends ObjectRolling
 
 export class WiredFurniMovementData extends ObjectRolling
 {
-    constructor(id: number, location: Vector3d, targetLocation: Vector3d, private _rotation: number, private _duration: number)
+    constructor(id: number, location: Vector3d, targetLocation: Vector3d, private _rotation: number, private _duration: number, private _elapsed: number, private _anchorType: number, private _anchorId: number)
     {
         super(id, location, targetLocation, ObjectRolling.SLIDE);
     }
@@ -51,6 +51,21 @@ export class WiredFurniMovementData extends ObjectRolling
     public get duration(): number
     {
         return this._duration;
+    }
+
+    public get elapsed(): number
+    {
+        return this._elapsed;
+    }
+
+    public get anchorType(): number
+    {
+        return this._anchorType;
+    }
+
+    public get anchorId(): number
+    {
+        return this._anchorId;
     }
 }
 
@@ -163,13 +178,19 @@ export class WiredMovementsParser implements IMessageParser
                     const id = wrapper.readInt();
                     const rotation = wrapper.readInt();
                     const duration = wrapper.readInt();
+                    const elapsed = wrapper.readInt();
+                    const anchorType = wrapper.readInt();
+                    const anchorId = wrapper.readInt();
 
                     this._furniMovements.push(new WiredFurniMovementData(
                         id,
                         new Vector3d(fromX, fromY, fromZ),
                         new Vector3d(toX, toY, toZ),
                         rotation,
-                        duration));
+                        duration,
+                        elapsed,
+                        anchorType,
+                        anchorId));
                     break;
                 }
                 case 2:
