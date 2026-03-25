@@ -9,6 +9,7 @@ export class AssetManager implements IAssetManager
 {
     private _textures: Map<string, Texture> = new Map();
     private _collections: Map<string, IGraphicAssetCollection> = new Map();
+    private _missingAssetNames: Set<string> = new Set();
 
     public getTexture(name: string): Texture
     {
@@ -30,6 +31,8 @@ export class AssetManager implements IAssetManager
     {
         if(!name) return null;
 
+        if(this._missingAssetNames.has(name)) return null;
+
         for(const collection of this._collections.values())
         {
             if(!collection) continue;
@@ -40,6 +43,8 @@ export class AssetManager implements IAssetManager
 
             return existing;
         }
+
+        this._missingAssetNames.add(name);
 
         return null;
     }
@@ -69,6 +74,8 @@ export class AssetManager implements IAssetManager
         for(const [name, texture] of collection.textures.entries()) this.setTexture(name, texture);
 
         this._collections.set(collection.name, collection);
+
+        if(this._missingAssetNames.size > 0) this._missingAssetNames.clear();
 
         return collection;
     }
