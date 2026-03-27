@@ -477,6 +477,12 @@ export class IncomingHeader
     public static RENTABLE_FURNI_RENT_OR_BUYOUT_OFFER = 35;
     public static HANDSHAKE_IDENTITY_ACCOUNT = 3523;
 	
+	// Furni Editor
+	public static FURNI_EDITOR_SEARCH_RESULT = 10040;
+	public static FURNI_EDITOR_DETAIL_RESULT = 10041;
+	public static FURNI_EDITOR_INTERACTIONS_RESULT = 10043;
+	public static FURNI_EDITOR_RESULT = 10044;
+
 	// Catalog Admin
     public static CATALOG_ADMIN_RESULT = 10059;
 

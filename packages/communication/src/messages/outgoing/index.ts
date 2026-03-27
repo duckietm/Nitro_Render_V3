@@ -9,6 +9,7 @@ export * from './crafting';
 export * from './desktop';
 export * from './friendfurni';
 export * from './friendlist';
+export * from './furnieditor';
 export * from './game';
 export * from './game/arena';
 export * from './game/directory';

@@ -476,6 +476,14 @@ export class OutgoingHeader
 	
 	public static FURNITURE_PICKUP_ALL = 10017;
 
+	// Furni Editor
+	public static FURNI_EDITOR_SEARCH = 10040;
+	public static FURNI_EDITOR_DETAIL = 10041;
+	public static FURNI_EDITOR_BY_SPRITE = 10042;
+	public static FURNI_EDITOR_INTERACTIONS = 10043;
+	public static FURNI_EDITOR_UPDATE = 10044;
+	public static FURNI_EDITOR_DELETE = 10045;
+
 	public static CATALOG_ADMIN_SAVE_PAGE = 10050;
     public static CATALOG_ADMIN_CREATE_PAGE = 10051;
     public static CATALOG_ADMIN_DELETE_PAGE = 10052;
