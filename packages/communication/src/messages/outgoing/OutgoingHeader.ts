@@ -65,8 +65,8 @@ export class OutgoingHeader
     public static GROUP_CREATE_OPTIONS = 798;
     public static GROUP_FAVORITE = 3549;
     public static GET_FORUM_STATS = 3149;
-    public static GET_FORUM_THREADS = 873;
-    public static GET_FORUMS_LIST = 436;
+    public static GET_FORUM_THREADS = 436;
+    public static GET_FORUMS_LIST = 873;
     public static GET_FORUM_MESSAGES = 232;
     public static GET_FORUM_THREAD = 3900;
     public static GET_UNREAD_FORUMS_COUNT = 2908;
