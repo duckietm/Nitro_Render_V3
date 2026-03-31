@@ -28,6 +28,8 @@ export class RoomUserData implements IRoomUserData
     private _hasBreedingPermission: boolean;
     private _botSkills: number[];
     private _isModerator: boolean;
+    private _roomEntryMethod: string = 'unknown';
+    private _roomEntryTeleportId: number = 0;
 
     constructor(k: number)
     {
@@ -287,5 +289,25 @@ export class RoomUserData implements IRoomUserData
     public set isModerator(k: boolean)
     {
         this._isModerator = k;
+    }
+
+    public get roomEntryMethod(): string
+    {
+        return this._roomEntryMethod;
+    }
+
+    public set roomEntryMethod(k: string)
+    {
+        this._roomEntryMethod = k;
+    }
+
+    public get roomEntryTeleportId(): number
+    {
+        return this._roomEntryTeleportId;
+    }
+
+    public set roomEntryTeleportId(k: number)
+    {
+        this._roomEntryTeleportId = k;
     }
 }

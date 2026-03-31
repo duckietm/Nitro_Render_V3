@@ -23,4 +23,6 @@ export interface IRoomUserData
     petLevel: number;
     botSkills: number[];
     isModerator: boolean;
+    roomEntryMethod: string;
+    roomEntryTeleportId: number;
 }

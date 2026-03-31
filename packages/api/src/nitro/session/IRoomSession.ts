@@ -57,6 +57,11 @@ export interface IRoomSession
     allowPets: boolean;
     controllerLevel: number;
     ownRoomIndex: number;
+    groupId: number;
+    hotelTimeZone: string;
+    hotelTimeSnapshotMs: number;
+    hotelTimeSyncMs: number;
+    roomItemLimit: number;
     isGuildRoom: boolean;
     isRoomOwner: boolean;
     isDecorating: boolean;

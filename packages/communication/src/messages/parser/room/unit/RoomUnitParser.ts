@@ -135,6 +135,9 @@ export class RoomUnitParser implements IMessageParser
                 }
             }
 
+            user.roomEntryMethod = wrapper.readString();
+            user.roomEntryTeleportId = wrapper.readInt();
+
             i++;
         }
 

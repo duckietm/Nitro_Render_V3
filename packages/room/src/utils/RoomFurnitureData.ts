@@ -18,8 +18,15 @@ export class RoomFurnitureData
     private _synchronized: boolean;
     private _realRoomObject: boolean;
     private _sizeZ: number;
+    private _allowStack: boolean;
+    private _allowSit: boolean;
+    private _allowLay: boolean;
+    private _allowWalk: boolean;
+    private _dimensionsX: number;
+    private _dimensionsY: number;
+    private _teleportTargetId: number;
 
-    constructor(id: number, typeId: number, type: string, location: IVector3D, direction: IVector3D, state: number, objectData: IObjectData, extra: number = NaN, expires: number = -1, usagePolicy: number = 0, ownerId: number = 0, ownerName: string = '', synchronized: boolean = true, realRoomObject: boolean = true, sizeZ: number = -1)
+    constructor(id: number, typeId: number, type: string, location: IVector3D, direction: IVector3D, state: number, objectData: IObjectData, extra: number = NaN, expires: number = -1, usagePolicy: number = 0, ownerId: number = 0, ownerName: string = '', synchronized: boolean = true, realRoomObject: boolean = true, sizeZ: number = -1, allowStack: boolean = false, allowSit: boolean = false, allowLay: boolean = false, allowWalk: boolean = false, dimensionsX: number = 0, dimensionsY: number = 0, teleportTargetId: number = 0)
     {
         this._id = id;
         this._typeId = typeId;
@@ -34,6 +41,13 @@ export class RoomFurnitureData
         this._synchronized = synchronized;
         this._realRoomObject = realRoomObject;
         this._sizeZ = sizeZ;
+        this._allowStack = allowStack;
+        this._allowSit = allowSit;
+        this._allowLay = allowLay;
+        this._allowWalk = allowWalk;
+        this._dimensionsX = dimensionsX;
+        this._dimensionsY = dimensionsY;
+        this._teleportTargetId = teleportTargetId;
 
         this._location = new Vector3d();
         this._direction = new Vector3d();
@@ -115,5 +129,40 @@ export class RoomFurnitureData
     public get sizeZ(): number
     {
         return this._sizeZ;
+    }
+
+    public get allowStack(): boolean
+    {
+        return this._allowStack;
+    }
+
+    public get allowSit(): boolean
+    {
+        return this._allowSit;
+    }
+
+    public get allowLay(): boolean
+    {
+        return this._allowLay;
+    }
+
+    public get allowWalk(): boolean
+    {
+        return this._allowWalk;
+    }
+
+    public get dimensionsX(): number
+    {
+        return this._dimensionsX;
+    }
+
+    public get dimensionsY(): number
+    {
+        return this._dimensionsY;
+    }
+
+    public get teleportTargetId(): number
+    {
+        return this._teleportTargetId;
     }
 }

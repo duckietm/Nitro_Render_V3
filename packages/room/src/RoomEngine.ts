@@ -819,6 +819,13 @@ export class RoomEngine implements IRoomEngine, IRoomCreator, IRoomEngineService
             model.setValue(RoomObjectVariable.FURNITURE_USAGE_POLICY, data.usagePolicy);
             model.setValue(RoomObjectVariable.FURNITURE_OWNER_ID, data.ownerId);
             model.setValue(RoomObjectVariable.FURNITURE_OWNER_NAME, data.ownerName);
+            model.setValue(RoomObjectVariable.FURNITURE_ALLOW_STACK, data.allowStack ? 1 : 0);
+            model.setValue(RoomObjectVariable.FURNITURE_ALLOW_SIT, data.allowSit ? 1 : 0);
+            model.setValue(RoomObjectVariable.FURNITURE_ALLOW_LAY, data.allowLay ? 1 : 0);
+            model.setValue(RoomObjectVariable.FURNITURE_ALLOW_WALK, data.allowWalk ? 1 : 0);
+            model.setValue(RoomObjectVariable.FURNITURE_DIMENSIONS_X, data.dimensionsX);
+            model.setValue(RoomObjectVariable.FURNITURE_DIMENSIONS_Y, data.dimensionsY);
+            model.setValue(RoomObjectVariable.FURNITURE_TELEPORT_TARGET_ID, data.teleportTargetId);
         }
 
         if(!this.updateRoomObjectFloor(roomId, id, data.location, data.direction, data.state, data.data, data.extra)) return false;
@@ -879,6 +886,13 @@ export class RoomEngine implements IRoomEngine, IRoomCreator, IRoomEngineService
             model.setValue(RoomObjectVariable.FURNITURE_USAGE_POLICY, data.usagePolicy);
             model.setValue(RoomObjectVariable.FURNITURE_OWNER_ID, data.ownerId);
             model.setValue(RoomObjectVariable.FURNITURE_OWNER_NAME, data.ownerName);
+            model.setValue(RoomObjectVariable.FURNITURE_ALLOW_STACK, data.allowStack ? 1 : 0);
+            model.setValue(RoomObjectVariable.FURNITURE_ALLOW_SIT, data.allowSit ? 1 : 0);
+            model.setValue(RoomObjectVariable.FURNITURE_ALLOW_LAY, data.allowLay ? 1 : 0);
+            model.setValue(RoomObjectVariable.FURNITURE_ALLOW_WALK, data.allowWalk ? 1 : 0);
+            model.setValue(RoomObjectVariable.FURNITURE_DIMENSIONS_X, data.dimensionsX);
+            model.setValue(RoomObjectVariable.FURNITURE_DIMENSIONS_Y, data.dimensionsY);
+            model.setValue(RoomObjectVariable.FURNITURE_TELEPORT_TARGET_ID, data.teleportTargetId);
         }
 
         if(!this.updateRoomObjectWall(roomId, id, data.location, data.direction, data.state, extra)) return false;
@@ -1667,33 +1681,33 @@ export class RoomEngine implements IRoomEngine, IRoomCreator, IRoomEngineService
         if(GetEventDispatcher()) GetEventDispatcher().dispatchEvent(new RoomEngineObjectEvent(RoomEngineObjectEvent.REMOVED, roomId, objectId, category));
     }
 
-    public addFurnitureFloor(roomId: number, id: number, typeId: number, location: IVector3D, direction: IVector3D, state: number, objectData: IObjectData, extra: number = NaN, expires: number = -1, usagePolicy: number = 0, ownerId: number = 0, ownerName: string = '', synchronized: boolean = true, realRoomObject: boolean = true, sizeZ: number = -1): boolean
+    public addFurnitureFloor(roomId: number, id: number, typeId: number, location: IVector3D, direction: IVector3D, state: number, objectData: IObjectData, extra: number = NaN, expires: number = -1, usagePolicy: number = 0, ownerId: number = 0, ownerName: string = '', synchronized: boolean = true, realRoomObject: boolean = true, sizeZ: number = -1, allowStack: boolean = false, allowSit: boolean = false, allowLay: boolean = false, allowWalk: boolean = false, dimensionsX: number = 0, dimensionsY: number = 0, teleportTargetId: number = 0): boolean
     {
         const instanceData = this.getRoomInstanceData(roomId);
 
         if(!instanceData) return false;
 
-        const furnitureData = new RoomFurnitureData(id, typeId, null, location, direction, state, objectData, extra, expires, usagePolicy, ownerId, ownerName, synchronized, realRoomObject, sizeZ);
+        const furnitureData = new RoomFurnitureData(id, typeId, null, location, direction, state, objectData, extra, expires, usagePolicy, ownerId, ownerName, synchronized, realRoomObject, sizeZ, allowStack, allowSit, allowLay, allowWalk, dimensionsX, dimensionsY, teleportTargetId);
 
         instanceData.addPendingFurnitureFloor(furnitureData);
 
         return true;
     }
 
-    public addFurnitureFloorByTypeName(roomId: number, id: number, typeName: string, location: IVector3D, direction: IVector3D, state: number, objectData: IObjectData, extra: number = NaN, expires: number = -1, usagePolicy: number = 0, ownerId: number = 0, ownerName: string = '', synchronized: boolean = true, realRoomObject: boolean = true, sizeZ: number = -1): boolean
+    public addFurnitureFloorByTypeName(roomId: number, id: number, typeName: string, location: IVector3D, direction: IVector3D, state: number, objectData: IObjectData, extra: number = NaN, expires: number = -1, usagePolicy: number = 0, ownerId: number = 0, ownerName: string = '', synchronized: boolean = true, realRoomObject: boolean = true, sizeZ: number = -1, allowStack: boolean = false, allowSit: boolean = false, allowLay: boolean = false, allowWalk: boolean = false, dimensionsX: number = 0, dimensionsY: number = 0, teleportTargetId: number = 0): boolean
     {
         const instanceData = this.getRoomInstanceData(roomId);
 
         if(!instanceData) return false;
 
-        const furnitureData = new RoomFurnitureData(id, 0, typeName, location, direction, state, objectData, extra, expires, usagePolicy, ownerId, ownerName, synchronized, realRoomObject, sizeZ);
+        const furnitureData = new RoomFurnitureData(id, 0, typeName, location, direction, state, objectData, extra, expires, usagePolicy, ownerId, ownerName, synchronized, realRoomObject, sizeZ, allowStack, allowSit, allowLay, allowWalk, dimensionsX, dimensionsY, teleportTargetId);
 
         instanceData.addPendingFurnitureFloor(furnitureData);
 
         return true;
     }
 
-    public addFurnitureWall(roomId: number, id: number, typeId: number, location: IVector3D, direction: IVector3D, state: number, extra: string, expires: number = -1, usagePolicy: number = 0, ownerId: number = 0, ownerName: string = '', realRoomObject: boolean = true): boolean
+    public addFurnitureWall(roomId: number, id: number, typeId: number, location: IVector3D, direction: IVector3D, state: number, extra: string, expires: number = -1, usagePolicy: number = 0, ownerId: number = 0, ownerName: string = '', realRoomObject: boolean = true, allowStack: boolean = false, allowSit: boolean = false, allowLay: boolean = false, allowWalk: boolean = false, dimensionsX: number = 0, dimensionsY: number = 0, teleportTargetId: number = 0): boolean
     {
         const instanceData = this.getRoomInstanceData(roomId);
 
@@ -1703,7 +1717,7 @@ export class RoomEngine implements IRoomEngine, IRoomCreator, IRoomEngineService
 
         objectData.setString(extra);
 
-        const furnitureData = new RoomFurnitureData(id, typeId, null, location, direction, state, objectData, NaN, expires, usagePolicy, ownerId, ownerName, true, realRoomObject);
+        const furnitureData = new RoomFurnitureData(id, typeId, null, location, direction, state, objectData, NaN, expires, usagePolicy, ownerId, ownerName, true, realRoomObject, -1, allowStack, allowSit, allowLay, allowWalk, dimensionsX, dimensionsY, teleportTargetId);
 
         instanceData.addPendingFurnitureWall(furnitureData);
 

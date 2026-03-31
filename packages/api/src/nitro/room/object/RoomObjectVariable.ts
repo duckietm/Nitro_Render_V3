@@ -83,6 +83,13 @@ export class RoomObjectVariable
     public static FURNITURE_USAGE_POLICY: string = 'furniture_usage_policy';
     public static FURNITURE_OWNER_ID: string = 'furniture_owner_id';
     public static FURNITURE_OWNER_NAME: string = 'furniture_owner_name';
+    public static FURNITURE_ALLOW_STACK: string = 'furniture_allow_stack';
+    public static FURNITURE_ALLOW_SIT: string = 'furniture_allow_sit';
+    public static FURNITURE_ALLOW_LAY: string = 'furniture_allow_lay';
+    public static FURNITURE_ALLOW_WALK: string = 'furniture_allow_walk';
+    public static FURNITURE_DIMENSIONS_X: string = 'furniture_dimensions_x';
+    public static FURNITURE_DIMENSIONS_Y: string = 'furniture_dimensions_y';
+    public static FURNITURE_TELEPORT_TARGET_ID: string = 'furniture_teleport_target_id';
     public static FURNITURE_ROOM_BACKGROUND_COLOR_HUE: string = 'furniture_room_background_color_hue';
     public static FURNITURE_ROOM_BACKGROUND_COLOR_SATURATION: string = 'furniture_room_background_color_saturation';
     public static FURNITURE_ROOM_BACKGROUND_COLOR_LIGHTNESS: string = 'furniture_room_background_color_lightness';

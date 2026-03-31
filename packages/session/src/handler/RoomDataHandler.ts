@@ -29,6 +29,11 @@ export class RoomDataHandler extends BaseHandler
         const roomData = parser.data;
 
         roomSession.tradeMode = roomData.tradeMode;
+        roomSession.groupId = roomData.habboGroupId;
+        roomSession.hotelTimeZone = (parser.hotelTimeZoneId || 'UTC');
+        roomSession.hotelTimeSnapshotMs = parser.hotelCurrentTimeMs;
+        roomSession.hotelTimeSyncMs = Date.now();
+        roomSession.roomItemLimit = parser.roomItemLimit;
         roomSession.isGuildRoom = (roomData.habboGroupId !== 0);
         roomSession.doorMode = roomData.doorMode;
         roomSession.allowPets = roomData.allowPets;

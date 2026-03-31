@@ -17,6 +17,11 @@ export class RoomSession implements IRoomSession
     private _allowPets: boolean = false;
     private _controllerLevel: number = RoomControllerLevel.NONE;
     private _ownRoomIndex: number = -1;
+    private _groupId: number = 0;
+    private _hotelTimeZone: string = 'UTC';
+    private _hotelTimeSnapshotMs: number = 0;
+    private _hotelTimeSyncMs: number = 0;
+    private _roomItemLimit: number = 0;
     private _isGuildRoom: boolean = false;
     private _isRoomOwner: boolean = false;
     private _isDecorating: boolean = false;
@@ -396,6 +401,56 @@ export class RoomSession implements IRoomSession
     public get ownRoomIndex(): number
     {
         return this._ownRoomIndex;
+    }
+
+    public get groupId(): number
+    {
+        return this._groupId;
+    }
+
+    public set groupId(groupId: number)
+    {
+        this._groupId = groupId;
+    }
+
+    public get hotelTimeZone(): string
+    {
+        return this._hotelTimeZone;
+    }
+
+    public set hotelTimeZone(timeZone: string)
+    {
+        this._hotelTimeZone = (timeZone || 'UTC');
+    }
+
+    public get hotelTimeSnapshotMs(): number
+    {
+        return this._hotelTimeSnapshotMs;
+    }
+
+    public set hotelTimeSnapshotMs(value: number)
+    {
+        this._hotelTimeSnapshotMs = value;
+    }
+
+    public get hotelTimeSyncMs(): number
+    {
+        return this._hotelTimeSyncMs;
+    }
+
+    public set hotelTimeSyncMs(value: number)
+    {
+        this._hotelTimeSyncMs = value;
+    }
+
+    public get roomItemLimit(): number
+    {
+        return this._roomItemLimit;
+    }
+
+    public set roomItemLimit(value: number)
+    {
+        this._roomItemLimit = value;
     }
 
     public get isGuildRoom(): boolean

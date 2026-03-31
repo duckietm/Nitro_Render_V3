@@ -1167,11 +1167,11 @@ export class RoomMessageHandler
 
         if(data.spriteName)
         {
-            this._roomEngine.addFurnitureFloorByTypeName(roomId, data.itemId, data.spriteName, location, direction, data.state, data.data, data.extra, data.expires, data.usagePolicy, data.userId, data.username, true, true, data.stackHeight);
+            this._roomEngine.addFurnitureFloorByTypeName(roomId, data.itemId, data.spriteName, location, direction, data.state, data.data, data.extra, data.expires, data.usagePolicy, data.userId, data.username, true, true, data.stackHeight, data.allowStack, data.allowSit, data.allowLay, data.allowWalk, data.dimensionsX, data.dimensionsY, data.teleportTargetId);
         }
         else
         {
-            this._roomEngine.addFurnitureFloor(roomId, data.itemId, data.spriteId, location, direction, data.state, data.data, data.extra, data.expires, data.usagePolicy, data.userId, data.username, true, true, data.stackHeight);
+            this._roomEngine.addFurnitureFloor(roomId, data.itemId, data.spriteId, location, direction, data.state, data.data, data.extra, data.expires, data.usagePolicy, data.userId, data.username, true, true, data.stackHeight, data.allowStack, data.allowSit, data.allowLay, data.allowWalk, data.dimensionsX, data.dimensionsY, data.teleportTargetId);
         }
     }
 
@@ -1196,7 +1196,7 @@ export class RoomMessageHandler
 
         const direction = new Vector3d(wallGeometry.getDirection(data.direction));
 
-        this._roomEngine.addFurnitureWall(roomId, data.itemId, data.spriteId, location, direction, data.state, data.stuffData, data.secondsToExpiration, data.usagePolicy, data.userId, data.username);
+        this._roomEngine.addFurnitureWall(roomId, data.itemId, data.spriteId, location, direction, data.state, data.stuffData, data.secondsToExpiration, data.usagePolicy, data.userId, data.username, true, data.allowStack, data.allowSit, data.allowLay, data.allowWalk, data.dimensionsX, data.dimensionsY, data.teleportTargetId);
     }
 
     private onIgnoreResultEvent(event: IgnoreResultEvent): void
