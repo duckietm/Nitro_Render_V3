@@ -78,6 +78,8 @@ export class RoomUsersHandler extends BaseHandler
                 userData.petLevel = user.petLevel;
                 userData.botSkills = user.botSkills;
                 userData.isModerator = user.isModerator;
+                userData.roomEntryMethod = user.roomEntryMethod;
+                userData.roomEntryTeleportId = user.roomEntryTeleportId;
 
                 if(!session.userDataManager.getUserData(user.roomIndex)) usersToAdd.push(userData);
 

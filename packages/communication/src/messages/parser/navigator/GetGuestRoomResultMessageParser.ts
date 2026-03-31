@@ -11,6 +11,9 @@ export class GetGuestRoomResultMessageParser implements IMessageParser
     private _isGroupMember: boolean;
     private _moderation: RoomModerationSettings;
     private _chat: RoomChatSettings;
+    private _hotelTimeZoneId: string;
+    private _hotelCurrentTimeMs: number;
+    private _roomItemLimit: number;
 
     public flush(): boolean
     {
@@ -21,6 +24,9 @@ export class GetGuestRoomResultMessageParser implements IMessageParser
         this._isGroupMember = false;
         this._moderation = null;
         this._chat = null;
+        this._hotelTimeZoneId = null;
+        this._hotelCurrentTimeMs = 0;
+        this._roomItemLimit = 0;
 
         return true;
     }
@@ -38,6 +44,13 @@ export class GetGuestRoomResultMessageParser implements IMessageParser
         this._moderation = new RoomModerationSettings(wrapper);
         this.data.canMute = wrapper.readBoolean();
         this._chat = new RoomChatSettings(wrapper);
+
+        if(wrapper.bytesAvailable)
+        {
+            this._hotelTimeZoneId = wrapper.readString();
+            this._hotelCurrentTimeMs = Number(wrapper.readString()) || 0;
+            if(wrapper.bytesAvailable) this._roomItemLimit = wrapper.readInt();
+        }
 
         return true;
     }
@@ -75,5 +88,20 @@ export class GetGuestRoomResultMessageParser implements IMessageParser
     public get chat(): RoomChatSettings
     {
         return this._chat;
+    }
+
+    public get hotelTimeZoneId(): string
+    {
+        return this._hotelTimeZoneId;
+    }
+
+    public get hotelCurrentTimeMs(): number
+    {
+        return this._hotelCurrentTimeMs;
+    }
+
+    public get roomItemLimit(): number
+    {
+        return this._roomItemLimit;
     }
 }

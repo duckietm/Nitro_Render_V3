@@ -11,6 +11,13 @@ export class FurnitureWallDataParser
     private _usagePolicy: number;
     private _userId: number;
     private _username: string;
+    private _allowStack: boolean;
+    private _allowSit: boolean;
+    private _allowLay: boolean;
+    private _allowWalk: boolean;
+    private _dimensionsX: number;
+    private _dimensionsY: number;
+    private _teleportTargetId: number;
 
     private _width: number;
     private _height: number;
@@ -40,6 +47,13 @@ export class FurnitureWallDataParser
         this._usagePolicy = -1;
         this._userId = 0;
         this._username = null;
+        this._allowStack = false;
+        this._allowSit = false;
+        this._allowLay = false;
+        this._allowWalk = false;
+        this._dimensionsX = 0;
+        this._dimensionsY = 0;
+        this._teleportTargetId = 0;
 
         this._width = 0;
         this._height = 0;
@@ -64,6 +78,13 @@ export class FurnitureWallDataParser
         this._secondsToExpiration = wrapper.readInt();
         this._usagePolicy = wrapper.readInt();
         this._userId = wrapper.readInt();
+        this._allowStack = (wrapper.readInt() === 1);
+        this._allowSit = (wrapper.readInt() === 1);
+        this._allowLay = (wrapper.readInt() === 1);
+        this._allowWalk = (wrapper.readInt() === 1);
+        this._dimensionsX = wrapper.readInt();
+        this._dimensionsY = wrapper.readInt();
+        this._teleportTargetId = wrapper.readInt();
         this._username = null;
 
         const state = parseFloat(this._stuffData);
@@ -189,6 +210,41 @@ export class FurnitureWallDataParser
     public get username(): string
     {
         return this._username;
+    }
+
+    public get allowStack(): boolean
+    {
+        return this._allowStack;
+    }
+
+    public get allowSit(): boolean
+    {
+        return this._allowSit;
+    }
+
+    public get allowLay(): boolean
+    {
+        return this._allowLay;
+    }
+
+    public get allowWalk(): boolean
+    {
+        return this._allowWalk;
+    }
+
+    public get dimensionsX(): number
+    {
+        return this._dimensionsX;
+    }
+
+    public get dimensionsY(): number
+    {
+        return this._dimensionsY;
+    }
+
+    public get teleportTargetId(): number
+    {
+        return this._teleportTargetId;
     }
 
     public set username(username: string)

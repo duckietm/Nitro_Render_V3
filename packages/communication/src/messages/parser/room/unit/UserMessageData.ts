@@ -35,6 +35,8 @@ export class UserMessageData
     private _petPosture: string = '';
     private _botSkills: number[] = [];
     private _isModerator: boolean = false;
+    private _roomEntryMethod: string = 'unknown';
+    private _roomEntryTeleportId: number = 0;
     private _isReadOnly: boolean = false;
 
     constructor(k: number)
@@ -440,6 +442,32 @@ export class UserMessageData
         if(!this._isReadOnly)
         {
             this._isModerator = k;
+        }
+    }
+
+    public get roomEntryMethod(): string
+    {
+        return this._roomEntryMethod;
+    }
+
+    public set roomEntryMethod(k: string)
+    {
+        if(!this._isReadOnly)
+        {
+            this._roomEntryMethod = k;
+        }
+    }
+
+    public get roomEntryTeleportId(): number
+    {
+        return this._roomEntryTeleportId;
+    }
+
+    public set roomEntryTeleportId(k: number)
+    {
+        if(!this._isReadOnly)
+        {
+            this._roomEntryTeleportId = k;
         }
     }
 }

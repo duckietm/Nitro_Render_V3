@@ -24,6 +24,7 @@ export class FurnitureData implements IFurnitureData
     private _purchaseCouldBeUsedForBuyout: boolean;
     private _rentCouldBeUsedForBuyout: boolean;
     private _availableForBuildersClub: boolean;
+    private _allowStack: boolean;
     private _canStandOn: boolean;
     private _canSitOn: boolean;
     private _canLayOn: boolean;
@@ -32,7 +33,7 @@ export class FurnitureData implements IFurnitureData
     private _environment: string;
     private _rare: boolean;
 
-    constructor(type: FurnitureType, id: number, fullName: string, className: string, category: string, localizedName: string, description: string, revision: number, tileSizeX: number, tileSizeY: number, tileSizeZ: number, colors: number[], hadIndexedColor: boolean, colorIndex: number, adUrl: string, purchaseOfferId: number, purchaseCouldBeUsedForBuyout: boolean, rentOfferId: number, rentCouldBeUsedForBuyout: boolean, availableForBuildersClub: boolean, customParams: string, specialType: number, canStandOn: boolean, canSitOn: boolean, canLayOn: boolean, excludedfromDynamic: boolean, furniLine: string, environment: string, rare: boolean)
+    constructor(type: FurnitureType, id: number, fullName: string, className: string, category: string, localizedName: string, description: string, revision: number, tileSizeX: number, tileSizeY: number, tileSizeZ: number, colors: number[], hadIndexedColor: boolean, colorIndex: number, adUrl: string, purchaseOfferId: number, purchaseCouldBeUsedForBuyout: boolean, rentOfferId: number, rentCouldBeUsedForBuyout: boolean, availableForBuildersClub: boolean, customParams: string, specialType: number, allowStack: boolean, canStandOn: boolean, canSitOn: boolean, canLayOn: boolean, excludedfromDynamic: boolean, furniLine: string, environment: string, rare: boolean)
     {
         this._type = type;
         this._id = id;
@@ -56,6 +57,7 @@ export class FurnitureData implements IFurnitureData
         this._customParams = customParams;
         this._specialType = specialType;
         this._availableForBuildersClub = availableForBuildersClub;
+        this._allowStack = allowStack;
         this._canStandOn = canStandOn;
         this._canSitOn = canSitOn;
         this._canLayOn = canLayOn;
@@ -178,6 +180,11 @@ export class FurnitureData implements IFurnitureData
     public get availableForBuildersClub(): boolean
     {
         return this._availableForBuildersClub;
+    }
+
+    public get allowStack(): boolean
+    {
+        return this._allowStack;
     }
 
     public get canStandOn(): boolean

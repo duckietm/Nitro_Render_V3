@@ -62,7 +62,8 @@ export class CommunicationManager implements ICommunicationManager
 		t.shadowColor = 'blue';
 		t.fillRect(-20, 10, 234, 5);
 		const i = e.toDataURL();
-		document.body.appendChild(e);
+		e.width = 0;
+		e.height = 0;
 		let r = 0;
 		if (i.length === 0) return 'nothing!';
 		for (let n = 0; n < i.length; n++) {
