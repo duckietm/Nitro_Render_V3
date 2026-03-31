@@ -28,6 +28,7 @@ export class FurnitureDynamicThumbnailVisualization extends IsometricImageFurniV
                         if (image.complete && image.width > 0 && image.height > 0) {
                             const texture = Texture.from(image);
                             texture.source.scaleMode = 'linear';
+
                             this.setThumbnailImages(texture, thumbnailUrl);
                         } else {
                             this.setThumbnailImages(null);
