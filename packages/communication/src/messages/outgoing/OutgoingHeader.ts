@@ -277,6 +277,7 @@ export class OutgoingHeader
     public static WIRED_USER_VARIABLES_REQUEST = 10024;
     public static WIRED_USER_VARIABLE_UPDATE = 10025;
     public static WIRED_USER_VARIABLE_MANAGE = 10026;
+    public static WIRED_USER_INSPECT_MOVE = 10027;
     public static WIRED_OPEN = 768;
     public static WIRED_TRIGGER_SAVE = 1520;
     public static GET_ITEM_DATA = 3964;
