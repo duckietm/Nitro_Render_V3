@@ -110,6 +110,12 @@ export class RoomMessageHandler
         this._latestEntryTileEvent = null;
         this._activeWiredUserMovements.clear();
         this._activeRoomUserWalks.clear();
+
+        if(this._planeParser)
+        {
+            this._planeParser.dispose();
+            this._planeParser = null;
+        }
     }
 
     public setRoomId(id: number): void

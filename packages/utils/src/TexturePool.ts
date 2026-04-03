@@ -3,7 +3,8 @@ import { Texture } from 'pixi.js';
 
 export class TexturePool
 {
-    private static MAX_IDLE: number = 3600;
+    private static MAX_IDLE: number = 1800;
+    private static MAX_POOL_SIZE: number = 200;
 
     private _textures: { [index: string]: { [index: string]: Texture[] } } = {};
     private _totalTextures: number = 0;
@@ -50,6 +51,16 @@ export class TexturePool
     public putTexture(texture: Texture)
     {
         if(!texture) return;
+
+        if(this._totalTextures >= TexturePool.MAX_POOL_SIZE)
+        {
+            //@ts-ignore
+            delete texture.source.hitMap;
+
+            if(!texture.destroyed) texture.destroy(true);
+
+            return;
+        }
 
         if(!this._textures[texture.width]) this._textures[texture.width] = {};
 

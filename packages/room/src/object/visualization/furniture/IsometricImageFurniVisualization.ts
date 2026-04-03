@@ -105,6 +105,7 @@ export class IsometricImageFurniVisualization extends FurnitureAnimatedVisualiza
             const sprite = this.getSprite(layerId);
             if (sprite) {
                 sprite.texture = this._thumbnailTexture;
+                sprite.offsetY -= 1;
             }
         }
     }

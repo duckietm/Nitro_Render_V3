@@ -39,7 +39,44 @@ export class RoomInstanceData
 
     public dispose(): void
     {
-        return;
+        if(this._selectedObject)
+        {
+            this._selectedObject.dispose();
+            this._selectedObject = null;
+        }
+
+        if(this._placedObject)
+        {
+            this._placedObject.dispose();
+            this._placedObject = null;
+        }
+
+        if(this._furnitureStackingHeightMap)
+        {
+            this._furnitureStackingHeightMap.dispose();
+            this._furnitureStackingHeightMap = null;
+        }
+
+        if(this._tileObjectMap)
+        {
+            this._tileObjectMap.dispose();
+            this._tileObjectMap = null;
+        }
+
+        if(this._legacyGeometry)
+        {
+            this._legacyGeometry = null;
+        }
+
+        if(this._roomCamera)
+        {
+            this._roomCamera = null;
+        }
+
+        this._floorStack.clear();
+        this._wallStack.clear();
+        this._mouseButtonCursorOwners = [];
+        this._modelName = null;
     }
 
     public setModelName(name: string): void
