@@ -19,6 +19,7 @@ export class GroupInformationParser implements IMessageParser
     private _flag: boolean;
     private _canMembersDecorate: boolean;
     private _pendingRequestsCount: number;
+    private _hasForum: boolean;
 
     public flush(): boolean
     {
@@ -39,6 +40,7 @@ export class GroupInformationParser implements IMessageParser
         this._flag = false;
         this._canMembersDecorate = false;
         this._pendingRequestsCount = 0;
+        this._hasForum = false;
 
         return true;
     }
@@ -65,6 +67,7 @@ export class GroupInformationParser implements IMessageParser
         this._flag = wrapper.readBoolean();
         this._canMembersDecorate = wrapper.readBoolean();
         this._pendingRequestsCount = wrapper.readInt();
+        this._hasForum = wrapper.readBoolean();
 
         return true;
     }
@@ -152,5 +155,10 @@ export class GroupInformationParser implements IMessageParser
     public get pendingRequestsCount(): number
     {
         return this._pendingRequestsCount;
+    }
+
+    public get hasForum(): boolean
+    {
+        return this._hasForum;
     }
 }

@@ -4,9 +4,9 @@ export class GroupSavePreferencesComposer implements IMessageComposer<Constructo
 {
     private _data: ConstructorParameters<typeof GroupSavePreferencesComposer>;
 
-    constructor(groupId: number, state: number, onlyAdminCanDecorate: number)
+    constructor(groupId: number, state: number, onlyAdminCanDecorate: number, forumEnabled: boolean)
     {
-        this._data = [groupId, state, onlyAdminCanDecorate];
+        this._data = [groupId, state, onlyAdminCanDecorate, forumEnabled];
     }
 
     public getMessageArray()

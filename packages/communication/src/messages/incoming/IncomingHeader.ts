@@ -269,6 +269,9 @@ export class IncomingHeader
     public static WIRED_ACTION = 1434;
     public static WIRED_CONDITION = 1108;
     public static WIRED_ERROR = 156;
+    public static WIRED_MONITOR_DATA = 5101;
+    public static WIRED_ROOM_SETTINGS_DATA = 5102;
+    public static WIRED_USER_VARIABLES_DATA = 5103;
     public static WIRED_OPEN = 1830;
     public static WIRED_REWARD = 178;
     public static WIRED_SAVE = 1155;
@@ -477,6 +480,12 @@ export class IncomingHeader
     public static RENTABLE_FURNI_RENT_OR_BUYOUT_OFFER = 35;
     public static HANDSHAKE_IDENTITY_ACCOUNT = 3523;
 	
+	// Furni Editor
+	public static FURNI_EDITOR_SEARCH_RESULT = 10040;
+	public static FURNI_EDITOR_DETAIL_RESULT = 10041;
+	public static FURNI_EDITOR_INTERACTIONS_RESULT = 10043;
+	public static FURNI_EDITOR_RESULT = 10044;
+
 	// Catalog Admin
     public static CATALOG_ADMIN_RESULT = 10059;
 

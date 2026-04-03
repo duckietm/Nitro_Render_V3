@@ -37,18 +37,18 @@ export class AvatarStructure
 
     }
 
-    public initGeometry(k: any): void
+    public initGeometry(data: any): void
     {
-        if(!k) return;
+        if(!data) return;
 
-        this._geometry = new AvatarModelGeometry(k);
+        this._geometry = new AvatarModelGeometry(data);
     }
 
-    public initActions(k: IAssetManager, _arg_2: any): void
+    public initActions(assets: IAssetManager, data: any): void
     {
-        if(!_arg_2) return;
+        if(!data) return;
 
-        this._actionManager = new AvatarActionManager(k, _arg_2);
+        this._actionManager = new AvatarActionManager(assets, data);
         this._defaultAction = this._actionManager.getDefaultAction();
     }
 
@@ -59,11 +59,11 @@ export class AvatarStructure
         this._defaultAction = this._actionManager.getDefaultAction();
     }
 
-    public initPartSets(k: any): boolean
+    public initPartSets(data: any): boolean
     {
-        if(!k) return false;
+        if(!data) return false;
 
-        if(this._partSetsData.parse(k))
+        if(this._partSetsData.parse(data))
         {
             this._partSetsData.getPartDefinition('ri').appendToFigure = true;
             this._partSetsData.getPartDefinition('li').appendToFigure = true;
@@ -74,18 +74,18 @@ export class AvatarStructure
         return false;
     }
 
-    public initAnimation(k: any): boolean
+    public initAnimation(data: any): boolean
     {
-        if(!k) return false;
+        if(!data) return false;
 
-        return this._animationData.parse(k);
+        return this._animationData.parse(data);
     }
 
-    public initFigureData(k: IFigureData): boolean
+    public initFigureData(data: IFigureData): boolean
     {
-        if(!k) return false;
+        if(!data) return false;
 
-        return this._figureData.parse(k);
+        return this._figureData.parse(data);
     }
 
     public injectFigureData(data: IFigureData): void
@@ -93,13 +93,13 @@ export class AvatarStructure
         this._figureData.injectJSON(data);
     }
 
-    public registerAnimations(k: IAssetManager, _arg_2: string = 'fx', _arg_3: number = 200): void
+    public registerAnimations(assets: IAssetManager, prefix: string = 'fx', maxCount: number = 200): void
     {
         let index = 0;
 
-        while(index < _arg_3)
+        while(index < maxCount)
         {
-            const collection = k.getCollection((_arg_2 + index));
+            const collection = assets.getCollection((prefix + index));
 
             if(collection)
             {
@@ -117,21 +117,21 @@ export class AvatarStructure
         this._animationManager.registerAnimation(this, data);
     }
 
-    public getPartColor(container: IAvatarFigureContainer, _arg_2: string, _arg_3: number = 0): IPartColor
+    public getPartColor(figureContainer: IAvatarFigureContainer, partType: string, colorIndex: number = 0): IPartColor
     {
-        const _local_4 = container.getPartColorIds(_arg_2);
+        const colorIds = figureContainer.getPartColorIds(partType);
 
-        if((!(_local_4)) || (_local_4.length < _arg_3)) return null;
+        if(!colorIds || (colorIds.length < colorIndex)) return null;
 
-        const _local_5 = this._figureData.getSetType(_arg_2);
+        const setType = this._figureData.getSetType(partType);
 
-        if(_local_5 == null) return null;
+        if(setType == null) return null;
 
-        const _local_6 = this._figureData.getPalette(_local_5.paletteID);
+        const palette = this._figureData.getPalette(setType.paletteID);
 
-        if(!_local_6) return null;
+        if(!palette) return null;
 
-        return _local_6.getColor(_local_4[_arg_3]);
+        return palette.getColor(colorIds[colorIndex]);
     }
 
     public getBodyPartData(animation: string, frameCount: number, spriteId: string): AvatarAnimationLayerData
@@ -139,98 +139,98 @@ export class AvatarStructure
         return this._animationManager.getLayerData(animation, frameCount, spriteId) as AvatarAnimationLayerData;
     }
 
-    public getAnimation(k: string): Animation
+    public getAnimation(name: string): Animation
     {
-        return this._animationManager.getAnimation(k);
+        return this._animationManager.getAnimation(name);
     }
 
-    public getActionDefinition(k: string): ActionDefinition
+    public getActionDefinition(id: string): ActionDefinition
     {
-        return this._actionManager.getActionDefinition(k);
+        return this._actionManager.getActionDefinition(id);
     }
 
-    public getActionDefinitionWithState(k: string): ActionDefinition
+    public getActionDefinitionWithState(state: string): ActionDefinition
     {
-        return this._actionManager.getActionDefinitionWithState(k);
+        return this._actionManager.getActionDefinitionWithState(state);
     }
 
-    public isMainAvatarSet(k: string): boolean
+    public isMainAvatarSet(setType: string): boolean
     {
-        return this._geometry.isMainAvatarSet(k);
+        return this._geometry.isMainAvatarSet(setType);
     }
 
-    public sortActions(k: IActiveActionData[]): IActiveActionData[]
+    public sortActions(actions: IActiveActionData[]): IActiveActionData[]
     {
-        return this._actionManager.sortActions(k);
+        return this._actionManager.sortActions(actions);
     }
 
-    public maxFrames(k: IActiveActionData[]): number
+    public maxFrames(actions: IActiveActionData[]): number
     {
-        let _local_2 = 0;
+        let maxFrameCount = 0;
 
-        for(const _local_3 of k)
+        for(const action of actions)
         {
-            _local_2 = Math.max(_local_2, this._animationData.getFrameCount(_local_3.definition));
-        }
-        return _local_2;
-    }
-
-    public getMandatorySetTypeIds(k: string, _arg_2: number): string[]
-    {
-        if(!this._mandatorySetTypeIds[k])
-        {
-            this._mandatorySetTypeIds[k] = [];
+            maxFrameCount = Math.max(maxFrameCount, this._animationData.getFrameCount(action.definition));
         }
 
-        if(this._mandatorySetTypeIds[k][_arg_2])
+        return maxFrameCount;
+    }
+
+    public getMandatorySetTypeIds(gender: string, clubLevel: number): string[]
+    {
+        if(!this._mandatorySetTypeIds[gender])
         {
-            return this._mandatorySetTypeIds[k][_arg_2];
+            this._mandatorySetTypeIds[gender] = [];
         }
 
-        this._mandatorySetTypeIds[k][_arg_2] = this._figureData.getMandatorySetTypeIds(k, _arg_2);
-
-        return this._mandatorySetTypeIds[k][_arg_2];
-    }
-
-    public getDefaultPartSet(k: string, _arg_2: string): IFigurePartSet
-    {
-        return this._figureData.getDefaultPartSet(k, _arg_2);
-    }
-
-    public getCanvasOffsets(k: IActiveActionData[], _arg_2: string, _arg_3: number): number[]
-    {
-        return this._actionManager.getCanvasOffsets(k, _arg_2, _arg_3);
-    }
-
-    public getCanvas(k: string, _arg_2: string): AvatarCanvas
-    {
-        return this._geometry.getCanvas(k, _arg_2);
-    }
-
-    public removeDynamicItems(k: IAvatarImage): void
-    {
-        this._geometry.removeDynamicItems(k);
-    }
-
-    public getActiveBodyPartIds(k: IActiveActionData, _arg_2: IAvatarImage): string[]
-    {
-        let _local_3: string[] = [];
-
-        const _local_4: string[] = [];
-        const _local_5 = k.definition.geometryType;
-
-        if(k.definition.isAnimation)
+        if(this._mandatorySetTypeIds[gender][clubLevel])
         {
-            const _local_7 = ((k.definition.state + '.') + k.actionParameter);
-            const _local_8 = this._animationManager.getAnimation(_local_7);
+            return this._mandatorySetTypeIds[gender][clubLevel];
+        }
 
-            if(_local_8)
+        this._mandatorySetTypeIds[gender][clubLevel] = this._figureData.getMandatorySetTypeIds(gender, clubLevel);
+
+        return this._mandatorySetTypeIds[gender][clubLevel];
+    }
+
+    public getDefaultPartSet(partType: string, gender: string): IFigurePartSet
+    {
+        return this._figureData.getDefaultPartSet(partType, gender);
+    }
+
+    public getCanvasOffsets(actions: IActiveActionData[], scale: string, direction: number): number[]
+    {
+        return this._actionManager.getCanvasOffsets(actions, scale, direction);
+    }
+
+    public getCanvas(scale: string, geometryType: string): AvatarCanvas
+    {
+        return this._geometry.getCanvas(scale, geometryType);
+    }
+
+    public removeDynamicItems(avatar: IAvatarImage): void
+    {
+        this._geometry.removeDynamicItems(avatar);
+    }
+
+    public getActiveBodyPartIds(action: IActiveActionData, avatar: IAvatarImage): string[]
+    {
+        let partTypeIds: string[] = [];
+        const bodyPartIds: string[] = [];
+        const geometryType = action.definition.geometryType;
+
+        if(action.definition.isAnimation)
+        {
+            const animationKey = ((action.definition.state + '.') + action.actionParameter);
+            const animation = this._animationManager.getAnimation(animationKey);
+
+            if(animation)
             {
-                _local_3 = _local_8.getAnimatedBodyPartIds(0, k.overridingAction);
+                partTypeIds = animation.getAnimatedBodyPartIds(0, action.overridingAction);
 
-                if(_local_8.hasAddData())
+                if(animation.hasAddData())
                 {
-                    const _local_11 = {
+                    const dynamicPart = {
                         id: '',
                         x: 0,
                         y: 0,
@@ -242,110 +242,121 @@ export class AvatarStructure
                         double: 1
                     };
 
-                    const _local_12 = {
+                    const partSetDefinition = {
                         setType: ''
                     };
 
-                    for(const _local_13 of _local_8.addData)
+                    for(const addData of animation.addData)
                     {
-                        const _local_6 = this._geometry.getBodyPart(_local_5, _local_13.align);
+                        const bodyPart = this._geometry.getBodyPart(geometryType, addData.align);
 
-                        if(_local_6)
+                        if(bodyPart)
                         {
-                            _local_11.id = _local_13.id;
-                            _local_6.addPart(_local_11, _arg_2);
+                            dynamicPart.id = addData.id;
+                            bodyPart.addPart(dynamicPart, avatar);
 
-                            _local_12.setType = _local_13.id;
+                            partSetDefinition.setType = addData.id;
 
-                            const _local_10 = this._partSetsData.addPartDefinition(_local_12);
-                            _local_10.appendToFigure = true;
+                            const partDefinition = this._partSetsData.addPartDefinition(partSetDefinition);
+                            partDefinition.appendToFigure = true;
 
-                            if(_local_13.base === '') _local_10.staticId = 1;
+                            if(addData.base === '') partDefinition.staticId = 1;
 
-                            if(_local_4.indexOf(_local_6.id) === -1) _local_4.push(_local_6.id);
+                            if(bodyPartIds.indexOf(bodyPart.id) === -1) bodyPartIds.push(bodyPart.id);
                         }
                     }
                 }
             }
 
-            for(const _local_9 of _local_3)
+            for(const partTypeId of partTypeIds)
             {
-                const _local_6 = this._geometry.getBodyPart(_local_5, _local_9);
+                const bodyPart = this._geometry.getBodyPart(geometryType, partTypeId);
 
-                if(_local_6 && (_local_4.indexOf(_local_6.id) === -1)) _local_4.push(_local_6.id);
+                if(bodyPart && (bodyPartIds.indexOf(bodyPart.id) === -1)) bodyPartIds.push(bodyPart.id);
+            }
+
+            if(bodyPartIds.length === 0)
+            {
+                partTypeIds = this._partSetsData.getActiveParts(action.definition);
+
+                for(const partType of partTypeIds)
+                {
+                    const bodyPart = this._geometry.getBodyPartOfItem(geometryType, partType, avatar);
+
+                    if(bodyPart && (bodyPartIds.indexOf(bodyPart.id) === -1)) bodyPartIds.push(bodyPart.id);
+                }
             }
         }
         else
         {
-            _local_3 = this._partSetsData.getActiveParts(k.definition);
+            partTypeIds = this._partSetsData.getActiveParts(action.definition);
 
-            for(const _local_14 of _local_3)
+            for(const partType of partTypeIds)
             {
-                const _local_6 = this._geometry.getBodyPartOfItem(_local_5, _local_14, _arg_2);
+                const bodyPart = this._geometry.getBodyPartOfItem(geometryType, partType, avatar);
 
-                if(_local_6 && (_local_4.indexOf(_local_6.id) === -1)) _local_4.push(_local_6.id);
+                if(bodyPart && (bodyPartIds.indexOf(bodyPart.id) === -1)) bodyPartIds.push(bodyPart.id);
             }
         }
 
-        return _local_4;
+        return bodyPartIds;
     }
 
-    public getBodyPartsUnordered(k: string): string[]
+    public getBodyPartsUnordered(avatarSet: string): string[]
     {
-        return this._geometry.getBodyPartIdsInAvatarSet(k);
+        return this._geometry.getBodyPartIdsInAvatarSet(avatarSet);
     }
 
-    public getBodyParts(k: string, _arg_2: string, _arg_3: number): string[]
+    public getBodyParts(avatarSet: string, geometryType: string, direction: number): string[]
     {
-        const _local_4 = AvatarDirectionAngle.DIRECTION_TO_ANGLE[_arg_3];
+        const angle = AvatarDirectionAngle.DIRECTION_TO_ANGLE[direction];
 
-        return this._geometry.getBodyPartsAtAngle(k, _local_4, _arg_2);
+        return this._geometry.getBodyPartsAtAngle(avatarSet, angle, geometryType);
     }
 
-    public getFrameBodyPartOffset(k: IActiveActionData, _arg_2: number, _arg_3: number, _arg_4: string): Point
+    public getFrameBodyPartOffset(action: IActiveActionData, direction: number, frameCount: number, bodyPartId: string): Point
     {
-        const _local_5 = this._animationData.getAction(k.definition);
+        const animationAction = this._animationData.getAction(action.definition);
 
-        if(_local_5) return _local_5.getFrameBodyPartOffset(_arg_2, _arg_3, _arg_4);
+        if(animationAction) return animationAction.getFrameBodyPartOffset(direction, frameCount, bodyPartId);
 
         return AnimationAction.DEFAULT_OFFSET;
     }
 
-    public getParts(k: string, _arg_2: IAvatarFigureContainer, _arg_3: IActiveActionData, _arg_4: string, _arg_5: number, removes: string[], _arg_7: IAvatarImage, _arg_8: Map<string, string> = null): AvatarImagePartContainer[]
+    public getParts(bodyPartId: string, figureContainer: IAvatarFigureContainer, action: IActiveActionData, geometryType: string, direction: number, removes: string[], avatar: IAvatarImage, itemOverrides: Map<string, string> = null): AvatarImagePartContainer[]
     {
-        const _local_10: Animation = null;
-        let _local_34: IActionDefinition = null;
+        const effectAnimation: Animation = null;
+        let actionDefinition: IActionDefinition = null;
+        let animationFrames: AvatarAnimationFrame[] = [];
+        let partColor: IPartColor = null;
 
-        let _local_20: AvatarAnimationFrame[] = [];
-        let _local_36: IPartColor = null;
+        if(!action) return [];
 
-        if(!_arg_3) return [];
+        const activePartTypes = this._partSetsData.getActiveParts(action.definition);
+        const partContainers: AvatarImagePartContainer[] = [];
+        let defaultFrames: any[] = [0];
+        const animationAction = this._animationData.getAction(action.definition);
 
-        const _local_9 = this._partSetsData.getActiveParts(_arg_3.definition);
-        const _local_11: AvatarImagePartContainer[] = [];
-        let _local_14: any[] = [0];
-        const _local_15 = this._animationData.getAction(_arg_3.definition);
-
-        if(_arg_3.definition.isAnimation)
+        if(action.definition.isAnimation)
         {
-            const _local_24 = ((_arg_3.definition.state + '.') + _arg_3.actionParameter);
-            const _local_10 = this._animationManager.getAnimation(_local_24);
+            const animationKey = ((action.definition.state + '.') + action.actionParameter);
+            const spriteAnimation = this._animationManager.getAnimation(animationKey);
 
-            if(_local_10)
+            if(spriteAnimation)
             {
-                _local_14 = this.getPopulatedArray(_local_10.frameCount(_arg_3.overridingAction));
+                defaultFrames = this.getPopulatedArray(spriteAnimation.frameCount(action.overridingAction));
 
-                for(const _local_25 of _local_10.getAnimatedBodyPartIds(0, _arg_3.overridingAction))
+                for(const animatedPartId of spriteAnimation.getAnimatedBodyPartIds(0, action.overridingAction))
                 {
-                    if(_local_25 === k)
+                    if(animatedPartId === bodyPartId)
                     {
-                        const _local_26 = this._geometry.getBodyPart(_arg_4, _local_25);
+                        const geometryBodyPart = this._geometry.getBodyPart(geometryType, animatedPartId);
 
-                        if(_local_26)
+                        if(geometryBodyPart)
                         {
-                            for(const _local_27 of _local_26.getDynamicParts(_arg_7))
+                            for(const dynamicPart of geometryBodyPart.getDynamicParts(avatar))
                             {
-                                _local_9.push(_local_27.id);
+                                activePartTypes.push(dynamicPart.id);
                             }
                         }
                     }
@@ -353,75 +364,73 @@ export class AvatarStructure
             }
         }
 
-        const _local_16 = this._geometry.getParts(_arg_4, k, _arg_5, _local_9, _arg_7);
-        const _local_21 = _arg_2.getPartTypeIds();
+        const visiblePartTypes = this._geometry.getParts(geometryType, bodyPartId, direction, activePartTypes, avatar);
+        const figurePartTypeIds = figureContainer.getPartTypeIds();
 
-        for(const _local_17 of _local_21)
+        for(const figurePartType of figurePartTypeIds)
         {
-            if(_arg_8)
+            if(itemOverrides)
             {
-                if(_arg_8.get(_local_17)) continue;
+                if(itemOverrides.get(figurePartType)) continue;
             }
 
-            const _local_28 = _arg_2.getPartSetId(_local_17);
-            const _local_29 = _arg_2.getPartColorIds(_local_17);
-            const _local_30 = this._figureData.getSetType(_local_17);
+            const partSetId = figureContainer.getPartSetId(figurePartType);
+            const partColorIds = figureContainer.getPartColorIds(figurePartType);
+            const setType = this._figureData.getSetType(figurePartType);
 
-
-
-            if(_local_30)
+            if(setType)
             {
-                const _local_31 = this._figureData.getPalette(_local_30.paletteID);
+                const palette = this._figureData.getPalette(setType.paletteID);
 
-                if(_local_31)
+                if(palette)
                 {
-                    const _local_32 = _local_30.getPartSet(_local_28);
+                    const figurePartSet = setType.getPartSet(partSetId);
 
-                    if(_local_32)
+                    if(figurePartSet)
                     {
-                        removes = removes.concat(_local_32.hiddenLayers);
+                        removes = removes.concat(figurePartSet.hiddenLayers);
 
-                        for(const _local_33 of _local_32.parts)
+                        for(const figurePart of figurePartSet.parts)
                         {
-                            if(_local_16.indexOf(_local_33.type) > -1)
+                            if(visiblePartTypes.indexOf(figurePart.type) > -1)
                             {
-                                if(_local_15)
+                                if(animationAction)
                                 {
-                                    const _local_19 = _local_15.getPart(_local_33.type);
+                                    const animationPart = animationAction.getPart(figurePart.type);
 
-                                    if(_local_19)
+                                    if(animationPart)
                                     {
-                                        _local_20 = _local_19.frames;
+                                        animationFrames = animationPart.frames;
                                     }
                                     else
                                     {
-                                        _local_20 = _local_14;
+                                        animationFrames = defaultFrames;
                                     }
                                 }
                                 else
                                 {
-                                    _local_20 = _local_14;
+                                    animationFrames = defaultFrames;
                                 }
 
-                                _local_34 = _arg_3.definition;
+                                actionDefinition = action.definition;
 
-                                if(_local_9.indexOf(_local_33.type) === -1) _local_34 = this._defaultAction;
+                                if(activePartTypes.indexOf(figurePart.type) === -1) actionDefinition = this._defaultAction;
 
-                                const _local_13 = this._partSetsData.getPartDefinition(_local_33.type);
+                                const partDefinition = this._partSetsData.getPartDefinition(figurePart.type);
 
-                                let _local_35 = (!_local_13) ? _local_33.type : _local_13.flippedSetType;
+                                let flippedPartType = (!partDefinition) ? figurePart.type : partDefinition.flippedSetType;
 
-                                if(!_local_35 || (_local_35 === '')) _local_35 = _local_33.type;
+                                if(!flippedPartType || (flippedPartType === '')) flippedPartType = figurePart.type;
 
-                                if(_local_29 && (_local_29.length > (_local_33.colorLayerIndex - 1)))
+                                if(partColorIds && (partColorIds.length > (figurePart.colorLayerIndex - 1)))
                                 {
-                                    _local_36 = _local_31.getColor(_local_29[(_local_33.colorLayerIndex - 1)]);
+                                    partColor = palette.getColor(partColorIds[(figurePart.colorLayerIndex - 1)]);
                                 }
 
-                                const _local_37 = (_local_33.colorLayerIndex > 0);
-                                const _local_18 = new AvatarImagePartContainer(k, _local_33.type, _local_33.id.toString(), _local_36, _local_20, _local_34, _local_37, _local_33.paletteMap, _local_35);
+                                const isColorable = (figurePart.colorLayerIndex > 0);
+                                const container = new AvatarImagePartContainer(bodyPartId, figurePart.type, figurePart.id.toString(), partColor, animationFrames, actionDefinition, isColorable, figurePart.paletteMap, flippedPartType);
 
-                                _local_11.push(_local_18);
+                                partContainers.push(container);
                             }
                         }
                     }
@@ -429,132 +438,132 @@ export class AvatarStructure
             }
         }
 
-        const _local_22: AvatarImagePartContainer[] = [];
+        const sortedContainers: AvatarImagePartContainer[] = [];
 
-        for(const _local_12 of _local_16)
+        for(const visiblePartType of visiblePartTypes)
         {
-            let _local_39: IPartColor = null;
-            let _local_38 = false;
+            let overrideColor: IPartColor = null;
+            let partFound = false;
 
-            const _local_40 = ((_arg_8) && (_arg_8.get(_local_12)));
+            const hasItemOverride = ((itemOverrides) && (itemOverrides.get(visiblePartType)));
 
-            for(const _local_23 of _local_11)
+            for(const container of partContainers)
             {
-                if(_local_23.partType === _local_12)
+                if(container.partType === visiblePartType)
                 {
-                    if(_local_40)
+                    if(hasItemOverride)
                     {
-                        _local_39 = _local_23.color;
+                        overrideColor = container.color;
                     }
                     else
                     {
-                        _local_38 = true;
+                        partFound = true;
 
-                        if(removes.indexOf(_local_12) === -1) _local_22.push(_local_23);
+                        if(removes.indexOf(visiblePartType) === -1) sortedContainers.push(container);
                     }
                 }
             }
 
-            if(!_local_38)
+            if(!partFound)
             {
-                if(_local_40)
+                if(hasItemOverride)
                 {
-                    const _local_41 = _arg_8.get(_local_12);
+                    const itemId = itemOverrides.get(visiblePartType);
 
-                    let _local_42 = 0;
-                    let _local_43 = 0;
+                    let charCodeSum = 0;
+                    let charIndex = 0;
 
-                    while(_local_43 < _local_41.length)
+                    while(charIndex < itemId.length)
                     {
-                        _local_42 = (_local_42 + _local_41.charCodeAt(_local_43));
-                        _local_43++;
+                        charCodeSum = (charCodeSum + itemId.charCodeAt(charIndex));
+                        charIndex++;
                     }
 
-                    if(_local_15)
+                    if(animationAction)
                     {
-                        const _local_19 = _local_15.getPart(_local_12);
+                        const animationPart = animationAction.getPart(visiblePartType);
 
-                        if(_local_19)
+                        if(animationPart)
                         {
-                            _local_20 = _local_19.frames;
+                            animationFrames = animationPart.frames;
                         }
                         else
                         {
-                            _local_20 = _local_14;
+                            animationFrames = defaultFrames;
                         }
                     }
                     else
                     {
-                        _local_20 = _local_14;
+                        animationFrames = defaultFrames;
                     }
 
-                    const _local_18 = new AvatarImagePartContainer(k, _local_12, _local_41, _local_39, _local_20, _arg_3.definition, (!(_local_39 == null)), -1, _local_12, false, 1);
+                    const container = new AvatarImagePartContainer(bodyPartId, visiblePartType, itemId, overrideColor, animationFrames, action.definition, (!(overrideColor == null)), -1, visiblePartType, false, 1);
 
-                    _local_22.push(_local_18);
+                    sortedContainers.push(container);
                 }
                 else
                 {
-                    if(_local_9.indexOf(_local_12) > -1)
+                    if(activePartTypes.indexOf(visiblePartType) > -1)
                     {
-                        const _local_44 = this._geometry.getBodyPartOfItem(_arg_4, _local_12, _arg_7);
+                        const ownerBodyPart = this._geometry.getBodyPartOfItem(geometryType, visiblePartType, avatar);
 
-                        if(k !== _local_44.id)
+                        if(bodyPartId !== ownerBodyPart.id)
                         {
                             //
                         }
                         else
                         {
-                            const _local_13 = this._partSetsData.getPartDefinition(_local_12);
+                            const partDefinition = this._partSetsData.getPartDefinition(visiblePartType);
 
-                            let _local_45 = false;
-                            let _local_46 = 1;
+                            let isBlended = false;
+                            let blendFactor = 1;
 
-                            if(_local_13.appendToFigure)
+                            if(partDefinition.appendToFigure)
                             {
-                                let _local_47 = '1';
+                                let partId = '1';
 
-                                if(_arg_3.actionParameter !== '')
+                                if(action.actionParameter !== '')
                                 {
-                                    _local_47 = _arg_3.actionParameter;
+                                    partId = action.actionParameter;
                                 }
 
-                                if(_local_13.hasStaticId())
+                                if(partDefinition.hasStaticId())
                                 {
-                                    _local_47 = _local_13.staticId.toString();
+                                    partId = partDefinition.staticId.toString();
                                 }
 
-                                if(_local_10 != null)
+                                if(effectAnimation != null)
                                 {
-                                    const _local_48 = _local_10.getAddData(_local_12);
+                                    const addData = effectAnimation.getAddData(visiblePartType);
 
-                                    if(_local_48)
+                                    if(addData)
                                     {
-                                        _local_45 = _local_48.isBlended;
-                                        _local_46 = _local_48.blend;
+                                        isBlended = addData.isBlended;
+                                        blendFactor = addData.blend;
                                     }
                                 }
 
-                                if(_local_15)
+                                if(animationAction)
                                 {
-                                    const _local_19 = _local_15.getPart(_local_12);
+                                    const animationPart = animationAction.getPart(visiblePartType);
 
-                                    if(_local_19)
+                                    if(animationPart)
                                     {
-                                        _local_20 = _local_19.frames;
+                                        animationFrames = animationPart.frames;
                                     }
                                     else
                                     {
-                                        _local_20 = _local_14;
+                                        animationFrames = defaultFrames;
                                     }
                                 }
                                 else
                                 {
-                                    _local_20 = _local_14;
+                                    animationFrames = defaultFrames;
                                 }
 
-                                const _local_18 = new AvatarImagePartContainer(k, _local_12, _local_47, null, _local_20, _arg_3.definition, false, -1, _local_12, _local_45, _local_46);
+                                const container = new AvatarImagePartContainer(bodyPartId, visiblePartType, partId, null, animationFrames, action.definition, false, -1, visiblePartType, isBlended, blendFactor);
 
-                                _local_22.push(_local_18);
+                                sortedContainers.push(container);
                             }
                         }
                     }
@@ -562,36 +571,36 @@ export class AvatarStructure
             }
         }
 
-        return _local_22;
+        return sortedContainers;
     }
 
-    private getPopulatedArray(k: number): number[]
+    private getPopulatedArray(count: number): number[]
     {
-        const _local_2: number[] = [];
+        const result: number[] = [];
 
         let index = 0;
 
-        while(index < k)
+        while(index < count)
         {
-            _local_2.push(index);
+            result.push(index);
 
             index++;
         }
 
-        return _local_2;
+        return result;
     }
 
     public getItemIds(): string[]
     {
         if(this._actionManager)
         {
-            const k = this._actionManager.getActionDefinition('CarryItem').params;
+            const params = this._actionManager.getActionDefinition('CarryItem').params;
 
-            const _local_2 = [];
+            const itemIds = [];
 
-            for(const _local_3 of k.values()) _local_2.push(_local_3);
+            for(const value of params.values()) itemIds.push(value);
 
-            return _local_2;
+            return itemIds;
         }
 
         return [];

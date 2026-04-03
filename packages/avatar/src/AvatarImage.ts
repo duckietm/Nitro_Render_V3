@@ -285,6 +285,8 @@ export class AvatarImage implements IAvatarImage, IAvatarEffectListener
 
         const container = this.buildAvatarContainer(avatarCanvas, setType);
 
+        if(!container) return null;
+
         GetRenderer().render({
             target: this._activeTexture,
             container: container,

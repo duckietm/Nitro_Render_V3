@@ -607,6 +607,19 @@ export class RoomMessageHandler
         return true;
     }
 
+    private getReleasedWiredStatusLocation(status: RoomUnitStatusMessage): IVector3D
+    {
+        const activeMovement = this._activeWiredUserMovements.get(status.id);
+
+        if(!activeMovement) return null;
+
+        if(activeMovement.expiresAt <= Date.now()) return null;
+
+        if(!this.shouldReleaseWiredStatusLocation(status, activeMovement)) return null;
+
+        return new Vector3d(activeMovement.targetX, activeMovement.targetY, activeMovement.targetZ);
+    }
+
     private shouldReleaseWiredStatusLocation(status: RoomUnitStatusMessage, activeMovement: { expiresAt: number, targetX: number, targetY: number, targetZ: number }): boolean
     {
         if(!status.didMove)
@@ -967,7 +980,8 @@ export class RoomMessageHandler
 
             if(height) height = (height / zScale);
 
-            const location = new Vector3d(status.x, status.y, (status.z + height));
+            const releasedWiredLocation = this.getReleasedWiredStatusLocation(status);
+            const location = (releasedWiredLocation || new Vector3d(status.x, status.y, (status.z + height)));
             const direction = new Vector3d(status.direction);
 
             let goal: IVector3D = null;

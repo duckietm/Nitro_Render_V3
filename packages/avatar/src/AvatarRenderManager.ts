@@ -241,6 +241,8 @@ export class AvatarRenderManager implements IAvatarRenderManager
 
                 const palette = figureData.getPalette(set.paletteID);
                 const colors = container.getPartColorIds(part);
+				
+				if(!palette) continue;
 
                 for(const colorId of colors)
                 {

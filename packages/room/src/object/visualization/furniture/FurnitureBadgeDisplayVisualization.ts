@@ -283,6 +283,8 @@ export class FurnitureBadgeDisplayVisualization extends FurnitureAnimatedVisuali
                         tempCtx.putImageData(patchData, 0, 0);
 
                         accCtx.drawImage(tempCanvas, frame.dims.left, frame.dims.top);
+                        tempCanvas.width = 0;
+                        tempCanvas.height = 0;
 
                         // Create a new canvas for this frame and create a texture from it
                         const frameCanvas = document.createElement('canvas');
@@ -298,6 +300,9 @@ export class FurnitureBadgeDisplayVisualization extends FurnitureAnimatedVisuali
                         // GIF delays are in centiseconds (1/100th of a second)
                         frameDelays.push(frame.delay || 10);
                     }
+
+                    accCanvas.width = 0;
+                    accCanvas.height = 0;
 
                     // Create AnimatedSprite with frame textures
                     if(this._frameTextures.length > 1)
@@ -340,6 +345,13 @@ export class FurnitureBadgeDisplayVisualization extends FurnitureAnimatedVisuali
                     ctx.clearRect(0, 0, badgeCanvas.width, badgeCanvas.height);
                     ctx.drawImage(img, 0, 0, badgeCanvas.width, badgeCanvas.height);
                     tex.source.update();
+                    img.onload = null;
+                    img.onerror = null;
+                };
+                img.onerror = () =>
+                {
+                    img.onload = null;
+                    img.onerror = null;
                 };
                 img.src = badgeUrl;
             }

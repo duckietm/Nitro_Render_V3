@@ -1,15 +1,16 @@
 import { IGraphicAsset } from '@nitrots/api';
-import { GetRenderer, TextureUtils } from '@nitrots/utils';
-import { Container, Graphics, Matrix, Sprite, Texture, RenderTexture } from 'pixi.js';
+import { GetRenderer } from '@nitrots/utils';
+import { Container, Matrix, Sprite, Texture, RenderTexture } from 'pixi.js';
 import { FurnitureAnimatedVisualization } from './FurnitureAnimatedVisualization';
 
 export class IsometricImageFurniVisualization extends FurnitureAnimatedVisualization {
     protected static THUMBNAIL: string = 'THUMBNAIL';
 
-    private _thumbnailAssetNameNormal: string;
     private _thumbnailImageNormal: Texture;
     private _thumbnailDirection: number;
     private _thumbnailChanged: boolean;
+    private _thumbnailLayerId: number;
+    private _thumbnailTexture: Texture;
     private _uniqueId: string;
     private _photoUrl: string;
     protected _hasOutline: boolean;
@@ -17,10 +18,11 @@ export class IsometricImageFurniVisualization extends FurnitureAnimatedVisualiza
     constructor() {
         super();
 
-        this._thumbnailAssetNameNormal = null;
         this._thumbnailImageNormal = null;
         this._thumbnailDirection = -1;
         this._thumbnailChanged = false;
+        this._thumbnailLayerId = -1;
+        this._thumbnailTexture = null;
         this._uniqueId = `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
         this._photoUrl = null;
     }
@@ -56,13 +58,14 @@ export class IsometricImageFurniVisualization extends FurnitureAnimatedVisualiza
             return;
         }
 
-        const thumbnailAssetName = this.getThumbnailAssetName(64);
-
         if (this._thumbnailImageNormal) {
             this.addThumbnailAsset(this._thumbnailImageNormal, 64);
         } else {
-            const layerId = 2;
-            const sprite = this.getSprite(layerId);
+            if (this._thumbnailTexture instanceof RenderTexture) {
+                this._thumbnailTexture.destroy(true);
+            }
+            this._thumbnailTexture = null;
+            this._thumbnailLayerId = -1;
         }
 
         this._thumbnailChanged = false;
@@ -76,21 +79,16 @@ export class IsometricImageFurniVisualization extends FurnitureAnimatedVisualiza
             const layerTag = this.getLayerTag(scale, this.direction, layerId);
 
             if (layerTag === IsometricImageFurniVisualization.THUMBNAIL) {
+                this._thumbnailLayerId = layerId;
+
                 const assetName = (this.cacheSpriteAssetName(scale, layerId, false) + this.getFrameNumber(scale, layerId));
                 const asset = this.getAsset(assetName, layerId);
-                const thumbnailAssetName = `${this.getThumbnailAssetName(scale)}-${this._uniqueId}`;
-                const transformedTexture = this.generateTransformedThumbnail(k, asset || { width: 64, height: 64 });
 
-                // Use the original asset's registered offsets so the thumbnail is drawn at the
-                // furniture-defined sprite position. Fall back to centering when no asset exists.
-                const offsetX = asset ? asset.offsetX : -Math.floor(transformedTexture.width / 2);
-                const offsetY = asset ? asset.offsetY : -Math.floor(transformedTexture.height / 2);
-
-                this.asset.addAsset(thumbnailAssetName, transformedTexture, true, offsetX, offsetY, false, false);
-
-                const placedSprite = this.getSprite(layerId);
-                if (placedSprite) {
-                    placedSprite.texture = transformedTexture;
+                if (asset) {
+                    if (this._thumbnailTexture instanceof RenderTexture) {
+                        this._thumbnailTexture.destroy(true);
+                    }
+                    this._thumbnailTexture = this.generateTransformedThumbnail(k, asset);
                 }
 
                 return;
@@ -100,78 +98,117 @@ export class IsometricImageFurniVisualization extends FurnitureAnimatedVisualiza
         }
     }
 
-    protected generateTransformedThumbnail(texture: Texture, asset: IGraphicAsset): Texture {
-        const scaleFactor = (asset?.width || 64) / texture.width;
-        const verticalScale = 1.0265;
-        const matrix = new Matrix();
-        const frameThickness = 20;
-        const frameColor = 0x000000;
+    protected updateSprite(scale: number, layerId: number): void {
+        super.updateSprite(scale, layerId);
 
-        switch (this.direction) {
+        if (this._thumbnailTexture && this._thumbnailLayerId === layerId) {
+            const sprite = this.getSprite(layerId);
+            if (sprite) {
+                sprite.texture = this._thumbnailTexture;
+            }
+        }
+    }
+
+    protected generateTransformedThumbnail(texture: Texture, asset: IGraphicAsset): Texture {
+        const assetWidth = asset.width;
+        const assetHeight = asset.height;
+        let outlineTexture: RenderTexture = null;
+
+        if(this._hasOutline)
+        {
+            const borderSize = 20;
+            const bgWidth = texture.width + borderSize * 2;
+            const bgHeight = texture.height + borderSize * 2;
+
+            const container = new Container();
+            const background = new Sprite(Texture.WHITE);
+            background.tint = 0x000000;
+            background.width = bgWidth;
+            background.height = bgHeight;
+
+            const imageSprite = new Sprite(texture);
+            imageSprite.position.set(borderSize, borderSize);
+
+            container.addChild(background, imageSprite);
+
+            outlineTexture = RenderTexture.create({ width: bgWidth, height: bgHeight, resolution: 1 });
+            GetRenderer().render({ container, target: outlineTexture, clear: true });
+
+            texture = outlineTexture;
+        }
+
+        texture.source.scaleMode = 'linear';
+
+        const texW = texture.width;
+        const texH = texture.height;
+        const scaleX = assetWidth / texW;
+        const scaleY = assetHeight / texH;
+
+        const matrix = new Matrix();
+
+        switch(this.direction)
+        {
             case 2:
-                matrix.a = scaleFactor;
-                matrix.b = (-0.5 * scaleFactor);
+                matrix.a = scaleX;
+                matrix.b = -(0.5 * scaleX);
                 matrix.c = 0;
-                matrix.d = (scaleFactor * verticalScale);
+                matrix.d = (scaleY / 1.6);
                 matrix.tx = 0;
-                matrix.ty = (0.5 * scaleFactor * texture.width);
+                matrix.ty = (0.5 * scaleX * texW);
                 break;
             case 0:
             case 4:
-                matrix.a = scaleFactor;
-                matrix.b = (0.5 * scaleFactor);
+                matrix.a = scaleX;
+                matrix.b = (0.5 * scaleX);
                 matrix.c = 0;
-                matrix.d = (scaleFactor * verticalScale);
+                matrix.d = (scaleY / 1.6);
                 matrix.tx = 0;
                 matrix.ty = 0;
                 break;
             default:
-                matrix.a = scaleFactor;
+                matrix.a = scaleX;
                 matrix.b = 0;
                 matrix.c = 0;
-                matrix.d = scaleFactor;
+                matrix.d = scaleY;
                 matrix.tx = 0;
                 matrix.ty = 0;
         }
 
-        const imgWidth = texture.width;
-        const imgHeight = texture.height;
-        const flatWidth = imgWidth + frameThickness * 2;
-        const flatHeight = imgHeight + frameThickness * 2;
-        const flatRenderTexture = TextureUtils.createAndFillRenderTexture(flatWidth, flatHeight, frameColor);
-        const imageSprite = new Sprite(texture);
-        imageSprite.position.set(frameThickness, frameThickness);
-        TextureUtils.writeToTexture(imageSprite, flatRenderTexture, false);
-        const flatTexture = flatRenderTexture;
-        const transformedSprite = new Sprite(flatTexture);
-        transformedSprite.setFromMatrix(matrix);
-        const width = 80;
-        const height = 80;
-        const finalContainer = new Container();
-        const posX = (width - transformedSprite.width) / 2;
-        const posY = (height - transformedSprite.height) / 2;
-        transformedSprite.position.set(posX, posY);
-        finalContainer.addChild(transformedSprite);
+        // Calculate transformed corners manually for accurate bounds
+        const corners = [
+            { x: matrix.tx, y: matrix.ty },
+            { x: matrix.a * texW + matrix.tx, y: matrix.b * texW + matrix.ty },
+            { x: matrix.c * texH + matrix.tx, y: matrix.d * texH + matrix.ty },
+            { x: matrix.a * texW + matrix.c * texH + matrix.tx, y: matrix.b * texW + matrix.d * texH + matrix.ty }
+        ];
 
-        const renderTexture = RenderTexture.create({ width, height, resolution: 1 });
-        GetRenderer().render({ container: finalContainer, target: renderTexture, clear: true });
+        let minX = corners[0].x, minY = corners[0].y;
+        let maxX = corners[0].x, maxY = corners[0].y;
+
+        for (const corner of corners) {
+            if (corner.x < minX) minX = corner.x;
+            if (corner.y < minY) minY = corner.y;
+            if (corner.x > maxX) maxX = corner.x;
+            if (corner.y > maxY) maxY = corner.y;
+        }
+
+        const renderWidth = Math.ceil(maxX - minX);
+        const renderHeight = Math.ceil(maxY - minY);
+
+        matrix.tx -= minX;
+        matrix.ty -= minY;
+
+        const transformedSprite = new Sprite(texture);
+        transformedSprite.setFromMatrix(matrix);
+
+        const renderTexture = RenderTexture.create({ width: renderWidth, height: renderHeight, resolution: 1 });
+        GetRenderer().render({ container: transformedSprite, target: renderTexture, clear: true });
+
+        if (outlineTexture) {
+            outlineTexture.destroy(true);
+        }
 
         return renderTexture;
     }
 
-    protected getSpriteAssetName(scale: number, layerId: number): string {
-        if (this._thumbnailImageNormal && (this.getLayerTag(scale, this.direction, layerId) === IsometricImageFurniVisualization.THUMBNAIL)) {
-            return `${this.getThumbnailAssetName(scale)}-${this._uniqueId}`;
-        }
-
-        return super.getSpriteAssetName(scale, layerId);
-    }
-
-    protected getThumbnailAssetName(scale: number): string {
-        return this.cacheSpriteAssetName(scale, 2, false) + this.getFrameNumber(scale, 2);
-    }
-
-    protected getFullThumbnailAssetName(k: number, _arg_2: number): string {
-        return [this._type, k, 'thumb', _arg_2].join('_');
-    }
 }

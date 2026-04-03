@@ -65,8 +65,8 @@ export class OutgoingHeader
     public static GROUP_CREATE_OPTIONS = 798;
     public static GROUP_FAVORITE = 3549;
     public static GET_FORUM_STATS = 3149;
-    public static GET_FORUM_THREADS = 873;
-    public static GET_FORUMS_LIST = 436;
+    public static GET_FORUM_THREADS = 436;
+    public static GET_FORUMS_LIST = 873;
     public static GET_FORUM_MESSAGES = 232;
     public static GET_FORUM_THREAD = 3900;
     public static GET_UNREAD_FORUMS_COUNT = 2908;
@@ -271,6 +271,13 @@ export class OutgoingHeader
     public static WIRED_ACTION_SAVE = 2281;
     public static WIRED_APPLY_SNAPSHOT = 3373;
     public static WIRED_CONDITION_SAVE = 3203;
+    public static WIRED_MONITOR_REQUEST = 10021;
+    public static WIRED_ROOM_SETTINGS_REQUEST = 10022;
+    public static WIRED_ROOM_SETTINGS_SAVE = 10023;
+    public static WIRED_USER_VARIABLES_REQUEST = 10024;
+    public static WIRED_USER_VARIABLE_UPDATE = 10025;
+    public static WIRED_USER_VARIABLE_MANAGE = 10026;
+    public static WIRED_USER_INSPECT_MOVE = 10027;
     public static WIRED_OPEN = 768;
     public static WIRED_TRIGGER_SAVE = 1520;
     public static GET_ITEM_DATA = 3964;
@@ -475,6 +482,14 @@ export class OutgoingHeader
     public static RENTABLE_GET_RENT_OR_BUYOUT_OFFER = 2518;
 	
 	public static FURNITURE_PICKUP_ALL = 10017;
+
+	// Furni Editor
+	public static FURNI_EDITOR_SEARCH = 10040;
+	public static FURNI_EDITOR_DETAIL = 10041;
+	public static FURNI_EDITOR_BY_SPRITE = 10042;
+	public static FURNI_EDITOR_INTERACTIONS = 10043;
+	public static FURNI_EDITOR_UPDATE = 10044;
+	public static FURNI_EDITOR_DELETE = 10045;
 
 	public static CATALOG_ADMIN_SAVE_PAGE = 10050;
     public static CATALOG_ADMIN_CREATE_PAGE = 10051;

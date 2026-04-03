@@ -867,202 +867,217 @@ export class RoomPlane implements IRoomPlane
     }
 
     private renderWindowReflections(): void
+{
+    if(!this._planeTexture || !this._leftSide || !this._rightSide || !this._normal) return;
+
+    if(this._leftSide.length <= 0 || this._rightSide.length <= 0) return;
+
+    const now = Date.now();
+    const fadeDurationMs = 150;
+    const avatars = RoomWindowReflectionState.getAvatars();
+    const canvasWidth = this._landscapeRenderWidth;
+    const canvasHeight = this._landscapeRenderHeight;
+
+    if(canvasWidth <= 0 || canvasHeight <= 0) return;
+
+    const container = new Container();
+    const visibleAvatarIds = new Set<number>();
+
+    const addReflectionSprite = (
+        texture: Texture,
+        oppositeTexture: Texture,
+        location: IVector3D,
+        alpha: number,
+        verticalOffset: number = 0,
+        direction: number = 0,
+        avatarId: number = -1
+    ): boolean =>
     {
-        if(!this._planeTexture || !this._leftSide || !this._rightSide || !this._normal) return;
+        if(!texture?.source || texture.source.destroyed || !texture.source.style || !location || alpha < 0)
+            return false;
 
-        if(this._leftSide.length <= 0 || this._rightSide.length <= 0) return;
+        const relative = Vector3d.dif(location, this._location);
+        const planeDistance = Math.abs(Vector3d.scalarProjection(relative, this._normal));
 
-        const now = Date.now();
-        const fadeDurationMs = 150;
-        const avatars = RoomWindowReflectionState.getAvatars();
-        const canvasWidth = this._landscapeRenderWidth;
-        const canvasHeight = this._landscapeRenderHeight;
+        if(planeDistance > 0.8) return false;
 
-        if(canvasWidth <= 0 || canvasHeight <= 0) return;
+        const leftSideLoc = Vector3d.scalarProjection(relative, this._leftSide);
+        const rightSideLoc = Vector3d.scalarProjection(relative, this._rightSide);
 
-        const container = new Container();
-        const visibleAvatarIds = new Set<number>();
-
-        const addReflectionSprite = (texture: Texture, oppositeTexture: Texture, location: IVector3D, alpha: number, verticalOffset: number = 0, direction: number = 0, avatarId: number = -1): boolean => {
-            if(!texture?.source || texture.source.destroyed || !texture.source.style || !location || alpha < 0) return false;
-
-            const relative = Vector3d.dif(location, this._location);
-            const planeDistance = Math.abs(Vector3d.scalarProjection(relative, this._normal));
-
-            if(planeDistance > 0.8) return false;
-
-            const leftSideLoc = Vector3d.scalarProjection(relative, this._leftSide);
-            const rightSideLoc = Vector3d.scalarProjection(relative, this._rightSide);
-
-            const closestMask = this._windowMasks.reduce((best, mask) => {
-                const score = Math.abs(mask.leftSideLoc - leftSideLoc) + Math.abs(mask.rightSideLoc - rightSideLoc);
-
-                if(!best || (score < best.score)) return { mask, score };
-
-                return best;
-            }, null as { mask: { leftSideLoc: number; rightSideLoc: number }; score: number } | null);
-
-            if(!closestMask || (closestMask.score > 3)) return false;
-
-            const x = (canvasWidth - ((canvasWidth * leftSideLoc) / this._leftSide.length));
-            const y = (canvasHeight - ((canvasHeight * rightSideLoc) / this._rightSide.length)) + verticalOffset;
-
-            const toPlaneX = (this._location.x - location.x);
-            const toPlaneY = (this._location.y - location.y);
-            const toPlaneLength = Math.hypot(toPlaneX, toPlaneY);
-
-            const facingRadians = ((((direction - 90) % 360) + 360) % 360) * (Math.PI / 180);
-            const facingX = Math.cos(facingRadians);
-            const facingY = Math.sin(facingRadians);
-            const facingWindow = (toPlaneLength > 0.001)
-                ? (((facingX * toPlaneX) + (facingY * toPlaneY)) / toPlaneLength) > 0.5
-                : false;
-
-            const deltaLeft = Math.abs(closestMask.mask.leftSideLoc - leftSideLoc);
-            const deltaRight = Math.abs(closestMask.mask.rightSideLoc - rightSideLoc);
-
-            const isInFrontOfWindow = ((closestMask.score <= 2) && ((deltaLeft <= 0.9) || (deltaRight <= 0.9)));
-            const shouldMirror = isInFrontOfWindow;
-
-            const normal2DLength = Math.hypot(this._normal.x, this._normal.y);
-            const normalX = (normal2DLength > 0.0001) ? (this._normal.x / normal2DLength) : 0;
-            const normalY = (normal2DLength > 0.0001) ? (this._normal.y / normal2DLength) : 0;
-            const normalFacingDot = Math.abs((facingX * normalX) + (facingY * normalY));
-
-            const transitionLow = 0.6;
-            const transitionHigh = 0.8;
-            let oppositeWeight = 0;
-
-            if(shouldMirror && oppositeTexture)
-            {
-                if(normalFacingDot >= transitionHigh) oppositeWeight = 1;
-                else if(normalFacingDot > transitionLow) oppositeWeight = (normalFacingDot - transitionLow) / (transitionHigh - transitionLow);
-            }
-
-            if(oppositeWeight < 1)
-            {
-                const sprite = new Sprite(texture);
-                sprite.anchor.set(0.5, 1);
-                sprite.position.set(Math.trunc(x), Math.trunc(y));
-                sprite.scale.set(1, 1);
-                sprite.tint = 0xCFE3FF;
-                sprite.alpha = alpha * (1 - oppositeWeight);
-                container.addChild(sprite);
-            }
-
-            if(oppositeWeight > 0 && oppositeTexture)
-            {
-                const sprite = new Sprite(oppositeTexture);
-                sprite.anchor.set(0.5, 1);
-                sprite.position.set(Math.trunc(x), Math.trunc(y));
-                sprite.scale.set(1, 1);
-                sprite.tint = 0xCFE3FF;
-                sprite.alpha = alpha * oppositeWeight;
-                container.addChild(sprite);
-            }
-
-            return true;
-        };
-
-        for(const avatar of avatars)
+        const closestMask = this._windowMasks.reduce((best, mask) =>
         {
-            if(!avatar?.texture?.source || avatar.texture.source.destroyed || !avatar.texture.source.style || !avatar.location) continue;
+            const score = Math.abs(mask.leftSideLoc - leftSideLoc) + Math.abs(mask.rightSideLoc - rightSideLoc);
 
-            let firstSeenAt = this._windowReflectionFirstSeenAt.get(avatar.id);
+            if(!best || (score < best.score)) return { mask, score };
 
-            if(firstSeenAt === undefined)
-            {
-                firstSeenAt = now;
-            }
+            return best;
+        }, null as { mask: { leftSideLoc: number; rightSideLoc: number }; score: number } | null);
 
-            const elapsed = Math.min(fadeDurationMs, Math.max(0, (now - firstSeenAt)));
-            const progress = (elapsed / fadeDurationMs);
-            const alpha = (0.4 * progress);
+        if(!closestMask || (closestMask.score > 3)) return false;
 
-            if(!addReflectionSprite(avatar.texture, avatar.oppositeTexture, avatar.location, alpha, avatar.verticalOffset || 0, avatar.direction || 0, avatar.id)) continue;
+        const x = (canvasWidth - ((canvasWidth * leftSideLoc) / this._leftSide.length));
+        const y = (canvasHeight - ((canvasHeight * rightSideLoc) / this._rightSide.length)) + verticalOffset;
 
-            if(!this._windowReflectionFirstSeenAt.has(avatar.id)) this._windowReflectionFirstSeenAt.set(avatar.id, firstSeenAt);
+        const toPlaneX = (this._location.x - location.x);
+        const toPlaneY = (this._location.y - location.y);
+        const toPlaneLength = Math.hypot(toPlaneX, toPlaneY);
 
-            visibleAvatarIds.add(avatar.id);
-            this._windowReflectionFadeOut.delete(avatar.id);
+        const facingRadians = ((((direction - 90) % 360) + 360) % 360) * (Math.PI / 180);
+        const facingX = Math.cos(facingRadians);
+        const facingY = Math.sin(facingRadians);
+        const facingWindow = (toPlaneLength > 0.001)
+            ? (((facingX * toPlaneX) + (facingY * toPlaneY)) / toPlaneLength) > 0.5
+            : false;
 
-            const storedLocation = new Vector3d();
-            storedLocation.assign(avatar.location);
+        const deltaLeft = Math.abs(closestMask.mask.leftSideLoc - leftSideLoc);
+        const deltaRight = Math.abs(closestMask.mask.rightSideLoc - rightSideLoc);
 
-            this._windowReflectionLastVisible.set(avatar.id, {
-                texture: avatar.texture,
-                oppositeTexture: avatar.oppositeTexture,
-                location: storedLocation,
-                verticalOffset: avatar.verticalOffset || 0,
-                direction: avatar.direction || 0
-            });
+        const isInFrontOfWindow = ((closestMask.score <= 2) && ((deltaLeft <= 0.9) || (deltaRight <= 0.9)));
+        const shouldMirror = isInFrontOfWindow;
+
+        const normal2DLength = Math.hypot(this._normal.x, this._normal.y);
+        const normalX = (normal2DLength > 0.0001) ? (this._normal.x / normal2DLength) : 0;
+        const normalY = (normal2DLength > 0.0001) ? (this._normal.y / normal2DLength) : 0;
+        const normalFacingDot = Math.abs((facingX * normalX) + (facingY * normalY));
+
+        const transitionLow = 0.6;
+        const transitionHigh = 0.8;
+        let oppositeWeight = 0;
+
+        if(shouldMirror && oppositeTexture)
+        {
+            if(normalFacingDot >= transitionHigh) oppositeWeight = 1;
+            else if(normalFacingDot > transitionLow)
+                oppositeWeight = (normalFacingDot - transitionLow) / (transitionHigh - transitionLow);
         }
 
-        for(const [id, lastVisible] of this._windowReflectionLastVisible)
+        if(oppositeWeight < 1)
         {
-            if(visibleAvatarIds.has(id) || this._windowReflectionFadeOut.has(id)) continue;
-
-            if(!lastVisible.texture?.source || lastVisible.texture.source.destroyed || !lastVisible.texture.source.style)
-            {
-                this._windowReflectionLastVisible.delete(id);
-                this._windowReflectionFirstSeenAt.delete(id);
-
-                continue;
-            }
-
-            this._windowReflectionFadeOut.set(id, {
-                texture: lastVisible.texture,
-                oppositeTexture: lastVisible.oppositeTexture,
-                location: lastVisible.location,
-                verticalOffset: lastVisible.verticalOffset,
-                direction: lastVisible.direction,
-                startedAt: now
-            });
-
-            this._windowReflectionLastVisible.delete(id);
-            this._windowReflectionFirstSeenAt.delete(id);
+            const sprite = new Sprite(texture);
+            sprite.anchor.set(0.5, 1);
+            sprite.position.set(Math.trunc(x), Math.trunc(y));
+            sprite.tint = 0xCFE3FF;
+            sprite.alpha = alpha * (1 - oppositeWeight);
+            container.addChild(sprite);
         }
 
-        for(const [id, fadeOut] of this._windowReflectionFadeOut)
+        if(oppositeWeight > 0 && oppositeTexture)
         {
-            const elapsed = (now - fadeOut.startedAt);
-
-            if(elapsed >= fadeDurationMs)
-            {
-                this._windowReflectionFadeOut.delete(id);
-
-                continue;
-            }
-
-            const alpha = (0.4 * (1 - (elapsed / fadeDurationMs)));
-
-            if(!addReflectionSprite(fadeOut.texture, fadeOut.oppositeTexture, fadeOut.location, alpha, fadeOut.verticalOffset, fadeOut.direction, id)) this._windowReflectionFadeOut.delete(id);
+            const sprite = new Sprite(oppositeTexture);
+            sprite.anchor.set(0.5, 1);
+            sprite.position.set(Math.trunc(x), Math.trunc(y));
+            sprite.tint = 0xCFE3FF;
+            sprite.alpha = alpha * oppositeWeight;
+            container.addChild(sprite);
         }
 
-        if(!container.children.length)
-        {
-            container.destroy({ children: true });
+        return true;
+    };
 
-            if(!avatars.length)
-            {
-                this._windowReflectionFirstSeenAt.clear();
-                this._windowReflectionLastVisible.clear();
-            }
+    for(const avatar of avatars)
+    {
+        if(!avatar?.texture?.source || avatar.texture.source.destroyed || !avatar.texture.source.style || !avatar.location)
+            continue;
 
-            return;
-        }
+        let firstSeenAt = this._windowReflectionFirstSeenAt.get(avatar.id);
 
-        if(this._maskFilter) container.filters = [this._maskFilter];
+        if(firstSeenAt === undefined) firstSeenAt = now;
 
-        GetRenderer().render({
-            target: this._planeTexture,
-            container,
-            transform: this.getMatrixForDimensions(canvasWidth, canvasHeight),
-            clear: false
+        const elapsed = Math.min(fadeDurationMs, Math.max(0, (now - firstSeenAt)));
+        const alpha = (0.4 * (elapsed / fadeDurationMs));
+
+        if(!addReflectionSprite(
+            avatar.texture,
+            avatar.oppositeTexture,
+            avatar.location,
+            alpha,
+            avatar.verticalOffset || 0,
+            avatar.direction || 0,
+            avatar.id))
+            continue;
+
+        if(!this._windowReflectionFirstSeenAt.has(avatar.id))
+            this._windowReflectionFirstSeenAt.set(avatar.id, firstSeenAt);
+
+        visibleAvatarIds.add(avatar.id);
+        this._windowReflectionFadeOut.delete(avatar.id);
+
+        const storedLocation = new Vector3d();
+        storedLocation.assign(avatar.location);
+
+        this._windowReflectionLastVisible.set(avatar.id, {
+            texture: avatar.texture,
+            oppositeTexture: avatar.oppositeTexture,
+            location: storedLocation,
+            verticalOffset: avatar.verticalOffset || 0,
+            direction: avatar.direction || 0
+        });
+    }
+
+    // move to fade-out (NO destruction)
+    for(const [id, lastVisible] of this._windowReflectionLastVisible)
+    {
+        if(visibleAvatarIds.has(id) || this._windowReflectionFadeOut.has(id)) continue;
+
+        this._windowReflectionFadeOut.set(id, {
+            ...lastVisible,
+            startedAt: now
         });
 
-        container.destroy({ children: true });
+        this._windowReflectionLastVisible.delete(id);
+        this._windowReflectionFirstSeenAt.delete(id);
     }
+
+    // fade-out rendering (NO destruction)
+    for(const [id, fadeOut] of this._windowReflectionFadeOut)
+    {
+        const elapsed = (now - fadeOut.startedAt);
+
+        if(elapsed >= fadeDurationMs)
+        {
+            this._windowReflectionFadeOut.delete(id);
+            continue;
+        }
+
+        const alpha = (0.4 * (1 - (elapsed / fadeDurationMs)));
+
+        if(!addReflectionSprite(
+            fadeOut.texture,
+            fadeOut.oppositeTexture,
+            fadeOut.location,
+            alpha,
+            fadeOut.verticalOffset,
+            fadeOut.direction,
+            id))
+        {
+            this._windowReflectionFadeOut.delete(id);
+        }
+    }
+
+    if(!container.children.length)
+    {
+        container.destroy({ children: true });
+
+        if(!avatars.length)
+        {
+            this._windowReflectionFirstSeenAt.clear();
+            this._windowReflectionLastVisible.clear();
+        }
+
+        return;
+    }
+
+    if(this._maskFilter) container.filters = [this._maskFilter];
+
+    GetRenderer().render({
+        target: this._planeTexture,
+        container,
+        transform: this.getMatrixForDimensions(canvasWidth, canvasHeight),
+        clear: false
+    });
+
+    container.destroy({ children: true });
+	}
 
     private updateCorners(geometry: IRoomGeometry): void
     {
