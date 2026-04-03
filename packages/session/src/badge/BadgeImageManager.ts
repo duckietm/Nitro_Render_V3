@@ -248,6 +248,7 @@ export class BadgeImageManager
         if(!renderedLayers) return false;
 
         const texture = TextureUtils.generateTexture(container);
+        container.destroy({ children: true });
         GetAssetManager().setTexture(groupBadge.code, texture);
 
         GetEventDispatcher().dispatchEvent(new BadgeImageReadyEvent(groupBadge.code, texture));

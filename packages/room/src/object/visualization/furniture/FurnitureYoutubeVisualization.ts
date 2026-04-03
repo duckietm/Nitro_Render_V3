@@ -5,6 +5,13 @@ export class FurnitureYoutubeVisualization extends FurnitureDynamicThumbnailVisu
 {
     protected static THUMBNAIL_URL: string = 'THUMBNAIL_URL';
 
+    constructor()
+    {
+        super();
+
+        this._hasOutline = false;
+    }
+
     protected getThumbnailURL(): string
     {
         if(!this.object) return null;

@@ -23,9 +23,18 @@ export class AvatarAssetDownloadManager
         this._structure = structure;
     }
 
+    private static DEFAULT_MANDATORY_LIBS: string[] = ['hh_human_face'];
+
     public async init(): Promise<void>
     {
-        this._missingMandatoryLibs = GetConfiguration().getValue<string[]>('avatar.mandatory.libraries');
+        const configuredLibs = GetConfiguration().getValue<string[]>('avatar.mandatory.libraries') || [];
+
+        this._missingMandatoryLibs = [ ...configuredLibs ];
+
+        for(const lib of AvatarAssetDownloadManager.DEFAULT_MANDATORY_LIBS)
+        {
+            if(this._missingMandatoryLibs.indexOf(lib) === -1) this._missingMandatoryLibs.push(lib);
+        }
 
         const url = GetConfiguration().getValue<string>('avatar.figuremap.url');
 
