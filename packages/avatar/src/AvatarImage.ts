@@ -293,6 +293,13 @@ export class AvatarImage implements IAvatarImage, IAvatarEffectListener
             clear: true
         });
 
+        for(const child of container.children)
+        {
+            child.removeChildren();
+        }
+
+        container.destroy({ children: true });
+
         //@ts-ignore
         this._activeTexture.source.hitMap = null;
 
