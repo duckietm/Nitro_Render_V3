@@ -105,6 +105,7 @@ export class RoomObjectVariable
     public static FURNITURE_USES_PLANE_MASK: string = 'furniture_uses_plane_mask';
     public static FURNITURE_PLANE_MASK_TYPE: string = 'furniture_plane_mask_type';
     public static FURNITURE_IS_VARIABLE_HEIGHT: string = 'furniture_is_variable_height';
+    public static FURNITURE_IS_WALK_HEIGHT_HELPER: string = 'furniture_is_walk_height_helper';
     public static FURNITURE_VOTE_MAJORITY_RESULT: string = 'furniture_vote_majority_result';
     public static FURNITURE_VOTE_COUNTER_COUNT: string = 'furniture_vote_counter_count';
     public static FURNITURE_SOUNDBLOCK_RELATIVE_ANIMATION_SPEED: string = 'furniture_soundblock_relative_animation_speed';

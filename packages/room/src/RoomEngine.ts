@@ -1834,6 +1834,7 @@ export class RoomEngine implements IRoomEngine, IRoomCreator, IRoomEngineService
         if(object.model && (extra === 2147483001))
         {
             object.model.setValue(RoomObjectVariable.FURNITURE_IS_VARIABLE_HEIGHT, 1);
+            object.model.setValue(RoomObjectVariable.FURNITURE_IS_WALK_HEIGHT_HELPER, 1);
         }
 
         return true;
