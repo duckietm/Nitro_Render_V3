@@ -741,6 +741,7 @@ export class RoomPlane implements IRoomPlane
         });
 
         animationCanvas.destroy(true);
+        animContainer.destroy({ children: true });
     }
 
     private renderLandscapeLayer(texture: Texture, tint: number, alignBottom: boolean): void
@@ -798,7 +799,7 @@ export class RoomPlane implements IRoomPlane
             clear: false
         });
 
-        layerSprite.destroy();
+        layerContainer.destroy({ children: true });
     }
 
     private renderBackgroundColor(): void
@@ -826,7 +827,7 @@ export class RoomPlane implements IRoomPlane
             clear: true
         });
 
-        colorGraphics.destroy();
+        colorContainer.destroy({ children: true });
     }
 
     private clearPlaneTexture(): void
@@ -838,11 +839,15 @@ export class RoomPlane implements IRoomPlane
 
         if(canvasWidth <= 0 || canvasHeight <= 0)
         {
+            const emptyContainer = new Container();
+
             GetRenderer().render({
                 target: this._planeTexture,
-                container: new Container(),
+                container: emptyContainer,
                 clear: true
             });
+
+            emptyContainer.destroy();
 
             return;
         }
@@ -863,7 +868,7 @@ export class RoomPlane implements IRoomPlane
             clear: true
         });
 
-        colorGraphics.destroy();
+        colorContainer.destroy({ children: true });
     }
 
     private renderWindowReflections(): void

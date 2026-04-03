@@ -154,5 +154,6 @@ export class PlaneVisualizationAnimationLayer
         const sprite = new Sprite(item.bitmapData.texture);
         sprite.position.set(x, y);
         TextureUtils.writeToTexture(sprite, canvas, false);
+        sprite.destroy();
     }
 }

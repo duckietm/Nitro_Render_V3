@@ -1101,14 +1101,19 @@ export class AvatarVisualization extends RoomObjectSpriteVisualization implement
 
                 if(oppositeDirection !== currentDirection)
                 {
-                    const highlightEnabled = ((this.object.model.getValue<number>(RoomObjectVariable.FIGURE_HIGHLIGHT_ENABLE) === 1) && (this.object.model.getValue<number>(RoomObjectVariable.FIGURE_HIGHLIGHT) === 1));
-
-                    this._avatarImage.setDirection(AvatarSetType.FULL, oppositeDirection);
-
-                    const renderedOpposite = (this._avatarImage.processAsTexture(AvatarSetType.FULL, highlightEnabled) || sprite.texture);
-
-                    if((this._reflectionOppositeDirection !== currentDirection) || (this._reflectionOppositeBaseTexture !== sprite.texture) || !this._reflectionOppositeTexture)
+                    // Reuse the cached opposite texture if direction and base texture haven't changed
+                    if(this._reflectionOppositeTexture && (this._reflectionOppositeDirection === currentDirection) && (this._reflectionOppositeBaseTexture === sprite.texture))
                     {
+                        oppositeTexture = this._reflectionOppositeTexture;
+                    }
+                    else
+                    {
+                        const highlightEnabled = ((this.object.model.getValue<number>(RoomObjectVariable.FIGURE_HIGHLIGHT_ENABLE) === 1) && (this.object.model.getValue<number>(RoomObjectVariable.FIGURE_HIGHLIGHT) === 1));
+
+                        this._avatarImage.setDirection(AvatarSetType.FULL, oppositeDirection);
+
+                        const renderedOpposite = (this._avatarImage.processAsTexture(AvatarSetType.FULL, highlightEnabled) || sprite.texture);
+
                         if(this._reflectionOppositeTexture)
                         {
                             this._reflectionOppositeTexture.destroy(true);
@@ -1118,15 +1123,15 @@ export class AvatarVisualization extends RoomObjectSpriteVisualization implement
                         this._reflectionOppositeTexture = this.cloneTexture(renderedOpposite);
                         this._reflectionOppositeDirection = currentDirection;
                         this._reflectionOppositeBaseTexture = sprite.texture;
+
+                        oppositeTexture = (this._reflectionOppositeTexture || renderedOpposite);
+
+                        // Restore the live avatar direction and refresh the current texture so
+                        // movement updates do not keep showing the opposite-facing texture.
+                        this._avatarImage.setDirection(AvatarSetType.FULL, currentDirection);
+
+                        sprite.texture = (this._avatarImage.processAsTexture(AvatarSetType.FULL, highlightEnabled) || sprite.texture);
                     }
-
-                    oppositeTexture = (this._reflectionOppositeTexture || renderedOpposite);
-
-                    // Restore the live avatar direction and refresh the current texture so
-                    // movement updates do not keep showing the opposite-facing texture.
-                    this._avatarImage.setDirection(AvatarSetType.FULL, currentDirection);
-
-                    sprite.texture = (this._avatarImage.processAsTexture(AvatarSetType.FULL, highlightEnabled) || sprite.texture);
                 }
             }
 
