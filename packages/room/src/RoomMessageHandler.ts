@@ -31,7 +31,7 @@ export class RoomMessageHandler
     private _planeParser = new RoomPlaneParser();
     private _latestEntryTileEvent: RoomEntryTileMessageEvent = null;
     private _messageEvents: IMessageEvent[] = [];
-    private _activeWiredUserMovements = new Map<number, { expiresAt: number, targetX: number, targetY: number, targetZ: number }>();
+    private _activeWiredUserMovements = new Map<number, { expiresAt: number, sourceX: number, sourceY: number, sourceZ: number, targetX: number, targetY: number, targetZ: number }>();
     private _activeRoomUserWalks = new Map<number, { startedAt: number, targetX: number, targetY: number, targetZ: number, duration: number }>();
     private _activeConfInvisHiddenItemIds = new Set<number>();
     private _confInvisReapplyTimeouts: ReturnType<typeof setTimeout>[] = [];
@@ -618,6 +618,9 @@ export class RoomMessageHandler
     {
         this._activeWiredUserMovements.set(movement.id, {
             expiresAt: Date.now() + Math.max(movement.duration, 1) + RoomMessageHandler.WIRED_MOVEMENT_STATUS_GRACE,
+            sourceX: movement.location.x,
+            sourceY: movement.location.y,
+            sourceZ: movement.location.z,
             targetX: movement.targetLocation.x,
             targetY: movement.targetLocation.y,
             targetZ: movement.targetLocation.z
@@ -637,7 +640,8 @@ export class RoomMessageHandler
             return false;
         }
 
-        if(this.shouldReleaseWiredStatusLocation(status, activeMovement))
+        if(this.shouldDiscardWiredStatusLocation(status, activeMovement)
+            || !!this.getMatchedWiredStatusTargetLocation(status, activeMovement))
         {
             this._activeWiredUserMovements.delete(status.id);
 
@@ -655,42 +659,74 @@ export class RoomMessageHandler
 
         if(activeMovement.expiresAt <= Date.now()) return null;
 
-        if(!this.shouldReleaseWiredStatusLocation(status, activeMovement)) return null;
+        if(this.shouldDiscardWiredStatusLocation(status, activeMovement)) return null;
 
-        return new Vector3d(activeMovement.targetX, activeMovement.targetY, activeMovement.targetZ);
+        return this.getMatchedWiredStatusTargetLocation(status, activeMovement);
     }
 
-    private shouldReleaseWiredStatusLocation(status: RoomUnitStatusMessage, activeMovement: { expiresAt: number, targetX: number, targetY: number, targetZ: number }): boolean
+    private getMatchedWiredStatusTargetLocation(status: RoomUnitStatusMessage, activeMovement: { expiresAt: number, sourceX: number, sourceY: number, sourceZ: number, targetX: number, targetY: number, targetZ: number }): IVector3D
+    {
+        if(this.matchesWiredMovementTarget(status.x, status.y, (status.z + status.height), activeMovement))
+        {
+            return new Vector3d(activeMovement.targetX, activeMovement.targetY, activeMovement.targetZ);
+        }
+
+        if(status.didMove && this.matchesWiredMovementTarget(status.targetX, status.targetY, status.targetZ, activeMovement))
+        {
+            return new Vector3d(activeMovement.targetX, activeMovement.targetY, activeMovement.targetZ);
+        }
+
+        return null;
+    }
+
+    private shouldDiscardWiredStatusLocation(status: RoomUnitStatusMessage, activeMovement: { expiresAt: number, sourceX: number, sourceY: number, sourceZ: number, targetX: number, targetY: number, targetZ: number }): boolean
     {
         if(!status.didMove)
         {
-            return this.matchesWiredMovementTarget(status.x, status.y, (status.z + status.height), activeMovement);
+            return !this.matchesWiredMovementSource(status.x, status.y, (status.z + status.height), activeMovement)
+                && !this.matchesWiredMovementTarget(status.x, status.y, (status.z + status.height), activeMovement);
         }
 
-        return !this.matchesWiredMovementTarget(status.targetX, status.targetY, status.targetZ, activeMovement);
+        return !this.matchesWiredMovementSource(status.x, status.y, (status.z + status.height), activeMovement)
+            && !this.matchesWiredMovementTarget(status.x, status.y, (status.z + status.height), activeMovement)
+            && !this.matchesWiredMovementSource(status.targetX, status.targetY, status.targetZ, activeMovement)
+            && !this.matchesWiredMovementTarget(status.targetX, status.targetY, status.targetZ, activeMovement);
     }
 
-    private matchesWiredMovementTarget(x: number, y: number, z: number, activeMovement: { expiresAt: number, targetX: number, targetY: number, targetZ: number }): boolean
+    private matchesWiredMovementSource(x: number, y: number, z: number, activeMovement: { expiresAt: number, sourceX: number, sourceY: number, sourceZ: number, targetX: number, targetY: number, targetZ: number }): boolean
     {
         if(!activeMovement) return false;
 
-        return ((x === activeMovement.targetX)
-            && (y === activeMovement.targetY)
-            && (Math.abs(z - activeMovement.targetZ) <= RoomMessageHandler.WIRED_MOVEMENT_Z_EPSILON));
+        return this.matchesWiredMovementLocation(x, y, z, activeMovement.sourceX, activeMovement.sourceY, activeMovement.sourceZ);
+    }
+
+    private matchesWiredMovementTarget(x: number, y: number, z: number, activeMovement: { expiresAt: number, sourceX: number, sourceY: number, sourceZ: number, targetX: number, targetY: number, targetZ: number }): boolean
+    {
+        if(!activeMovement) return false;
+
+        return this.matchesWiredMovementLocation(x, y, z, activeMovement.targetX, activeMovement.targetY, activeMovement.targetZ);
+    }
+
+    private matchesWiredMovementLocation(x: number, y: number, z: number, movementX: number, movementY: number, movementZ: number): boolean
+    {
+        return ((x === movementX)
+            && (y === movementY)
+            && (Math.abs(z - movementZ) <= RoomMessageHandler.WIRED_MOVEMENT_Z_EPSILON));
     }
 
     private applyWiredUserDirectionUpdate(update: WiredUserDirectionUpdateData): void
     {
-        this._roomEngine.updateRoomObjectUserLocation(
-            this._currentRoomId,
-            update.id,
-            null,
-            null,
-            false,
-            0,
-            new Vector3d(update.bodyDirection),
-            update.headDirection,
-            true);
+        const userObject = this._roomEngine.getRoomObjectUser(this._currentRoomId, update.id);
+
+        if(!userObject) return;
+
+        userObject.setDirection(new Vector3d(update.bodyDirection));
+
+        const model = userObject.model;
+
+        if(!model) return;
+
+        model.setValue(RoomObjectVariable.HEAD_DIRECTION, update.headDirection);
     }
 
     private onObjectsDataUpdateEvent(event: ObjectsDataUpdateEvent): void
