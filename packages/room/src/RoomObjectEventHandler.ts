@@ -1501,11 +1501,37 @@ export class RoomObjectEventHandler implements IRoomCanvasMouseListener, IRoomOb
         return true;
     }
 
+    private _walkDebounceTimer: ReturnType<typeof setTimeout> = null;
+    private _lastWalkSentAt: number = 0;
+    private static readonly WALK_MIN_INTERVAL_MS = 100;
+
     private sendWalkUpdate(x: number, y: number): void
     {
         if(!this._roomEngine || !GetCommunication().connection) return;
 
-        GetCommunication().connection.send(new RoomUnitWalkComposer(x, y));
+        if(this._walkDebounceTimer)
+        {
+            clearTimeout(this._walkDebounceTimer);
+            this._walkDebounceTimer = null;
+        }
+
+        const now = Date.now();
+        const elapsed = now - this._lastWalkSentAt;
+
+        if(elapsed >= RoomObjectEventHandler.WALK_MIN_INTERVAL_MS)
+        {
+            this._lastWalkSentAt = now;
+            GetCommunication().connection.send(new RoomUnitWalkComposer(x, y));
+        }
+        else
+        {
+            this._walkDebounceTimer = setTimeout(() =>
+            {
+                this._walkDebounceTimer = null;
+                this._lastWalkSentAt = Date.now();
+                GetCommunication().connection.send(new RoomUnitWalkComposer(x, y));
+            }, RoomObjectEventHandler.WALK_MIN_INTERVAL_MS - elapsed);
+        }
     }
 
     private handleMouseOverObject(category: number, roomId: number, event: RoomObjectMouseEvent): ObjectTileCursorUpdateMessage

@@ -15,12 +15,48 @@ export class TextureUtils
 
     public static async generateImage(options: ExtractImageOptions | Container | Texture): Promise<HTMLImageElement>
     {
-        return this.getExtractor().image(options);
+        if(!options) return null;
+
+        if(options instanceof Texture)
+        {
+            if(options.destroyed || !options.source || options.source.destroyed) return null;
+        }
+        else if(options instanceof Container)
+        {
+            if(options.destroyed) return null;
+        }
+
+        try
+        {
+            return await this.getExtractor().image(options);
+        }
+        catch(e)
+        {
+            return null;
+        }
     }
 
     public static async generateImageUrl(options: ExtractImageOptions | Container | Texture): Promise<string>
     {
-        return this.getExtractor().base64(options);
+        if(!options) return null;
+
+        if(options instanceof Texture)
+        {
+            if(options.destroyed || !options.source || options.source.destroyed) return null;
+        }
+        else if(options instanceof Container)
+        {
+            if(options.destroyed) return null;
+        }
+
+        try
+        {
+            return await this.getExtractor().base64(options);
+        }
+        catch(e)
+        {
+            return null;
+        }
     }
 
     public static generateCanvas(options: ExtractOptions | Container | Texture): ICanvas
