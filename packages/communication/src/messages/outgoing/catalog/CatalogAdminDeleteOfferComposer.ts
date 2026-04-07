@@ -4,9 +4,9 @@ export class CatalogAdminDeleteOfferComposer implements IMessageComposer<Constru
 {
     private _data: ConstructorParameters<typeof CatalogAdminDeleteOfferComposer>;
 
-    constructor(offerId: number)
+    constructor(offerId: number, catalogMode: string = 'NORMAL')
     {
-        this._data = [ offerId ];
+        this._data = [ offerId, catalogMode ];
     }
 
     dispose(): void
