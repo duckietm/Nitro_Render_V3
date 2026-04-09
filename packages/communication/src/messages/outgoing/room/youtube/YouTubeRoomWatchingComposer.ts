@@ -6,7 +6,7 @@ export class YouTubeRoomWatchingComposer implements IMessageComposer<any[]>
 
     constructor(watching: boolean)
     {
-        this._data = [watching];
+        this._data = [watching ? 1 : 0];
     }
 
     public getMessageArray() { return this._data; }
