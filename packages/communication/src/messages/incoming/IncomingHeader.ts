@@ -490,4 +490,8 @@ export class IncomingHeader
     public static USER_PREFIXES = 7001;
     public static PREFIX_RECEIVED = 7002;
     public static ACTIVE_PREFIX_UPDATED = 7003;
+
+    // YouTube Room Broadcast
+    public static YOUTUBE_ROOM_BROADCAST = 8001;
+    public static YOUTUBE_ROOM_WATCHERS = 8002;
 }

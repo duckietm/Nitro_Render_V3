@@ -17,3 +17,4 @@ export * from './RedeemItemClothingComposer';
 export * from './session';
 export * from './unit';
 export * from './unit/chat';
+export * from './youtube';

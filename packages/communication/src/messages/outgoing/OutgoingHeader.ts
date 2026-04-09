@@ -503,4 +503,8 @@ export class OutgoingHeader
     public static SET_ACTIVE_PREFIX = 7012;
     public static DELETE_PREFIX = 7013;
     public static PURCHASE_PREFIX = 7014;
+
+    // YouTube Room Broadcast
+    public static YOUTUBE_ROOM_PLAY = 8001;
+    public static YOUTUBE_ROOM_WATCHING = 8002;
 }
