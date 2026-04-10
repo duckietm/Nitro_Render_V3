@@ -507,4 +507,5 @@ export class OutgoingHeader
     // YouTube Room Broadcast
     public static YOUTUBE_ROOM_PLAY = 8001;
     public static YOUTUBE_ROOM_WATCHING = 8002;
+    public static YOUTUBE_ROOM_SETTINGS = 8003;
 }

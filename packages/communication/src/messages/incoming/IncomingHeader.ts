@@ -494,4 +494,5 @@ export class IncomingHeader
     // YouTube Room Broadcast
     public static YOUTUBE_ROOM_BROADCAST = 8001;
     public static YOUTUBE_ROOM_WATCHERS = 8002;
+    public static YOUTUBE_ROOM_SETTINGS = 8003;
 }

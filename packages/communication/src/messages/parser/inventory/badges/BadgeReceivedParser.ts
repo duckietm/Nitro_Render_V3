@@ -21,6 +21,9 @@ export class BadgeReceivedParser implements IMessageParser
 
         this._badgeId = wrapper.readInt();
         this._badgeCode = wrapper.readString();
+        // Extra field appended by the Arcturus-Nitro fork: sender username for
+        // badges awarded by a staff member via the `:badge` command. Read
+        // defensively so older servers that don't send it still parse cleanly.
         this._senderName = wrapper.bytesAvailable ? wrapper.readString() : '';
 
         return true;
