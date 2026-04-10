@@ -493,6 +493,8 @@ export class OutgoingHeader
     public static CATALOG_ADMIN_MOVE_OFFER = 10056;
     public static CATALOG_ADMIN_MOVE_PAGE = 10057;
     public static CATALOG_ADMIN_PUBLISH = 10058;
+    public static CATALOG_ADMIN_SAVE_PAGE_IMAGES = 10060;
+    public static CATALOG_ADMIN_SAVE_PAGE_ICON = 10061;
 	
 	public static DELETE_ITEM = 10018;
 	public static DELETE_PET = 10030;

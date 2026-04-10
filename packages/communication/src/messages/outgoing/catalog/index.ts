@@ -8,6 +8,8 @@ export * from './CatalogAdminMovePageComposer';
 export * from './CatalogAdminPublishComposer';
 export * from './CatalogAdminSaveOfferComposer';
 export * from './CatalogAdminSavePageComposer';
+export * from './CatalogAdminSavePageImagesComposer';
+export * from './CatalogAdminSavePageIconComposer';
 export * from './BuildersClubPlaceWallItemMessageComposer';
 export * from './BuildersClubQueryFurniCountMessageComposer';
 export * from './CatalogAdminCreateOfferComposer';
