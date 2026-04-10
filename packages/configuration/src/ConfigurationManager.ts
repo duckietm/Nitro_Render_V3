@@ -1,4 +1,5 @@
 ﻿import { NitroLogger, NitroVersion } from '@nitrots/utils';
+import JSON5 from 'json5';
 import { IConfigurationManager } from './IConfigurationManager';
 
 export class ConfigurationManager implements IConfigurationManager
@@ -54,11 +55,12 @@ export class ConfigurationManager implements IConfigurationManager
 
                 try
                 {
-                    json = await response.json();
+                    const text = await response.text();
+                    json = JSON5.parse(text);
                 }
                 catch(parseError)
                 {
-                    throw new Error(`Invalid JSON in config "${ url }" — check for syntax errors like trailing commas or missing quotes (${ parseError.message })`);
+                    throw new Error(`Invalid JSON5 in config "${ url }" — check for syntax errors (${ parseError.message })`);
                 }
 
                 this.parseConfiguration(json);

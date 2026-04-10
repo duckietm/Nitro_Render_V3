@@ -10,7 +10,8 @@
   "main": "./index",
   "dependencies": {
     "@nitrots/api": "1.0.0",
-    "@nitrots/utils": "1.0.0"
+    "@nitrots/utils": "1.0.0",
+    "json5": "^2.2.3"
   },
   "devDependencies": {
     "typescript": "~5.8.2"
