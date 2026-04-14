@@ -26,6 +26,17 @@ export class IsometricImageFurniVisualization extends FurnitureAnimatedVisualiza
         this._uniqueId = `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
         this._photoUrl = null;
     }
+	
+	public dispose(): void {
+        if (this._thumbnailTexture instanceof RenderTexture) {
+            this._thumbnailTexture.destroy(true);
+        }
+
+        this._thumbnailTexture = null;
+        this._thumbnailImageNormal = null;
+
+        super.dispose();
+    }
 
     public get hasThumbnailImage(): boolean {
         return !(this._thumbnailImageNormal == null);

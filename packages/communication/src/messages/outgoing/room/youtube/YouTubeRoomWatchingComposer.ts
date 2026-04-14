@@ -6,8 +6,6 @@ export class YouTubeRoomWatchingComposer implements IMessageComposer<any[]>
 
     constructor(watching: boolean)
     {
-        // Send as int (0/1) instead of bare boolean to avoid
-        // serialization ambiguity in the Nitro wire protocol.
         this._data = [watching ? 1 : 0];
     }
 

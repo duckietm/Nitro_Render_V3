@@ -271,6 +271,13 @@ export class OutgoingHeader
     public static WIRED_ACTION_SAVE = 2281;
     public static WIRED_APPLY_SNAPSHOT = 3373;
     public static WIRED_CONDITION_SAVE = 3203;
+    public static WIRED_MONITOR_REQUEST = 10021;
+    public static WIRED_ROOM_SETTINGS_REQUEST = 10022;
+    public static WIRED_ROOM_SETTINGS_SAVE = 10023;
+    public static WIRED_USER_VARIABLES_REQUEST = 10024;
+    public static WIRED_USER_VARIABLE_UPDATE = 10025;
+    public static WIRED_USER_VARIABLE_MANAGE = 10026;
+    public static WIRED_USER_INSPECT_MOVE = 10027;
     public static WIRED_OPEN = 768;
     public static WIRED_TRIGGER_SAVE = 1520;
     public static GET_ITEM_DATA = 3964;
@@ -503,8 +510,8 @@ export class OutgoingHeader
     public static SET_ACTIVE_PREFIX = 7012;
     public static DELETE_PREFIX = 7013;
     public static PURCHASE_PREFIX = 7014;
-
-    // YouTube Room Broadcast
+	
+	// YouTube Room Broadcast
     public static YOUTUBE_ROOM_PLAY = 8001;
     public static YOUTUBE_ROOM_WATCHING = 8002;
     public static YOUTUBE_ROOM_SETTINGS = 8003;

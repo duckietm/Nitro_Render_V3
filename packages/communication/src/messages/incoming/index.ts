@@ -58,6 +58,7 @@ export * from './room/furniture';
 export * from './room/furniture/floor';
 export * from './room/furniture/wall';
 export * from './room/furniture/youtube';
+export * from './room/youtube';
 export * from './room/mapping';
 export * from './room/pet';
 export * from './room/session';

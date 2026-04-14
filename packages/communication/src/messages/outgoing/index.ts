@@ -55,6 +55,7 @@ export * from './room/furniture/presents';
 export * from './room/furniture/toner';
 export * from './room/furniture/wall';
 export * from './room/furniture/youtube';
+export * from './room/youtube';
 export * from './room/layout';
 export * from './room/pets';
 export * from './room/session';

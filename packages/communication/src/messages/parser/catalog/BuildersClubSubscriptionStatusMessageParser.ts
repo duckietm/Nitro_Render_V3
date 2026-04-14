@@ -6,6 +6,8 @@ export class BuildersClubSubscriptionStatusMessageParser implements IMessagePars
     private _furniLimit: number;
     private _maxFurniLimit: number;
     private _secondsLeftWithGrace: number;
+    private _placementBlockedByVisitors: boolean;
+    private _placementAllowedInCurrentRoom: boolean;
 
     public flush(): boolean
     {
@@ -13,6 +15,8 @@ export class BuildersClubSubscriptionStatusMessageParser implements IMessagePars
         this._furniLimit = 0;
         this._maxFurniLimit = 0;
         this._secondsLeftWithGrace = 0;
+        this._placementBlockedByVisitors = false;
+        this._placementAllowedInCurrentRoom = false;
 
         return true;
     }
@@ -27,6 +31,12 @@ export class BuildersClubSubscriptionStatusMessageParser implements IMessagePars
 
         if(wrapper.bytesAvailable) this._secondsLeftWithGrace = wrapper.readInt();
         else this._secondsLeftWithGrace = this._secondsLeft;
+
+        if(wrapper.bytesAvailable) this._placementBlockedByVisitors = wrapper.readBoolean();
+        else this._placementBlockedByVisitors = false;
+
+        if(wrapper.bytesAvailable) this._placementAllowedInCurrentRoom = wrapper.readBoolean();
+        else this._placementAllowedInCurrentRoom = false;
 
         return true;
     }
@@ -49,5 +59,15 @@ export class BuildersClubSubscriptionStatusMessageParser implements IMessagePars
     public get secondsLeftWithGrace(): number
     {
         return this._secondsLeftWithGrace;
+    }
+
+    public get placementBlockedByVisitors(): boolean
+    {
+        return this._placementBlockedByVisitors;
+    }
+
+    public get placementAllowedInCurrentRoom(): boolean
+    {
+        return this._placementAllowedInCurrentRoom;
     }
 }

@@ -623,7 +623,17 @@ export class RoomPlaneParser
             }
             _local_3++;
         }
-        const _local_4: Point = RoomPlaneParser.findEntranceTile(this._tileMatrix);
+        const _local_4: Point = (() =>
+        {
+            const matrixWithFloorHoles = this._tileMatrix.map((row, rowIndex) =>
+            {
+                const floorHoleRow = this._floorHoleMatrix[rowIndex] || [];
+
+                return row.map((value, columnIndex) => (floorHoleRow[columnIndex] ? RoomPlaneParser.TILE_HOLE : value));
+            });
+
+            return RoomPlaneParser.findEntranceTile(matrixWithFloorHoles);
+        })();
 
         _local_3 = 0;
         while(_local_3 < this._height)

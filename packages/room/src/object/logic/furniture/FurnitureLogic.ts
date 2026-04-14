@@ -398,6 +398,13 @@ export class FurnitureLogic extends MovingObjectLogic
     {
         if(!this.object || !this.eventDispatcher) return;
 
+        if(this.object.model && (this.object.model.getValue<number>(RoomObjectVariable.FURNITURE_IS_VARIABLE_HEIGHT) > 0))
+        {
+            this.eventDispatcher.dispatchEvent(new RoomObjectWidgetRequestEvent(RoomObjectWidgetRequestEvent.STACK_HEIGHT, this.object));
+
+            return;
+        }
+
         const clickUrl = this.getAdClickUrl(this.object.model);
 
         if(clickUrl && clickUrl.length)

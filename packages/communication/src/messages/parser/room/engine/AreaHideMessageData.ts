@@ -9,6 +9,8 @@ export class AreaHideMessageData
     private _width: number;
     private _length: number;
     private _invert: boolean;
+    private _wallItems: boolean;
+    private _invisibility: boolean;
 
     constructor(wrapper: IMessageDataWrapper)
     {
@@ -19,6 +21,8 @@ export class AreaHideMessageData
         this._width = wrapper.readInt();
         this._length = wrapper.readInt();
         this._invert = wrapper.readBoolean();
+        this._wallItems = wrapper.readBoolean();
+        this._invisibility = wrapper.readBoolean();
     }
 
     public get furniId(): number
@@ -54,5 +58,15 @@ export class AreaHideMessageData
     public get invert(): boolean
     {
         return this._invert;
+    }
+
+    public get wallItems(): boolean
+    {
+        return this._wallItems;
+    }
+
+    public get invisibility(): boolean
+    {
+        return this._invisibility;
     }
 }

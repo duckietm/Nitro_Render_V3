@@ -163,6 +163,18 @@ export class AvatarVisualization extends RoomObjectSpriteVisualization implement
         super.dispose();
 
         if(this._avatarImage) this._avatarImage.dispose();
+		
+		if(this._cachedAvatars)
+        {
+            for(const avatar of this._cachedAvatars.getValues()) avatar && avatar.dispose();
+            this._cachedAvatars.reset();
+        }
+
+        if(this._cachedAvatarEffects)
+        {
+            for(const avatar of this._cachedAvatarEffects.getValues()) avatar && avatar.dispose();
+            this._cachedAvatarEffects.reset();
+        }
 
         if(this._reflectionOppositeTexture)
         {

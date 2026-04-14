@@ -269,6 +269,11 @@ export class IncomingHeader
     public static WIRED_ACTION = 1434;
     public static WIRED_CONDITION = 1108;
     public static WIRED_ERROR = 156;
+    public static WIRED_MONITOR_DATA = 5101;
+    public static WIRED_ROOM_SETTINGS_DATA = 5102;
+    public static WIRED_USER_VARIABLES_DATA = 5103;
+    public static CONF_INVIS_STATE = 5104;
+    public static HANDITEM_BLOCK_STATE = 5105;
     public static WIRED_OPEN = 1830;
     public static WIRED_REWARD = 178;
     public static WIRED_SAVE = 1155;
@@ -490,8 +495,8 @@ export class IncomingHeader
     public static USER_PREFIXES = 7001;
     public static PREFIX_RECEIVED = 7002;
     public static ACTIVE_PREFIX_UPDATED = 7003;
-
-    // YouTube Room Broadcast
+	
+	// YouTube Room Broadcast
     public static YOUTUBE_ROOM_BROADCAST = 8001;
     public static YOUTUBE_ROOM_WATCHERS = 8002;
     public static YOUTUBE_ROOM_SETTINGS = 8003;

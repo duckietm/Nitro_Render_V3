@@ -6,6 +6,7 @@ import { RoomObjectLogicBase } from './RoomObjectLogicBase';
 export class MovingObjectLogic extends RoomObjectLogicBase
 {
     public static DEFAULT_UPDATE_INTERVAL: number = 500;
+    private static LOCATION_EPSILON: number = 0.01;
     private static TEMP_VECTOR: Vector3d = new Vector3d();
 
     private _liftAmount: number;
@@ -17,6 +18,7 @@ export class MovingObjectLogic extends RoomObjectLogicBase
     private _lastUpdateTime: number;
     private _changeTime: number;
     private _updateInterval: number;
+    private _queuedMoveMessages: ObjectMoveUpdateMessage[];
 
     constructor()
     {
@@ -31,11 +33,13 @@ export class MovingObjectLogic extends RoomObjectLogicBase
         this._lastUpdateTime = 0;
         this._changeTime = 0;
         this._updateInterval = MovingObjectLogic.DEFAULT_UPDATE_INTERVAL;
+        this._queuedMoveMessages = [];
     }
 
     public dispose(): void
     {
         this._liftAmount = 0;
+        this._queuedMoveMessages = [];
 
         super.dispose();
     }
@@ -46,6 +50,7 @@ export class MovingObjectLogic extends RoomObjectLogicBase
 
         const locationOffset = this.getLocationOffset();
         const model = this.object && this.object.model;
+        let completedInterpolation = false;
 
         if(model)
         {
@@ -111,10 +116,13 @@ export class MovingObjectLogic extends RoomObjectLogicBase
                 this._locationDelta.x = 0;
                 this._locationDelta.y = 0;
                 this._locationDelta.z = 0;
+                completedInterpolation = true;
             }
         }
 
         this._lastUpdateTime = this.time;
+
+        if(completedInterpolation) this.processQueuedMoveMessage();
     }
 
     public setObject(object: IRoomObjectController): void
@@ -130,6 +138,17 @@ export class MovingObjectLogic extends RoomObjectLogicBase
 
         if(message instanceof ObjectMoveUpdateMessage)
         {
+            if(this.shouldApplyInstantMoveMessage(message))
+            {
+                super.processUpdateMessage(message);
+
+                if(message.location) this._location.assign(message.location);
+
+                this.resetInterpolationState();
+
+                return;
+            }
+
             const requiresCustomMoveHandling = !!message.anchorObject || (message.elapsed > 0);
 
             if(requiresCustomMoveHandling)
@@ -147,15 +166,30 @@ export class MovingObjectLogic extends RoomObjectLogicBase
         if(message instanceof ObjectMoveUpdateMessage) return this.processMoveMessage(message);
     }
 
+    private shouldApplyInstantMoveMessage(message: ObjectMoveUpdateMessage): boolean
+    {
+        if(!message || !message.location || message.isSlide || !!message.anchorObject || (message.elapsed > 0)) return false;
+
+        return this.matchesLocation(message.location, message.targetLocation);
+    }
+
     private processMoveMessage(message: ObjectMoveUpdateMessage): void
     {
         if(!message || !this.object || !message.location) return;
 
+        if(this.shouldQueueMoveMessage(message))
+        {
+            this.queueMoveMessage(message);
+
+            return;
+        }
+
         const hadActiveInterpolation = this.isInterpolating();
+        const duration = ((message.duration > 0) ? message.duration : ObjectMoveUpdateMessage.DEFAULT_DURATION);
         const startLocation = hadActiveInterpolation
             ? this.object.getLocation()
             : message.location;
-        const elapsed = Math.max(0, Math.min(message.duration, message.elapsed));
+        const elapsed = Math.max(0, Math.min(duration, message.elapsed));
 
         this._location.assign(startLocation);
         this.object.setLocation(this._location);
@@ -165,7 +199,7 @@ export class MovingObjectLogic extends RoomObjectLogicBase
         else this._followOffset.assign(new Vector3d());
 
         this._changeTime = (this._lastUpdateTime - elapsed);
-        this.updateInterval = message.duration;
+        this.updateInterval = duration;
 
         this._locationDelta.assign(message.targetLocation);
         this._locationDelta.subtract(this._location);
@@ -203,9 +237,84 @@ export class MovingObjectLogic extends RoomObjectLogicBase
         }
     }
 
+    private resetInterpolationState(): void
+    {
+        this._locationDelta.x = 0;
+        this._locationDelta.y = 0;
+        this._locationDelta.z = 0;
+        this._followObject = null;
+        this._followOffset.assign(new Vector3d());
+        this._queuedMoveMessages = [];
+        this._changeTime = this._lastUpdateTime;
+    }
+
     private isInterpolating(): boolean
     {
         return (this._locationDelta.length > 0) && ((this.time - this._changeTime) < this._updateInterval);
+    }
+
+    private shouldQueueMoveMessage(message: ObjectMoveUpdateMessage): boolean
+    {
+        if(!message.isSlide || !!message.anchorObject || !this.isInterpolating() || !message.location || !message.targetLocation) return false;
+
+        const expectedStartLocation = this.getQueuedMovementTailLocation();
+
+        if(!expectedStartLocation) return false;
+
+        return this.matchesLocation(message.location, expectedStartLocation)
+            && !this.matchesLocation(message.targetLocation, expectedStartLocation);
+    }
+
+    private queueMoveMessage(message: ObjectMoveUpdateMessage): void
+    {
+        this._queuedMoveMessages.push(new ObjectMoveUpdateMessage(
+            message.location,
+            message.targetLocation,
+            message.direction,
+            message.isSlide,
+            message.duration,
+            message.elapsed,
+            message.anchorObject,
+            message.anchorOffset));
+    }
+
+    private processQueuedMoveMessage(): void
+    {
+        if(!this._queuedMoveMessages.length) return;
+
+        const nextMoveMessage = this._queuedMoveMessages.shift();
+
+        if(!nextMoveMessage) return;
+
+        this.processMoveMessage(nextMoveMessage);
+    }
+
+    private getQueuedMovementTailLocation(): IVector3D
+    {
+        if(this._queuedMoveMessages.length)
+        {
+            const queuedMoveMessage = this._queuedMoveMessages[this._queuedMoveMessages.length - 1];
+
+            if(queuedMoveMessage?.targetLocation) return queuedMoveMessage.targetLocation;
+        }
+
+        if(this._locationDelta.length <= 0) return null;
+
+        const targetLocation = new Vector3d();
+
+        targetLocation.assign(this._location);
+        targetLocation.add(this._locationDelta);
+
+        return targetLocation;
+    }
+
+    private matchesLocation(first: IVector3D, second: IVector3D): boolean
+    {
+        if(!first || !second) return false;
+
+        return (Math.abs(first.x - second.x) <= MovingObjectLogic.LOCATION_EPSILON)
+            && (Math.abs(first.y - second.y) <= MovingObjectLogic.LOCATION_EPSILON)
+            && (Math.abs(first.z - second.z) <= MovingObjectLogic.LOCATION_EPSILON);
     }
 
     protected getLocationOffset(): IVector3D

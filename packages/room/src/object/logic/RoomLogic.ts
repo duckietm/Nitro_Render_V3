@@ -294,7 +294,7 @@ export class RoomLogic extends RoomObjectLogicBase
         switch(message.type)
         {
             case ObjectRoomFloorHoleUpdateMessage.ADD:
-                this._planeParser.addFloorHole(message.id, message.x, message.y, message.width, message.height);
+                this._planeParser.addFloorHole(message.id, message.x, message.y, message.width, message.height, message.invert);
                 this._needsMapUpdate = true;
                 return;
             case ObjectRoomFloorHoleUpdateMessage.REMOVE:

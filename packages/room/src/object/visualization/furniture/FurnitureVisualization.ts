@@ -237,8 +237,11 @@ export class FurnitureVisualization extends RoomObjectSpriteVisualization
         this._furnitureLift = (model.getValue<number>(RoomObjectVariable.FURNITURE_LIFT_AMOUNT) || 0);
 
         let alphaMultiplier = model.getValue<number>(RoomObjectVariable.FURNITURE_ALPHA_MULTIPLIER);
+        const hiddenByConfInvisControl = (model.getValue<number>(RoomObjectVariable.FURNITURE_CONF_INVIS_HIDDEN) === 1);
+        const hiddenByAreaHideControl = (model.getValue<number>(RoomObjectVariable.FURNITURE_AREA_HIDE_HIDDEN) === 1);
 
         if(isNaN(alphaMultiplier)) alphaMultiplier = 1;
+        if(hiddenByConfInvisControl || hiddenByAreaHideControl) alphaMultiplier = 0;
 
         if(this._alphaMultiplier !== alphaMultiplier)
         {

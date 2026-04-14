@@ -157,6 +157,16 @@ export class RoomPlane implements IRoomPlane
             }
             this._animationLayers = [];
         }
+		
+		this._windowReflectionLastVisible.clear();
+        this._windowReflectionFadeOut.clear();
+        this._windowReflectionFirstSeenAt.clear();
+
+        if(this._maskFilter)
+        {
+            this._maskFilter.destroy();
+            this._maskFilter = null;
+        }
 
         this._disposed = true;
     }

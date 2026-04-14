@@ -22,6 +22,7 @@ export class RoomEngine implements IRoomEngine, IRoomCreator, IRoomEngineService
 {
     public static ROOM_OBJECT_ID: number = -1;
     public static ROOM_OBJECT_TYPE: string = 'room';
+    private _areaHideHoleCounts = new Map<string, number>();
 
     public static CURSOR_OBJECT_ID: number = -2;
     public static CURSOR_OBJECT_TYPE: string = 'tile_cursor';
@@ -168,6 +169,11 @@ export class RoomEngine implements IRoomEngine, IRoomCreator, IRoomEngineService
             this._roomInstanceDatas.delete(existing.roomId);
 
             existing.dispose();
+        }
+
+        for(const key of Array.from(this._areaHideHoleCounts.keys()))
+        {
+            if(key.startsWith(roomId + ':')) this._areaHideHoleCounts.delete(key);
         }
 
         GetEventDispatcher().dispatchEvent(new RoomEngineEvent(RoomEngineEvent.DISPOSED, roomId));
@@ -585,14 +591,106 @@ export class RoomEngine implements IRoomEngine, IRoomCreator, IRoomEngineService
 
         GetEventDispatcher().dispatchEvent(new RoomEngineAreaHideStateEvent(roomId, furniId, RoomObjectCategory.FLOOR, on));
 
+        this.removeAreaHideFloorHoles(roomObject, roomId, furniId);
+
         if(on)
         {
-            roomObject.logic.processUpdateMessage(new ObjectRoomFloorHoleUpdateMessage(ObjectRoomFloorHoleUpdateMessage.ADD, furniId, rootX, rootY, width, length, invert));
+            const rectangles = this.getAreaHideHoleRectangles(roomObject, rootX, rootY, width, length, invert);
+
+            for(let index = 0; index < rectangles.length; index++)
+            {
+                const rectangle = rectangles[index];
+
+                roomObject.logic.processUpdateMessage(new ObjectRoomFloorHoleUpdateMessage(ObjectRoomFloorHoleUpdateMessage.ADD, this.getAreaHideHoleId(furniId, index), rectangle.x, rectangle.y, rectangle.width, rectangle.length, false));
+            }
+
+            this._areaHideHoleCounts.set(this.getAreaHideHoleKey(roomId, furniId), rectangles.length);
         }
         else
         {
-            roomObject.logic.processUpdateMessage(new ObjectRoomFloorHoleUpdateMessage(ObjectRoomFloorHoleUpdateMessage.REMOVE, furniId));
+            this._areaHideHoleCounts.delete(this.getAreaHideHoleKey(roomId, furniId));
         }
+
+        return true;
+    }
+
+    private removeAreaHideFloorHoles(roomObject: IRoomObjectController, roomId: number, furniId: number): void
+    {
+        if(!roomObject?.logic) return;
+
+        roomObject.logic.processUpdateMessage(new ObjectRoomFloorHoleUpdateMessage(ObjectRoomFloorHoleUpdateMessage.REMOVE, furniId));
+
+        const count = this._areaHideHoleCounts.get(this.getAreaHideHoleKey(roomId, furniId)) ?? 0;
+
+        for(let index = 0; index < Math.max(count, 4); index++)
+        {
+            roomObject.logic.processUpdateMessage(new ObjectRoomFloorHoleUpdateMessage(ObjectRoomFloorHoleUpdateMessage.REMOVE, this.getAreaHideHoleId(furniId, index)));
+        }
+    }
+
+    private getAreaHideHoleKey(roomId: number, furniId: number): string
+    {
+        return roomId + ':' + furniId;
+    }
+
+    private getAreaHideHoleId(furniId: number, index: number): number
+    {
+        return -((furniId * 10000) + index + 1);
+    }
+
+    private getAreaHideHoleRectangles(roomObject: IRoomObjectController, rootX: number, rootY: number, width: number, length: number, invert: boolean): { x: number, y: number, width: number, length: number }[]
+    {
+        const rectangles: { x: number, y: number, width: number, length: number }[] = [];
+
+        if(width <= 0 || length <= 0) return rectangles;
+
+        const roomMap = roomObject?.model?.getValue<RoomMapData>(RoomObjectVariable.ROOM_MAP_DATA);
+        const tileMap = roomMap?.tileMap;
+
+        if(!tileMap?.length) return rectangles;
+
+        const areaMinX = rootX;
+        const areaMinY = rootY;
+        const areaMaxX = (rootX + width);
+        const areaMaxY = (rootY + length);
+        const pushRectangle = (x: number, y: number, rectWidth: number) =>
+        {
+            if(rectWidth <= 0) return;
+
+            rectangles.push({ x, y, width: rectWidth, length: 1 });
+        };
+
+        for(let y = 0; y < tileMap.length; y++)
+        {
+            const row = tileMap[y];
+
+            if(!row?.length) continue;
+
+            let segmentStart = -1;
+
+            for(let x = 0; x <= row.length; x++)
+            {
+                const tileHeight = (x < row.length) ? row[x]?.height : Number.NEGATIVE_INFINITY;
+                const validTile = (tileHeight >= 0);
+                const inSelection = (x >= areaMinX) && (x < areaMaxX) && (y >= areaMinY) && (y < areaMaxY);
+                const shouldHide = validTile && (invert ? !inSelection : inSelection);
+
+                if(shouldHide)
+                {
+                    if(segmentStart === -1) segmentStart = x;
+
+                    continue;
+                }
+
+                if(segmentStart !== -1)
+                {
+                    pushRectangle(segmentStart, y, (x - segmentStart));
+                    segmentStart = -1;
+                }
+            }
+        }
+
+        return rectangles;
     }
 
     public updateObjectRoomColor(roomId: number, color: number, light: number, backgroundOnly: boolean): boolean
@@ -1732,6 +1830,12 @@ export class RoomEngine implements IRoomEngine, IRoomCreator, IRoomEngineService
 
         object.processUpdateMessage(new RoomObjectUpdateMessage(location, direction));
         object.processUpdateMessage(new ObjectDataUpdateMessage(state, data, extra));
+
+        if(object.model && (extra === 2147483001))
+        {
+            object.model.setValue(RoomObjectVariable.FURNITURE_IS_VARIABLE_HEIGHT, 1);
+            object.model.setValue(RoomObjectVariable.FURNITURE_IS_WALK_HEIGHT_HELPER, 1);
+        }
 
         return true;
     }

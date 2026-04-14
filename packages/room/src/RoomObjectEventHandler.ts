@@ -87,6 +87,18 @@ export class RoomObjectEventHandler implements IRoomCanvasMouseListener, IRoomOb
             }
         }
 
+        if((event.type === MouseEventType.DOUBLE_CLICK) && (category === RoomObjectCategory.FLOOR) && object.model && (object.model.getValue<number>(RoomObjectVariable.FURNITURE_IS_VARIABLE_HEIGHT) > 0))
+        {
+            const roomIdString = object.model.getValue<string>(RoomObjectVariable.OBJECT_ROOM_ID);
+            const roomId = ((roomIdString && (parseInt(roomIdString.split('_')[0]) || 0)) || -1);
+
+            if((roomId >= 0) && GetEventDispatcher())
+            {
+                GetEventDispatcher().dispatchEvent(new RoomEngineTriggerWidgetEvent(RoomEngineTriggerWidgetEvent.REQUEST_STACK_HEIGHT, roomId, object.id, category));
+                return;
+            }
+        }
+
         if(object.mouseHandler) object.mouseHandler.mouseEvent(event, geometry);
     }
 

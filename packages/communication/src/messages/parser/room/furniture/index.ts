@@ -1,4 +1,5 @@
 export * from './AreaHideMessageParser';
+export * from './ConfInvisStateMessageParser';
 export * from './CustomUserNotificationMessageParser';
 export * from './DiceValueMessageParser';
 export * from './FurniRentOrBuyoutOfferMessageParser';
@@ -6,6 +7,7 @@ export * from './FurnitureAliasesParser';
 export * from './FurnitureDataParser';
 export * from './FurnitureStackHeightParser';
 export * from './GroupFurniContextMenuInfoMessageParser';
+export * from './HanditemBlockStateMessageParser';
 export * from './ItemDataUpdateMessageParser';
 export * from './LoveLockFurniFinishedParser';
 export * from './LoveLockFurniFriendConfirmedParser';

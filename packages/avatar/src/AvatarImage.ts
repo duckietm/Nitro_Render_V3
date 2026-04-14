@@ -314,6 +314,9 @@ export class AvatarImage implements IAvatarImage, IAvatarEffectListener
         const canvas = GetRenderer().texture.generateCanvas(texture);
 
         const url = canvas.toDataURL('image/png');
+		
+		canvas.width = 0;
+        canvas.height = 0;
 
         return url;
     }

@@ -4,9 +4,9 @@ export class CatalogAdminCreateOfferComposer implements IMessageComposer<Constru
 {
     private _data: ConstructorParameters<typeof CatalogAdminCreateOfferComposer>;
 
-    constructor(pageId: number, itemId: number, catalogName: string, costCredits: number, costPoints: number, pointsType: number, amount: number, clubOnly: number, extradata: string, haveOffer: boolean, offerIdGroup: number, limitedStack: number, orderNumber: number)
+    constructor(pageId: number, itemId: number, catalogName: string, costCredits: number, costPoints: number, pointsType: number, amount: number, clubOnly: number, extradata: string, haveOffer: boolean, offerIdGroup: number, limitedStack: number, orderNumber: number, catalogMode: string = 'NORMAL')
     {
-        this._data = [ pageId, itemId, catalogName, costCredits, costPoints, pointsType, amount, clubOnly, extradata, haveOffer, offerIdGroup, limitedStack, orderNumber ];
+        this._data = [ pageId, itemId, catalogName, costCredits, costPoints, pointsType, amount, clubOnly, extradata, haveOffer, offerIdGroup, limitedStack, orderNumber, catalogMode ];
     }
 
     dispose(): void

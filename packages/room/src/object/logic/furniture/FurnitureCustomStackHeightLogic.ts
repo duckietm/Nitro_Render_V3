@@ -25,7 +25,5 @@ export class FurnitureCustomStackHeightLogic extends FurnitureMultiStateLogic
         if(!this.object || !this.eventDispatcher) return;
 
         this.eventDispatcher.dispatchEvent(new RoomObjectWidgetRequestEvent(RoomObjectWidgetRequestEvent.STACK_HEIGHT, this.object));
-
-        super.useObject();
     }
 }
