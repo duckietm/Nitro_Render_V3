@@ -15,6 +15,7 @@ export class CatalogPageMessageOfferData
     private _isPet: boolean;
     private _previewImage: string;
     private _itemIds: string;
+    private _haveOffer: boolean;
     private _products: CatalogPageMessageProductData[];
 
     constructor(wrapper: IMessageDataWrapper)
@@ -43,6 +44,7 @@ export class CatalogPageMessageOfferData
         this._isPet = wrapper.readBoolean();
         this._previewImage = wrapper.readString();
         this._itemIds = wrapper.readString();
+        this._haveOffer = wrapper.readBoolean();
     }
 
     public get offerId(): number
@@ -108,5 +110,10 @@ export class CatalogPageMessageOfferData
     public get itemIds(): string
     {
         return this._itemIds;
+    }
+
+    public get haveOffer(): boolean
+    {
+        return this._haveOffer;
     }
 }
