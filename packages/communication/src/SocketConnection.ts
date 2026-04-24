@@ -3,19 +3,7 @@ import { GetConfiguration } from '@nitrots/configuration';
 import { GetEventDispatcher, NitroEvent, NitroEventType, ReconnectEvent } from '@nitrots/events';
 import { NitroLogger } from '@nitrots/utils';
 import { EvaWireFormat } from './codec';
-import {
-    aesGcmDecrypt,
-    aesGcmEncrypt,
-    buildClientHello,
-    deriveAesKey,
-    deriveSharedSecret,
-    exportPublicKeySpki,
-    generateEphemeralKeyPair,
-    importPublicKeySpki,
-    NONCE_LEN,
-    parseServerHello,
-    randomNonce
-} from './crypto';
+import { aesGcmDecrypt, aesGcmEncrypt, buildClientHello, deriveAesKey, deriveSharedSecret, exportPublicKeySpki, generateEphemeralKeyPair, importPublicKeySpki, importSigningPublicKeyFromBase64, NONCE_LEN, parseServerHello, randomNonce, verifyEphemeralSignature } from './crypto';
 import { MessageClassManager } from './messages';
 
 type CryptoState = 'disabled' | 'awaiting_server_hello' | 'ready' | 'error';
@@ -40,7 +28,7 @@ export class SocketConnection implements IConnection
     private _isReconnecting: boolean = false;
     private _intentionalClose: boolean = false;
     private _wasAuthenticated: boolean = false;
-
+	
     public static readonly MAX_RECONNECT_ATTEMPTS: number = 7;
     public static readonly BASE_RECONNECT_DELAY_MS: number = 1000;
     public static readonly MAX_RECONNECT_DELAY_MS: number = 30000;
@@ -62,7 +50,6 @@ export class SocketConnection implements IConnection
     private createSocket(socketUrl: string): void
     {
         this._dataBuffer = new ArrayBuffer(0);
-
         const cryptoEnabled = !!GetConfiguration().getValue<boolean>('crypto.ws.enabled', false);
         if(cryptoEnabled && !this.subtleCryptoAvailable())
         {
@@ -84,7 +71,6 @@ export class SocketConnection implements IConnection
         this._onCloseCallback = (event: Event) => this.onSocketClosed(event as CloseEvent);
         this._onErrorCallback = () => this.onSocketError();
         this._onMessageCallback = (event: MessageEvent) => this.onSocketMessage(event.data as ArrayBuffer);
-
         this._socket.addEventListener(WebSocketEventEnum.CONNECTION_OPENED, this._onOpenCallback);
         this._socket.addEventListener(WebSocketEventEnum.CONNECTION_CLOSED, this._onCloseCallback);
         this._socket.addEventListener(WebSocketEventEnum.CONNECTION_ERROR, this._onErrorCallback);
@@ -138,15 +124,23 @@ export class SocketConnection implements IConnection
             return;
         }
 
-        if(this._cryptoState === 'error') return;
-
         this._dataBuffer = this.concatArrayBuffers(this._dataBuffer, data);
         this.processReceivedData();
     }
 
     private async handleServerHello(frame: ArrayBuffer): Promise<void>
     {
-        const serverPubkeySpki = parseServerHello(frame);
+        const { pubkeySpki: serverPubkeySpki, signature } = parseServerHello(frame);
+        const signingRequired = !!GetConfiguration().getValue<boolean>('crypto.ws.signing.enabled', false);
+        if(signingRequired)
+        {
+            if(!signature) throw new Error('crypto.ws.signing.enabled=true but server_hello had no signature');
+
+            const signingPub = await this.getSigningPublicKey();
+            const ok = await verifyEphemeralSignature(signingPub, signature, serverPubkeySpki);
+            if(!ok) throw new Error('server_hello signature verification failed (MITM?)');
+        }
+
         const serverPubkey = await importPublicKeySpki(serverPubkeySpki);
         const ourKeys = await generateEphemeralKeyPair();
         const ourPubkeySpki = await exportPublicKeySpki(ourKeys.publicKey);
@@ -161,6 +155,29 @@ export class SocketConnection implements IConnection
             this._pendingEncryptedSends = [];
             for(const buf of queued) await this.encryptAndSend(buf);
         }
+    }
+
+    private _cachedSigningPublicKey: CryptoKey = null;
+    private async getSigningPublicKey(): Promise<CryptoKey>
+    {
+        if(this._cachedSigningPublicKey) return this._cachedSigningPublicKey;
+
+        const pinned = GetConfiguration().getValue<string>('crypto.ws.signing.public_key', '');
+        if(pinned)
+        {
+            this._cachedSigningPublicKey = await importSigningPublicKeyFromBase64(pinned);
+            return this._cachedSigningPublicKey;
+        }
+
+        const endpointTemplate = GetConfiguration().getValue<string>('login.server_key.endpoint', '/api/auth/server-key');
+        const endpoint = GetConfiguration().interpolate(endpointTemplate);
+        const resp = await fetch(endpoint, { credentials: 'include' });
+        if(!resp.ok) throw new Error(`server-key fetch failed: HTTP ${ resp.status }`);
+        const payload = await resp.json();
+        const b64 = typeof payload?.publicKey === 'string' ? payload.publicKey : '';
+        if(!b64) throw new Error('server-key response missing publicKey');
+        this._cachedSigningPublicKey = await importSigningPublicKeyFromBase64(b64);
+        return this._cachedSigningPublicKey;
     }
 
     private async decryptFrame(frame: ArrayBuffer): Promise<ArrayBuffer>
