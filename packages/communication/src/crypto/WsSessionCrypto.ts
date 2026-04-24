@@ -66,7 +66,13 @@ export function buildClientHello(pubkeySpki: ArrayBuffer): ArrayBuffer
     return out.buffer;
 }
 
-export function parseServerHello(frame: ArrayBuffer): ArrayBuffer
+export interface ParsedServerHello
+{
+    pubkeySpki: ArrayBuffer;
+    signature: ArrayBuffer | null;
+}
+
+export function parseServerHello(frame: ArrayBuffer): ParsedServerHello
 {
     if (frame.byteLength < 7) throw new Error('server_hello frame too short');
     const dv = new DataView(frame);
@@ -74,7 +80,40 @@ export function parseServerHello(frame: ArrayBuffer): ArrayBuffer
     if (magic >>> 0 !== (HANDSHAKE_MAGIC >>> 0)) throw new Error('server_hello magic mismatch');
     const type = dv.getUint8(4);
     if (type !== TYPE_SERVER_HELLO) throw new Error(`expected server_hello, got type=0x${ type.toString(16) }`);
+
     const keyLen = dv.getUint16(5, false);
     if (keyLen <= 0 || keyLen > frame.byteLength - 7) throw new Error(`invalid server key length ${ keyLen }`);
-    return frame.slice(7, 7 + keyLen);
+    const pubkeySpki = frame.slice(7, 7 + keyLen);
+
+    const remaining = frame.byteLength - (7 + keyLen);
+    if (remaining === 0) return { pubkeySpki, signature: null };
+    if (remaining < 2) throw new Error('truncated signature trailer');
+    const sigLen = dv.getUint16(7 + keyLen, false);
+    if (sigLen <= 0 || 7 + keyLen + 2 + sigLen !== frame.byteLength) throw new Error(`invalid signature length ${ sigLen }`);
+    const signature = frame.slice(7 + keyLen + 2, 7 + keyLen + 2 + sigLen);
+    return { pubkeySpki, signature };
+}
+
+export async function importSigningPublicKeyFromBase64(spkiBase64: string): Promise<CryptoKey>
+{
+    const bin = atob(spkiBase64.replace(/-/g, '+').replace(/_/g, '/'));
+    const bytes = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+    return window.crypto.subtle.importKey(
+        'spki',
+        bytes.buffer,
+        { name: 'ECDSA', namedCurve: 'P-256' },
+        false,
+        [ 'verify' ]
+    );
+}
+
+export async function verifyEphemeralSignature(signingKey: CryptoKey, signature: ArrayBuffer, signedBytes: ArrayBuffer): Promise<boolean>
+{
+    return window.crypto.subtle.verify(
+        { name: 'ECDSA', hash: 'SHA-256' },
+        signingKey,
+        signature,
+        signedBytes
+    );
 }
