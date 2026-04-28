@@ -11,7 +11,8 @@
   "dependencies": {
     "@nitrots/api": "1.0.0",
     "@nitrots/events": "1.0.0",
-    "@nitrots/utils": "1.0.0"
+    "@nitrots/utils": "1.0.0",
+    "@thumbmarkjs/thumbmarkjs": "^1.8.1"
   },
   "devDependencies": {
     "typescript": "~5.8.2"
