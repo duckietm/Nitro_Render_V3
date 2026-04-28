@@ -29,7 +29,6 @@ export class RoomSessionManager implements IRoomSessionManager, IRoomHandlerList
 
     public async init(): Promise<void>
     {
-        console.log('[RoomSessionManager] init() called');
         this.createHandlers();
         this.processPendingSession();
         this.setupReconnectListener();
