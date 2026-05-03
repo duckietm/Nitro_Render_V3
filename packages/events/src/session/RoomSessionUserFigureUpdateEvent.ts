@@ -12,6 +12,7 @@ export class RoomSessionUserFigureUpdateEvent extends RoomSessionEvent {
   private _backgroundId: number | null;
   private _standId: number | null;
   private _overlayId: number | null;
+  private _cardBackgroundId: number | null;
 
   constructor(
     session: IRoomSession,
@@ -22,7 +23,8 @@ export class RoomSessionUserFigureUpdateEvent extends RoomSessionEvent {
     achievementScore: number,
     backgroundId: number | null,
     standId: number | null,
-    overlayId: number | null
+    overlayId: number | null,
+    cardBackgroundId: number | null = 0
   ) {
     super(RoomSessionUserFigureUpdateEvent.USER_FIGURE, session);
 
@@ -34,6 +36,7 @@ export class RoomSessionUserFigureUpdateEvent extends RoomSessionEvent {
     this._backgroundId = backgroundId;
     this._standId = standId;
     this._overlayId = overlayId;
+    this._cardBackgroundId = cardBackgroundId;
   }
 
   public get roomIndex(): number {
@@ -66,5 +69,9 @@ export class RoomSessionUserFigureUpdateEvent extends RoomSessionEvent {
 
   public get overlayId(): number | null {
     return this._overlayId;
+  }
+
+  public get cardBackgroundId(): number | null {
+    return this._cardBackgroundId;
   }
 }

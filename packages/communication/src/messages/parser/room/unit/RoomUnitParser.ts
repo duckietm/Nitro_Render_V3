@@ -37,6 +37,7 @@ export class RoomUnitParser implements IMessageParser
 			const background = wrapper.readInt();
             const stand = wrapper.readInt();
             const overlay = wrapper.readInt();
+            const cardBackground = wrapper.readInt();
             let figure = wrapper.readString();
             const roomIndex = wrapper.readInt();
             const x = wrapper.readInt();
@@ -53,6 +54,7 @@ export class RoomUnitParser implements IMessageParser
 			user.background = background;
             user.stand = stand;
             user.overlay = overlay;
+            user.cardBackground = cardBackground;
             user.x = x;
             user.y = y;
             user.z = z;

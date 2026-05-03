@@ -97,9 +97,9 @@ export class RoomSession implements IRoomSession
         else GetCommunication().connection.send(new RoomUnitTypingStopComposer());
     }
 	
-	public sendBackgroundMessage(backgroundImage: number, backgroundStand: number, backgroundOverlay: number): void
+	public sendBackgroundMessage(backgroundImage: number, backgroundStand: number, backgroundOverlay: number, backgroundCard: number = 0): void
     {
-        GetCommunication().connection.send(new RoomUnitBackgroundComposer(backgroundImage, backgroundStand, backgroundOverlay));
+        GetCommunication().connection.send(new RoomUnitBackgroundComposer(backgroundImage, backgroundStand, backgroundOverlay, backgroundCard));
     }
 
     public sendMottoMessage(motto: string): void

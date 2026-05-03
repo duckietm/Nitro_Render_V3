@@ -57,7 +57,8 @@ export class RoomUsersHandler extends BaseHandler
                 userData.custom = user.custom;
 				userData.background = user.background;
                 userData.stand = user.stand;
-                userData.overlay = user.overlay;									  
+                userData.overlay = user.overlay;
+                userData.cardBackground = user.cardBackground;
                 userData.activityPoints = user.activityPoints;
                 userData.figure = user.figure;
                 userData.type = user.userType;
@@ -106,9 +107,9 @@ export class RoomUsersHandler extends BaseHandler
         session.userDataManager.updateMotto(parser.unitId, parser.motto);
         session.userDataManager.updateAchievementScore(parser.unitId, parser.achievementScore);
 		
-		session.userDataManager.updateBackground(parser.unitId, parser.backgroundId, parser.standId, parser.overlayId);
+		session.userDataManager.updateBackground(parser.unitId, parser.backgroundId, parser.standId, parser.overlayId, parser.cardBackgroundId);
 
-        GetEventDispatcher().dispatchEvent(new RoomSessionUserFigureUpdateEvent(session, parser.unitId, parser.figure, parser.gender, parser.motto, parser.achievementScore, parser.backgroundId, parser.standId, parser.overlayId));
+        GetEventDispatcher().dispatchEvent(new RoomSessionUserFigureUpdateEvent(session, parser.unitId, parser.figure, parser.gender, parser.motto, parser.achievementScore, parser.backgroundId, parser.standId, parser.overlayId, parser.cardBackgroundId));
 
     }
 

@@ -10,6 +10,7 @@ export class RoomUnitInfoParser implements IMessageParser
 	private _backgroundId: number;
     private _standId: number;
     private _overlayId: number;
+    private _cardBackgroundId: number;
 
     public flush(): boolean
     {
@@ -21,6 +22,7 @@ export class RoomUnitInfoParser implements IMessageParser
 		this._backgroundId = 0;
         this._standId = 0;
         this._overlayId = 0;
+        this._cardBackgroundId = 0;
 
         return true;
     }
@@ -36,7 +38,8 @@ export class RoomUnitInfoParser implements IMessageParser
         this._achievementScore = wrapper.readInt();
 		this._backgroundId = wrapper.readInt();
         this._standId = wrapper.readInt();
-        this._overlayId = wrapper.readInt();									   
+        this._overlayId = wrapper.readInt();
+        if(wrapper.bytesAvailable) this._cardBackgroundId = wrapper.readInt();
 
         return true;
     }
@@ -79,5 +82,10 @@ export class RoomUnitInfoParser implements IMessageParser
     public get overlayId(): number
     {
         return this._overlayId;
+    }
+
+    public get cardBackgroundId(): number
+    {
+        return this._cardBackgroundId;
     }
 }

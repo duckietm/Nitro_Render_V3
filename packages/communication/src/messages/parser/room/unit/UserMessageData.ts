@@ -17,6 +17,7 @@ export class UserMessageData
 	private _background: number = 0;
     private _stand: number = 0;
     private _overlay: number = 0;
+    private _cardBackground: number = 0;
     private _webID: number = 0;
     private _groupID: number = 0;
     private _groupStatus: number = 0;
@@ -212,6 +213,16 @@ export class UserMessageData
     public set overlay(k: number)
     {
         this._overlay = k;
+    }
+
+    public get cardBackground(): number
+    {
+        return this._cardBackground;
+    }
+
+    public set cardBackground(k: number)
+    {
+        this._cardBackground = k;
     }
 
     public get webID(): number
