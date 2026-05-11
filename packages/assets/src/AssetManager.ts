@@ -227,7 +227,7 @@ export class AssetManager implements IAssetManager
         for(const path in merged)
         {
             const mod = merged[path];
-            const imageUrl = (mod.default ?? mod) as string;
+            const imageUrl = ((mod as { default?: string }).default ?? mod) as string;
 
             const file = path.split('/').pop()!;
             const rawName = file.replace(/\.png$/i, '');
@@ -296,7 +296,7 @@ export class AssetManager implements IAssetManager
             if(!path.startsWith(prefix)) continue;
 
             const mod = allImages[path];
-            const imageUrl = (mod.default ?? mod) as string;
+            const imageUrl = ((mod as { default?: string }).default ?? mod) as string;
 
             const file = path.split('/').pop()!;
             const rawName = file.replace(/\.png$/i, '');

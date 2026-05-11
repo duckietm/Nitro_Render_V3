@@ -2,8 +2,8 @@ export { };
 
 declare global
 {
-	interface Window
-	{
-		NitroConfig?: { [index: string]: any };
-	}
+    interface Window
+    {
+        NitroConfig?: Record<string, unknown>;
+    }
 }
