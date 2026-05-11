@@ -1,12 +1,23 @@
 import { IMessageComposer } from '@nitrots/api';
 
-export class RoomEnterComposer implements IMessageComposer<ConstructorParameters<typeof RoomEnterComposer>>
-{
-    private _data: ConstructorParameters<typeof RoomEnterComposer>;
+type RoomEnterPayload = [ number, string, number?, number? ];
 
-    constructor(roomId: number, password: string = null)
+export class RoomEnterComposer implements IMessageComposer<RoomEnterPayload>
+{
+    private _data: RoomEnterPayload;
+
+    /**
+     * Optional spawnX/spawnY let the server resume the avatar at a
+     * specific tile when re-entering the same room — used by the
+     * reconnect flow. Arcturus' RequestRoomLoadEvent reads both ints
+     * only if `packet.remaining >= 8`, so omitting them keeps the
+     * legacy enter-via-door behavior.
+     */
+    constructor(roomId: number, password: string = null, spawnX?: number, spawnY?: number)
     {
-        this._data = [roomId, password];
+        this._data = (spawnX !== undefined && spawnY !== undefined)
+            ? [ roomId, password, spawnX, spawnY ]
+            : [ roomId, password ];
     }
 
     public getMessageArray()
