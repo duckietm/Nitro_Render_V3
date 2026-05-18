@@ -1,6 +1,7 @@
 import { IAssetManager, IAvatarFigureContainer, IAvatarImageListener } from '@nitrots/api';
 import { GetConfiguration } from '@nitrots/configuration';
 import { AvatarRenderLibraryEvent, GetEventDispatcher, NitroEvent, NitroEventType } from '@nitrots/events';
+import { parseConfigJsonFromResponse } from '@nitrots/utils';
 import { AvatarAssetDownloadLibrary } from './AvatarAssetDownloadLibrary';
 import { AvatarStructure } from './AvatarStructure';
 
@@ -57,11 +58,11 @@ export class AvatarAssetDownloadManager
 
         try
         {
-            responseData = await response.json();
+            responseData = await parseConfigJsonFromResponse(response, url);
         }
         catch(parseErr)
         {
-            throw new Error(`Invalid JSON in figure map "${ url }" — the URL may be wrong. Check "avatar.figuremap.url" in renderer-config.json (${ parseErr.message })`);
+            throw new Error(`Invalid figure map "${ url }" — JSON/JSON5 parse failed. Check "avatar.figuremap.url" in renderer-config.json (${ parseErr.message })`);
         }
 
         this.processFigureMap(responseData.libraries);

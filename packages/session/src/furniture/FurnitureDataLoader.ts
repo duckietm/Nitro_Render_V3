@@ -1,6 +1,7 @@
 import { FurnitureType, IFurnitureData } from '@nitrots/api';
 import { GetConfiguration } from '@nitrots/configuration';
 import { GetLocalizationManager } from '@nitrots/localization';
+import { parseConfigJsonFromResponse } from '@nitrots/utils';
 import { FurnitureData } from './FurnitureData';
 
 export class FurnitureDataLoader
@@ -37,11 +38,11 @@ export class FurnitureDataLoader
 
         try
         {
-            responseData = await response.json();
+            responseData = await parseConfigJsonFromResponse(response, url);
         }
         catch(parseErr)
         {
-            throw new Error(`Invalid JSON in furniture data "${ url }" — the URL may be wrong. Check "furnidata.url" in renderer-config.json (${ parseErr.message })`);
+            throw new Error(`Invalid furniture data "${ url }" — JSON/JSON5 parse failed. Check "furnidata.url" in renderer-config.json (${ parseErr.message })`);
         }
 
         if(responseData.roomitemtypes) this.parseFloorItems(responseData.roomitemtypes);

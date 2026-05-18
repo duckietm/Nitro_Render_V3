@@ -13,6 +13,7 @@ export * from './GetTickerFPS';
 export * from './GetTickerTime';
 export * from './HabboWebTools';
 export * from './Int32';
+export * from './JsonParser';
 export * from './LegacyExternalInterface';
 export * from './LinkTracker';
 export * from './Matrix4x4';

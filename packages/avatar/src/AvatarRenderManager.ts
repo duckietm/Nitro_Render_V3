@@ -2,6 +2,7 @@ import { AvatarSetType, IAssetManager, IAvatarEffectListener, IAvatarFigureConta
 import { GetAssetManager } from '@nitrots/assets';
 import { GetConfiguration } from '@nitrots/configuration';
 import { GetEventDispatcher, NitroEventType } from '@nitrots/events';
+import { parseConfigJsonFromResponse } from '@nitrots/utils';
 import { AvatarAssetDownloadManager } from './AvatarAssetDownloadManager';
 import { AvatarFigureContainer } from './AvatarFigureContainer';
 import { AvatarImage } from './AvatarImage';
@@ -87,11 +88,11 @@ export class AvatarRenderManager implements IAvatarRenderManager
 
         try
         {
-            this._structure.updateActions(await response.json());
+            this._structure.updateActions(await parseConfigJsonFromResponse(response, url));
         }
         catch(parseErr)
         {
-            throw new Error(`Invalid JSON from "${ url }" — the URL may be wrong and returning an HTML page instead of JSON. Check "avatar.actions.url" in renderer-config.json (${ parseErr.message })`);
+            throw new Error(`Invalid avatar actions "${ url }" — JSON/JSON5 parse failed. Check "avatar.actions.url" in renderer-config.json (${ parseErr.message })`);
         }
     }
 
@@ -120,11 +121,11 @@ export class AvatarRenderManager implements IAvatarRenderManager
 
         try
         {
-            this._structure.figureData.appendJSON(await response.json());
+            this._structure.figureData.appendJSON(await parseConfigJsonFromResponse(response, url));
         }
         catch(parseErr)
         {
-            throw new Error(`Invalid JSON from "${ url }" — the URL may be wrong and returning an HTML page instead of JSON. Check "avatar.figuredata.url" in renderer-config.json (${ parseErr.message })`);
+            throw new Error(`Invalid figure data "${ url }" — JSON/JSON5 parse failed. Check "avatar.figuredata.url" in renderer-config.json (${ parseErr.message })`);
         }
 
         this._structure.init();

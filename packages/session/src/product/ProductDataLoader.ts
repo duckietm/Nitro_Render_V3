@@ -1,5 +1,6 @@
 ﻿import { IProductData } from '@nitrots/api';
 import { GetConfiguration } from '@nitrots/configuration';
+import { parseConfigJsonFromResponse } from '@nitrots/utils';
 import { ProductData } from './ProductData';
 
 export class ProductDataLoader
@@ -34,11 +35,11 @@ export class ProductDataLoader
 
         try
         {
-            responseData = await response.json();
+            responseData = await parseConfigJsonFromResponse(response, url);
         }
         catch(parseErr)
         {
-            throw new Error(`Invalid JSON in product data "${ url }" — the URL may be wrong. Check "productdata.url" in renderer-config.json (${ parseErr.message })`);
+            throw new Error(`Invalid product data "${ url }" — JSON/JSON5 parse failed. Check "productdata.url" in renderer-config.json (${ parseErr.message })`);
         }
 
         this.parseProducts(responseData.productdata);

@@ -3,7 +3,7 @@ import { AccountSafetyLockStatusChangeMessageEvent, AccountSafetyLockStatusChang
 import { GetConfiguration } from '@nitrots/configuration';
 import { GetLocalizationManager } from '@nitrots/localization';
 import { GetEventDispatcher, MysteryBoxKeysUpdateEvent, NitroSettingsEvent, SessionDataPreferencesEvent, UserNameUpdateEvent } from '@nitrots/events';
-import { CreateLinkEvent, HabboWebTools } from '@nitrots/utils';
+import { CreateLinkEvent, HabboWebTools, parseConfigJsonFromResponse } from '@nitrots/utils';
 import { Texture } from 'pixi.js';
 import { GroupInformationManager } from './GroupInformationManager';
 import { IgnoredUsersManager } from './IgnoredUsersManager';
@@ -152,7 +152,7 @@ export class SessionDataManager implements ISessionDataManager
 
         if(response.status !== 200) throw new Error(`Unable to load ${ url }`);
 
-        const data = await response.json();
+        const data = await parseConfigJsonFromResponse(response, url);
 
         this._floorItemOverrides = this.parseFurnitureOverrides(data?.roomitemtypes?.furnitype || []);
         this._wallItemOverrides = this.parseFurnitureOverrides(data?.wallitemtypes?.furnitype || []);

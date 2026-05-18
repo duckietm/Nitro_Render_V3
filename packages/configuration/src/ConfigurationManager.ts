@@ -1,4 +1,4 @@
-﻿import { NitroLogger, NitroVersion } from '@nitrots/utils';
+﻿import { NitroLogger, NitroVersion, parseConfigJsonFromResponse } from '@nitrots/utils';
 import { IConfigurationManager } from './IConfigurationManager';
 
 export class ConfigurationManager implements IConfigurationManager
@@ -54,11 +54,11 @@ export class ConfigurationManager implements IConfigurationManager
 
                 try
                 {
-                    json = await response.json();
+                    json = await parseConfigJsonFromResponse(response, url);
                 }
                 catch(parseError)
                 {
-                    throw new Error(`Invalid JSON in config "${ url }" — check for syntax errors like trailing commas or missing quotes (${ parseError.message })`);
+                    throw new Error(`Invalid config "${ url }" — JSON/JSON5 parse failed. JSON5 allows comments, trailing commas and unquoted keys (${ parseError.message })`);
                 }
 
                 this.parseConfiguration(json);

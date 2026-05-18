@@ -1,6 +1,7 @@
 ﻿import { ILocalizationManager } from '@nitrots/api';
 import { BadgePointLimitsEvent, GetCommunication } from '@nitrots/communication';
 import { GetConfiguration } from '@nitrots/configuration';
+import { parseConfigJsonFromResponse } from '@nitrots/utils';
 import { BadgeBaseAndLevel } from './BadgeBaseAndLevel';
 
 export class LocalizationManager implements ILocalizationManager
@@ -42,11 +43,11 @@ export class LocalizationManager implements ILocalizationManager
 
                 try
                 {
-                    data = await response.json();
+                    data = await parseConfigJsonFromResponse(response, url);
                 }
                 catch(parseErr)
                 {
-                    throw new Error(`Invalid JSON in localization file "${ url }" — the URL may be wrong. Check "external.texts.url" in ui-config.json (${ parseErr.message })`);
+                    throw new Error(`Invalid localization file "${ url }" — JSON/JSON5 parse failed. Check "external.texts.url" in ui-config.json (${ parseErr.message })`);
                 }
 
                 this.parseLocalization(data);

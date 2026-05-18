@@ -1,6 +1,7 @@
 import { IAssetManager, IAvatarEffectListener } from '@nitrots/api';
 import { GetConfiguration } from '@nitrots/configuration';
 import { AvatarRenderEffectLibraryEvent, GetEventDispatcher, NitroEvent, NitroEventType } from '@nitrots/events';
+import { parseConfigJsonFromResponse } from '@nitrots/utils';
 import { AvatarStructure } from './AvatarStructure';
 import { EffectAssetDownloadLibrary } from './EffectAssetDownloadLibrary';
 
@@ -48,11 +49,11 @@ export class EffectAssetDownloadManager
 
         try
         {
-            responseData = await response.json();
+            responseData = await parseConfigJsonFromResponse(response, url);
         }
         catch(parseErr)
         {
-            throw new Error(`Invalid JSON in effect map "${ url }" — the URL may be wrong. Check "avatar.effectmap.url" in renderer-config.json (${ parseErr.message })`);
+            throw new Error(`Invalid effect map "${ url }" — JSON/JSON5 parse failed. Check "avatar.effectmap.url" in renderer-config.json (${ parseErr.message })`);
         }
 
         this.processEffectMap(responseData.effects);

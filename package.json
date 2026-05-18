@@ -33,6 +33,7 @@
     "@thumbmarkjs/thumbmarkjs": "^1.8.1",
     "gifuct-js": "^2.1.2",
     "howler": "^2.2.4",
+    "json5": "^2.2.3",
     "pako": "^2.1.0",
     "pixi-filters": "^6.1.5",
     "pixi.js": "^8.18.1"

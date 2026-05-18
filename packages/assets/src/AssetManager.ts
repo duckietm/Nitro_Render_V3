@@ -1,5 +1,5 @@
 import { IAssetData, IAssetManager, IGraphicAsset, IGraphicAssetCollection } from '@nitrots/api';
-import { NitroBundle, NitroLogger } from '@nitrots/utils';
+import { NitroBundle, NitroLogger, parseConfigJsonFromResponse } from '@nitrots/utils';
 import { AnimatedGIF } from '@pixi/gif';
 import { Assets, Spritesheet, SpritesheetData, Texture } from 'pixi.js';
 import { GraphicAssetCollection } from './GraphicAssetCollection';
@@ -159,7 +159,7 @@ export class AssetManager implements IAssetManager
                     }
                 }
             }
-            else if(url.endsWith('.json'))
+            else if(url.endsWith('.json') || url.endsWith('.json5'))
             {
                 let response: Response;
 
@@ -178,18 +178,18 @@ export class AssetManager implements IAssetManager
 
                 try
                 {
-                    data = await response.json() as IAssetData;
+                    data = await parseConfigJsonFromResponse<IAssetData>(response, url);
                 }
                 catch(parseErr)
                 {
-                    throw new Error(`Invalid JSON in "${ url }" — the URL may be wrong and returning an HTML page instead of JSON (${ parseErr.message })`);
+                    throw new Error(`Invalid asset data "${ url }" — JSON/JSON5 parse failed (${ parseErr.message })`);
                 }
 
                 let texture: Texture = null;
                 const imagePath = data?.spritesheet?.meta?.image;
                 const fallbackImagePath = ((data?.name && data.name.length > 0)
                     ? `${data.name}.png`
-                    : url.replace(/\.json$/i, '.png'));
+                    : url.replace(/\.json5?$/i, '.png'));
                 const resolvedImageUrl = (imagePath
                     ? new URL(imagePath, url).toString()
                     : new URL(fallbackImagePath, url).toString());
