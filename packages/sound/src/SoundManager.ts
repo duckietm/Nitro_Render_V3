@@ -1,6 +1,6 @@
-import { IAdvancedMap, IMusicController, INitroEvent, ISoundManager } from '@nitrots/api';
+import { IAdvancedMap, IMusicController, INitroEvent, ISoundManager, ISoundVolumesSnapshot } from '@nitrots/api';
 import { GetConfiguration } from '@nitrots/configuration';
-import { GetEventDispatcher, NitroSettingsEvent, NitroSoundEvent, RoomEngineEvent, RoomEngineObjectEvent, RoomEngineSamplePlaybackEvent } from '@nitrots/events';
+import { GetEventDispatcher, NitroEvent, NitroEventType, NitroSettingsEvent, NitroSoundEvent, RoomEngineEvent, RoomEngineObjectEvent, RoomEngineSamplePlaybackEvent } from '@nitrots/events';
 import { AdvancedMap, NitroLogger } from '@nitrots/utils';
 import { MusicController } from './music/MusicController';
 
@@ -9,6 +9,7 @@ export class SoundManager implements ISoundManager
     private _volumeSystem: number = 0.5;
     private _volumeFurni: number = 0.5;
     private _volumeTrax: number = 0.5;
+    private _volumesSnapshot: Readonly<ISoundVolumesSnapshot> | null = null;
 
     private _internalSamples: IAdvancedMap<string, HTMLAudioElement> = new AdvancedMap();
     private _furniSamples: IAdvancedMap<number, HTMLAudioElement> = new AdvancedMap();
@@ -81,16 +82,23 @@ export class SoundManager implements ISoundManager
             case NitroSettingsEvent.SETTINGS_UPDATED: {
                 const castedEvent = (event as NitroSettingsEvent);
 
-                const volumeFurniUpdated = castedEvent.volumeFurni !== this._volumeFurni;
-                const volumeTraxUpdated = castedEvent.volumeTrax !== this._volumeTrax;
+                const nextSystem = (castedEvent.volumeSystem / 100);
+                const nextFurni = (castedEvent.volumeFurni / 100);
+                const nextTrax = (castedEvent.volumeTrax / 100);
 
-                this._volumeSystem = (castedEvent.volumeSystem / 100);
-                this._volumeFurni = (castedEvent.volumeFurni / 100);
-                this._volumeTrax = (castedEvent.volumeTrax / 100);
+                const volumeSystemUpdated = nextSystem !== this._volumeSystem;
+                const volumeFurniUpdated = nextFurni !== this._volumeFurni;
+                const volumeTraxUpdated = nextTrax !== this._volumeTrax;
+
+                this._volumeSystem = nextSystem;
+                this._volumeFurni = nextFurni;
+                this._volumeTrax = nextTrax;
 
                 if(volumeFurniUpdated) this.updateFurniSamplesVolume(this._volumeFurni);
 
                 if(volumeTraxUpdated) this._musicController?.updateVolume(this._volumeTrax);
+
+                if(volumeSystemUpdated || volumeFurniUpdated || volumeTraxUpdated) this.invalidateVolumesSnapshot();
 
                 return;
             }
@@ -215,8 +223,38 @@ export class SoundManager implements ISoundManager
         return this._volumeTrax;
     }
 
+    public get systemVolume(): number
+    {
+        return this._volumeSystem;
+    }
+
+    public get furniVolume(): number
+    {
+        return this._volumeFurni;
+    }
+
     public get musicController(): IMusicController
     {
         return this._musicController;
+    }
+
+    private invalidateVolumesSnapshot(): void
+    {
+        this._volumesSnapshot = null;
+
+        GetEventDispatcher().dispatchEvent(new NitroEvent(NitroEventType.SOUND_VOLUMES_UPDATED));
+    }
+
+    public getVolumesSnapshot(): Readonly<ISoundVolumesSnapshot>
+    {
+        if(this._volumesSnapshot) return this._volumesSnapshot;
+
+        this._volumesSnapshot = Object.freeze<ISoundVolumesSnapshot>({
+            system: this._volumeSystem,
+            furni: this._volumeFurni,
+            trax: this._volumeTrax
+        });
+
+        return this._volumesSnapshot;
     }
 }
