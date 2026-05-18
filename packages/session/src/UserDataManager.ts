@@ -1,5 +1,6 @@
 import { IRoomUserData, IUserDataManager } from '@nitrots/api';
 import { GetCommunication, RequestPetInfoComposer, UserCurrentBadgesComposer } from '@nitrots/communication';
+import { GetEventDispatcher, NitroEvent, NitroEventType } from '@nitrots/events';
 
 export class UserDataManager implements IUserDataManager
 {
@@ -11,6 +12,23 @@ export class UserDataManager implements IUserDataManager
     private _userDataByType: Map<number, Map<number, IRoomUserData>> = new Map();
     private _userDataByRoomIndex: Map<number, IRoomUserData> = new Map();
     private _userBadges: Map<number, string[]> = new Map();
+    private _roomUserListSnapshot: ReadonlyArray<IRoomUserData> | null = null;
+
+    private invalidateRoomUserListSnapshot(): void
+    {
+        this._roomUserListSnapshot = null;
+
+        GetEventDispatcher().dispatchEvent(new NitroEvent(NitroEventType.ROOM_USER_LIST_UPDATED));
+    }
+
+    public getRoomUserListSnapshot(): ReadonlyArray<IRoomUserData>
+    {
+        if(this._roomUserListSnapshot) return this._roomUserListSnapshot;
+
+        this._roomUserListSnapshot = Object.freeze<IRoomUserData[]>([ ...this._userDataByRoomIndex.values() ]) as ReadonlyArray<IRoomUserData>;
+
+        return this._roomUserListSnapshot;
+    }
 
     public getUserData(webID: number): IRoomUserData
     {
@@ -84,6 +102,8 @@ export class UserDataManager implements IUserDataManager
         existingType.set(data.webID, data);
 
         this._userDataByRoomIndex.set(data.roomIndex, data);
+
+        this.invalidateRoomUserListSnapshot();
     }
 
     public removeUserData(roomIndex: number): void
@@ -97,6 +117,8 @@ export class UserDataManager implements IUserDataManager
         const existingType = this._userDataByType.get(existing.type);
 
         if(existingType) existingType.delete(existing.webID);
+
+        this.invalidateRoomUserListSnapshot();
     }
 
     public getUserBadges(userId: number): string[]
@@ -125,6 +147,8 @@ export class UserDataManager implements IUserDataManager
         userData.sex = sex;
         userData.hasSaddle = hasSaddle;
         userData.isRiding = isRiding;
+
+        this.invalidateRoomUserListSnapshot();
     }
 
     public updateName(roomIndex: number, name: string): void
@@ -134,6 +158,8 @@ export class UserDataManager implements IUserDataManager
         if(!userData) return;
 
         userData.name = name;
+
+        this.invalidateRoomUserListSnapshot();
     }
 
     public updateMotto(roomIndex: number, custom: string): void
@@ -143,6 +169,8 @@ export class UserDataManager implements IUserDataManager
         if(!userData) return;
 
         userData.custom = custom;
+
+        this.invalidateRoomUserListSnapshot();
     }
 
     public updateNickIcon(roomIndex: number, nickIcon: string): void
@@ -152,6 +180,8 @@ export class UserDataManager implements IUserDataManager
         if(!userData) return;
 
         userData.nickIcon = nickIcon;
+
+        this.invalidateRoomUserListSnapshot();
     }
 
     public updateCustomization(roomIndex: number, nickIcon: string, prefixText: string, prefixColor: string, prefixIcon: string, prefixEffect: string, prefixFont: string, displayOrder: string): void
@@ -167,9 +197,11 @@ export class UserDataManager implements IUserDataManager
         userData.prefixEffect = prefixEffect;
         userData.prefixFont = prefixFont;
         userData.displayOrder = displayOrder;
+
+        this.invalidateRoomUserListSnapshot();
     }
-	
-	public updateBackground(roomIndex: number, background: number, stand: number, overlay: number, cardBackground: number = 0): void
+
+    public updateBackground(roomIndex: number, background: number, stand: number, overlay: number, cardBackground: number = 0): void
     {
         const userData = this.getUserDataByIndex(roomIndex);
 
@@ -179,6 +211,8 @@ export class UserDataManager implements IUserDataManager
         userData.stand = stand;
         userData.overlay = overlay;
         userData.cardBackground = cardBackground;
+
+        this.invalidateRoomUserListSnapshot();
     }
 
     public updateAchievementScore(roomIndex: number, score: number): void
@@ -188,13 +222,19 @@ export class UserDataManager implements IUserDataManager
         if(!userData) return;
 
         userData.activityPoints = score;
+
+        this.invalidateRoomUserListSnapshot();
     }
 
     public updatePetLevel(roomIndex: number, level: number): void
     {
         const userData = this.getUserDataByIndex(roomIndex);
 
-        if(userData) userData.petLevel = level;
+        if(!userData) return;
+
+        userData.petLevel = level;
+
+        this.invalidateRoomUserListSnapshot();
     }
 
     public updatePetBreedingStatus(roomIndex: number, canBreed: boolean, canHarvest: boolean, canRevive: boolean, hasBreedingPermission: boolean): void
@@ -207,6 +247,8 @@ export class UserDataManager implements IUserDataManager
         userData.canHarvest = canHarvest;
         userData.canRevive = canRevive;
         userData.hasBreedingPermission = hasBreedingPermission;
+
+        this.invalidateRoomUserListSnapshot();
     }
 
     public requestPetInfo(id: number): void

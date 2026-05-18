@@ -23,4 +23,20 @@ export interface IUserDataManager
     updatePetLevel(roomIndex: number, level: number): void;
     updatePetBreedingStatus(roomIndex: number, canBreed: boolean, canHarvest: boolean, canRevive: boolean, hasBreedingPermission: boolean): void;
     requestPetInfo(id: number): void;
+
+    /**
+     * Returns the current room's user list as a referentially-stable
+     * ReadonlyArray. The same array reference is returned across reads
+     * until any user is added, removed, or has a tracked field updated
+     * (figure / name / motto / nick icon / customization / background /
+     * achievement score / pet level / breeding status). Mutations
+     * dispatch `NitroEventType.ROOM_USER_LIST_UPDATED` to signal
+     * invalidation.
+     *
+     * The inner IRoomUserData objects keep the existing in-place
+     * mutation semantics — they are NOT deep-cloned. Treat them as
+     * snapshots-at-time-of-read; consumers should not retain individual
+     * entries across invalidations.
+     */
+    getRoomUserListSnapshot(): ReadonlyArray<IRoomUserData>;
 }
