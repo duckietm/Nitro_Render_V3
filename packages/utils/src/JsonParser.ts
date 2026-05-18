@@ -1,7 +1,23 @@
 import JSON5 from 'json5';
 
+declare const __NITRO_JSON_MODE__: 'legacy' | 'json5' | 'auto' | undefined;
+
 const JSON5_EXTENSION = /\.json5(?:[?#]|$)/i;
 const JSON5_MIME = /(?:application|text)\/(?:json5|x-json5)/i;
+
+const resolveJsonMode = (): 'legacy' | 'json5' | 'auto' =>
+{
+    try
+    {
+        if(typeof __NITRO_JSON_MODE__ !== 'undefined' && __NITRO_JSON_MODE__)
+        {
+            if(__NITRO_JSON_MODE__ === 'legacy' || __NITRO_JSON_MODE__ === 'json5' || __NITRO_JSON_MODE__ === 'auto') return __NITRO_JSON_MODE__;
+        }
+    }
+    catch {}
+
+    return 'auto';
+};
 
 const looksLikeJson5Url = (url: string): boolean => !!url && JSON5_EXTENSION.test(url);
 
@@ -18,13 +34,34 @@ const formatParseError = (sourceUrl: string, strictError: unknown, json5Error: u
     return `Failed to parse JSON/JSON5${ source } — JSON5: ${ json5Message } (strict JSON: ${ strictMessage })`;
 };
 
+const formatStrictError = (sourceUrl: string, err: unknown): string =>
+{
+    const message = (err as Error)?.message || String(err);
+    const source = sourceUrl ? ` in "${ sourceUrl }"` : '';
+
+    return `Failed to parse strict JSON${ source } — ${ message } (build is in 'legacy' mode; switch to JSON5 mode via 'yarn configure' to accept comments/trailing commas)`;
+};
+
 export const parseConfigJson = <T = any>(text: string, sourceUrl: string = ''): T =>
 {
     if(text === null || text === undefined) throw new Error(`Empty response${ sourceUrl ? ` for "${ sourceUrl }"` : '' }`);
 
     const trimmed = text.length > 0 ? text : '';
+    const mode = resolveJsonMode();
 
-    if(looksLikeJson5Url(sourceUrl))
+    if(mode === 'legacy')
+    {
+        try
+        {
+            return JSON.parse(trimmed) as T;
+        }
+        catch(err)
+        {
+            throw new Error(formatStrictError(sourceUrl, err));
+        }
+    }
+
+    if(mode === 'json5' || looksLikeJson5Url(sourceUrl))
     {
         try
         {
@@ -62,8 +99,9 @@ export const parseConfigJsonFromResponse = async <T = any>(response: Response, s
     const contentType = response.headers?.get?.('content-type') || '';
     const text = await response.text();
     const url = sourceUrl || (response as any).url || '';
+    const mode = resolveJsonMode();
 
-    if(looksLikeJson5ContentType(contentType) && !looksLikeJson5Url(url))
+    if(mode === 'auto' && looksLikeJson5ContentType(contentType) && !looksLikeJson5Url(url))
     {
         try
         {
