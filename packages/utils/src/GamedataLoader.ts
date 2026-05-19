@@ -1,4 +1,5 @@
-import { fetchConfigJson } from './JsonParser';
+import { ConfigJsonError, fetchConfigJson, isMissingResource } from './JsonParser';
+import { NitroLogger } from './NitroLogger';
 
 export const DEFAULT_TIERS = [ 'core', 'custom', 'seasonal' ] as const;
 export type GamedataTier = typeof DEFAULT_TIERS[number] | string;
@@ -28,51 +29,69 @@ const joinUrl = (base: string, path: string): string =>
     return `${ cleanBase }${ cleanPath }`;
 };
 
-const tryFetchOrNull = async <T = any>(url: string): Promise<T | null> =>
+// Returns the parsed payload when the manifest exists, null on a clean 404.
+// Re-throws on any other error (network failure, 5xx, parse error) so callers
+// don't silently skip a tier because of a typo in manifest.json5.
+const tryFetchManifest = async <T = any>(url: string): Promise<T | null> =>
 {
     try
     {
         return await fetchConfigJson<T>(url);
     }
-    catch
+    catch(err)
     {
-        return null;
+        if(isMissingResource(err)) return null;
+        throw err;
     }
+};
+
+// Try .json5 first, then .json — both treated as optional. Anything other
+// than 404 on either bubbles up.
+const tryFetchManifestPair = async <T = any>(baseUrl: string, name: string): Promise<T | null> =>
+{
+    const json5 = await tryFetchManifest<T>(joinUrl(baseUrl, `${ name }.json5`));
+    if(json5 !== null) return json5;
+
+    return await tryFetchManifest<T>(joinUrl(baseUrl, `${ name }.json`));
 };
 
 const isPlainObject = (value: any): value is Record<string, any> => !!value && typeof value === 'object' && !Array.isArray(value);
 
-const arrayItemsLookKeyed = (arr: any[], idKeys: readonly string[]): string | null =>
+const arrayItemsLookKeyed = (arr: any[], idKeys: readonly string[], sourceLabel?: string): string | null =>
 {
     if(!arr.length) return null;
 
     for(const key of idKeys)
     {
-        let allHave = true;
+        let have = 0;
 
         for(const item of arr)
         {
-            if(!isPlainObject(item) || item[key] === undefined || item[key] === null)
-            {
-                allHave = false;
-                break;
-            }
+            if(isPlainObject(item) && item[key] !== undefined && item[key] !== null) have++;
         }
 
-        if(allHave) return key;
+        if(have === arr.length) return key;
+
+        // Heuristic: if most items are keyed but a few are not, the data is
+        // probably keyed and the outliers are bugs in the source data.
+        // Surface this so operators don't get silent duplicates after merge.
+        if(have > 0 && have / arr.length >= 0.8)
+        {
+            NitroLogger.warn(`mergeGamedata: ${ sourceLabel ? `${ sourceLabel }: ` : '' }array looks keyed by "${ key }" (${ have }/${ arr.length } items) but some entries are missing it — falling back to concat which may produce duplicates`);
+        }
     }
 
     return null;
 };
 
-export const mergeGamedata = (a: any, b: any, idKeys: readonly string[] = DEFAULT_ID_KEYS): any =>
+export const mergeGamedata = (a: any, b: any, idKeys: readonly string[] = DEFAULT_ID_KEYS, sourceLabel?: string): any =>
 {
     if(b === undefined) return a;
     if(a === undefined) return b;
 
     if(Array.isArray(a) && Array.isArray(b))
     {
-        const idKey = arrayItemsLookKeyed(a, idKeys) || arrayItemsLookKeyed(b, idKeys);
+        const idKey = arrayItemsLookKeyed(a, idKeys, sourceLabel) || arrayItemsLookKeyed(b, idKeys, sourceLabel);
 
         if(!idKey) return a.concat(b);
 
@@ -92,7 +111,7 @@ export const mergeGamedata = (a: any, b: any, idKeys: readonly string[] = DEFAUL
 
             if(at !== undefined)
             {
-                out[at] = mergeGamedata(out[at], item, idKeys);
+                out[at] = mergeGamedata(out[at], item, idKeys, sourceLabel);
             }
             else
             {
@@ -110,7 +129,7 @@ export const mergeGamedata = (a: any, b: any, idKeys: readonly string[] = DEFAUL
 
         for(const k of Object.keys(b))
         {
-            out[k] = mergeGamedata(a[k], b[k], idKeys);
+            out[k] = mergeGamedata(a[k], b[k], idKeys, sourceLabel);
         }
 
         return out;
@@ -130,6 +149,11 @@ interface RootManifest
     files?: string[];
 }
 
+// Load every file in `files` concurrently, return them in the original
+// declared order so the merge step preserves override semantics.
+const fetchFilesInOrder = async (baseUrl: string, files: readonly string[]): Promise<any[]> =>
+    Promise.all(files.map(file => fetchConfigJson(joinUrl(baseUrl, file))));
+
 export const loadGamedata = async <T = any>(url: string, options: GamedataLoadOptions = {}): Promise<T> =>
 {
     if(!url) throw new Error('loadGamedata: empty URL');
@@ -140,42 +164,47 @@ export const loadGamedata = async <T = any>(url: string, options: GamedataLoadOp
     }
 
     const idKeys = options.mergeArrayIdKeys ?? DEFAULT_ID_KEYS;
-    const rootManifest = await tryFetchOrNull<RootManifest>(joinUrl(url, 'manifest.json5'))
-        ?? await tryFetchOrNull<RootManifest>(joinUrl(url, 'manifest.json'));
+    const rootManifest = await tryFetchManifestPair<RootManifest>(url, 'manifest');
 
     const tiers = (rootManifest?.tiers && rootManifest.tiers.length)
         ? rootManifest.tiers
         : (options.tiers ?? DEFAULT_TIERS);
 
+    // Fetch root-level files in parallel with discovering each tier's
+    // manifest. Per-tier file batches stay sequenced relative to each other
+    // so override order (core → custom → seasonal) is preserved during
+    // merge, but fetches inside a tier batch run concurrently.
+    const [ rootParts, tierManifests ] = await Promise.all([
+        rootManifest?.files?.length ? fetchFilesInOrder(url, rootManifest.files) : Promise.resolve([] as any[]),
+        Promise.all(tiers.map(async tier =>
+        {
+            const tierUrl = joinUrl(url, `${ tier }/`);
+            const manifest = await tryFetchManifestPair<TierManifest>(tierUrl, 'manifest');
+
+            return { tier, tierUrl, manifest };
+        }))
+    ]);
+
     let merged: any = undefined;
 
-    if(rootManifest?.files?.length)
+    for(const part of rootParts)
     {
-        for(const file of rootManifest.files)
+        merged = (merged === undefined) ? part : mergeGamedata(merged, part, idKeys, url);
+    }
+
+    for(const { tier, tierUrl, manifest } of tierManifests)
+    {
+        if(!manifest?.files?.length) continue;
+
+        const parts = await fetchFilesInOrder(tierUrl, manifest.files);
+
+        for(const part of parts)
         {
-            const fileUrl = joinUrl(url, file);
-            const part = await fetchConfigJson(fileUrl);
-            merged = (merged === undefined) ? part : mergeGamedata(merged, part, idKeys);
+            merged = (merged === undefined) ? part : mergeGamedata(merged, part, idKeys, `${ url } (${ tier })`);
         }
     }
 
-    for(const tier of tiers)
-    {
-        const tierUrl = joinUrl(url, `${ tier }/`);
-        const tierManifest = await tryFetchOrNull<TierManifest>(joinUrl(tierUrl, 'manifest.json5'))
-            ?? await tryFetchOrNull<TierManifest>(joinUrl(tierUrl, 'manifest.json'));
-
-        if(!tierManifest?.files?.length) continue;
-
-        for(const file of tierManifest.files)
-        {
-            const fileUrl = joinUrl(tierUrl, file);
-            const part = await fetchConfigJson(fileUrl);
-            merged = (merged === undefined) ? part : mergeGamedata(merged, part, idKeys);
-        }
-    }
-
-    if(merged === undefined) throw new Error(`loadGamedata: directory mode at "${ url }" produced no data — make sure at least one tier (core/custom/seasonal) has a manifest.json5 with a 'files' array`);
+    if(merged === undefined) throw new ConfigJsonError(`loadGamedata: directory mode at "${ url }" produced no data — make sure at least one tier (core/custom/seasonal) has a manifest.json5 with a 'files' array`, 'fetch', url);
 
     return merged as T;
 };

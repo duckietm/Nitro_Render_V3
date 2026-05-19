@@ -5,6 +5,28 @@ declare const __NITRO_JSON_MODE__: 'legacy' | 'json5' | 'auto' | undefined;
 const JSON5_EXTENSION = /\.json5(?:[?#]|$)/i;
 const JSON5_MIME = /(?:application|text)\/(?:json5|x-json5)/i;
 
+export type ConfigJsonErrorPhase = 'fetch' | 'parse';
+
+export class ConfigJsonError extends Error
+{
+    public readonly phase: ConfigJsonErrorPhase;
+    public readonly sourceUrl: string;
+    public readonly httpStatus?: number;
+
+    constructor(message: string, phase: ConfigJsonErrorPhase, sourceUrl: string, httpStatus?: number, cause?: unknown)
+    {
+        super(message);
+        this.name = 'ConfigJsonError';
+        this.phase = phase;
+        this.sourceUrl = sourceUrl;
+        this.httpStatus = httpStatus;
+        if(cause !== undefined) (this as any).cause = cause;
+    }
+}
+
+export const isMissingResource = (err: unknown): boolean =>
+    err instanceof ConfigJsonError && err.phase === 'fetch' && err.httpStatus === 404;
+
 const resolveJsonMode = (): 'legacy' | 'json5' | 'auto' =>
 {
     try
@@ -44,9 +66,7 @@ const formatStrictError = (sourceUrl: string, err: unknown): string =>
 
 export const parseConfigJson = <T = any>(text: string, sourceUrl: string = ''): T =>
 {
-    if(text === null || text === undefined) throw new Error(`Empty response${ sourceUrl ? ` for "${ sourceUrl }"` : '' }`);
-
-    const trimmed = text.length > 0 ? text : '';
+    const trimmed = text ?? '';
     const mode = resolveJsonMode();
 
     if(mode === 'legacy')
@@ -57,7 +77,7 @@ export const parseConfigJson = <T = any>(text: string, sourceUrl: string = ''): 
         }
         catch(err)
         {
-            throw new Error(formatStrictError(sourceUrl, err));
+            throw new ConfigJsonError(formatStrictError(sourceUrl, err), 'parse', sourceUrl, undefined, err);
         }
     }
 
@@ -69,7 +89,7 @@ export const parseConfigJson = <T = any>(text: string, sourceUrl: string = ''): 
         }
         catch(err)
         {
-            throw new Error(formatParseError(sourceUrl, err, err));
+            throw new ConfigJsonError(formatParseError(sourceUrl, err, err), 'parse', sourceUrl, undefined, err);
         }
     }
 
@@ -90,7 +110,7 @@ export const parseConfigJson = <T = any>(text: string, sourceUrl: string = ''): 
     }
     catch(json5Error)
     {
-        throw new Error(formatParseError(sourceUrl, strictError, json5Error));
+        throw new ConfigJsonError(formatParseError(sourceUrl, strictError, json5Error), 'parse', sourceUrl, undefined, json5Error);
     }
 };
 
@@ -109,7 +129,7 @@ export const parseConfigJsonFromResponse = async <T = any>(response: Response, s
         }
         catch(err)
         {
-            throw new Error(formatParseError(url, err, err));
+            throw new ConfigJsonError(formatParseError(url, err, err), 'parse', url, undefined, err);
         }
     }
 
@@ -118,9 +138,23 @@ export const parseConfigJsonFromResponse = async <T = any>(response: Response, s
 
 export const fetchConfigJson = async <T = any>(url: string, init?: RequestInit): Promise<T> =>
 {
-    const response = await fetch(url, init);
+    let response: Response | undefined;
 
-    if(!response || response.status !== 200) throw new Error(`Failed to fetch "${ url }" — server returned HTTP ${ response?.status ?? 'no response' }`);
+    try
+    {
+        response = await fetch(url, init);
+    }
+    catch(networkErr)
+    {
+        const message = (networkErr as Error)?.message || String(networkErr);
+        throw new ConfigJsonError(`Network error fetching "${ url }" — ${ message }`, 'fetch', url, undefined, networkErr);
+    }
+
+    if(!response || response.status !== 200)
+    {
+        const status = response?.status;
+        throw new ConfigJsonError(`Failed to fetch "${ url }" — server returned HTTP ${ status ?? 'no response' }`, 'fetch', url, status);
+    }
 
     return parseConfigJsonFromResponse<T>(response, url);
 };
