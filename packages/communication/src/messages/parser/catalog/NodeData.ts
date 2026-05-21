@@ -5,6 +5,7 @@ export class NodeData
     private _visible: boolean;
     private _icon: number;
     private _pageId: number;
+    private _parentId: number;
     private _pageName: string;
     private _localization: string;
     private _children: NodeData[];
@@ -23,6 +24,7 @@ export class NodeData
         this._visible = false;
         this._icon = 0;
         this._pageId = -1;
+        this._parentId = -1;
         this._pageName = null;
         this._localization = null;
         this._children = [];
@@ -43,6 +45,7 @@ export class NodeData
         this._visible = wrapper.readBoolean();
         this._icon = wrapper.readInt();
         this._pageId = wrapper.readInt();
+        this._parentId = wrapper.readInt();
         this._pageName = wrapper.readString();
         this._localization = wrapper.readString();
 
@@ -90,6 +93,11 @@ export class NodeData
     public get pageId(): number
     {
         return this._pageId;
+    }
+
+    public get parentId(): number
+    {
+        return this._parentId;
     }
 
     public get pageName(): string
