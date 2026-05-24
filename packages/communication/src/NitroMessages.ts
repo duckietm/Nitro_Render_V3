@@ -7,7 +7,7 @@ import { ConfInvisStateMessageEvent } from './messages';
 import { HanditemBlockStateMessageEvent } from './messages';
 import { TranslationLanguagesEvent, TranslationLanguagesRequestComposer, TranslationResultEvent, TranslationTextRequestComposer } from './messages';
 import { YouTubeRoomBroadcastEvent, YouTubeRoomPlayComposer, YouTubeRoomSettingsComposer, YouTubeRoomSettingsEvent, YouTubeRoomWatchersEvent, YouTubeRoomWatchingComposer } from './messages';
-import { HousekeepingFindUserByIdComposer, HousekeepingFindUserByNameComposer, HousekeepingUserDetailEvent } from './messages';
+import { HousekeepingActionResultEvent, HousekeepingBanUserComposer, HousekeepingFindUserByIdComposer, HousekeepingFindUserByNameComposer, HousekeepingUserDetailEvent } from './messages';
 export class NitroMessages implements IMessageConfiguration
 {
     private _events: Map<number, Function>;
@@ -509,6 +509,7 @@ export class NitroMessages implements IMessageConfiguration
 
         // Housekeeping (in-client admin panel)
         this._events.set(IncomingHeader.HOUSEKEEPING_USER_DETAIL, HousekeepingUserDetailEvent);
+        this._events.set(IncomingHeader.HOUSEKEEPING_ACTION_RESULT, HousekeepingActionResultEvent);
         this._events.set(IncomingHeader.WIRED_REWARD, WiredRewardResultMessageEvent);
         this._events.set(IncomingHeader.WIRED_SAVE, WiredSaveSuccessEvent);
         this._events.set(IncomingHeader.WIRED_ERROR, WiredValidationErrorEvent);
@@ -1263,6 +1264,7 @@ export class NitroMessages implements IMessageConfiguration
         // Housekeeping (in-client admin panel)
         this._composers.set(OutgoingHeader.HOUSEKEEPING_FIND_USER_BY_NAME, HousekeepingFindUserByNameComposer);
         this._composers.set(OutgoingHeader.HOUSEKEEPING_FIND_USER_BY_ID, HousekeepingFindUserByIdComposer);
+        this._composers.set(OutgoingHeader.HOUSEKEEPING_BAN_USER, HousekeepingBanUserComposer);
     }
 
     public get events(): Map<number, Function>

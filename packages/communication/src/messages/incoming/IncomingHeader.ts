@@ -506,4 +506,5 @@ export class IncomingHeader
 
     // Housekeeping (in-client admin panel) — IDs 9200..9299 reserved
     public static HOUSEKEEPING_USER_DETAIL = 9200;
+    public static HOUSEKEEPING_ACTION_RESULT = 9201;
 }

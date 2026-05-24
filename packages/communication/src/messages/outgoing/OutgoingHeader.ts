@@ -526,4 +526,5 @@ export class OutgoingHeader
     // Housekeeping (in-client admin panel) — IDs 9100..9199 reserved
     public static HOUSEKEEPING_FIND_USER_BY_NAME = 9100;
     public static HOUSEKEEPING_FIND_USER_BY_ID = 9101;
+    public static HOUSEKEEPING_BAN_USER = 9102;
 }
