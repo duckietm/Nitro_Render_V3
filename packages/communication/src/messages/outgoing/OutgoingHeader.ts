@@ -522,4 +522,7 @@ export class OutgoingHeader
     public static YOUTUBE_ROOM_PLAY = 8001;
     public static YOUTUBE_ROOM_WATCHING = 8002;
     public static YOUTUBE_ROOM_SETTINGS = 8003;
+
+    // Housekeeping (in-client admin panel) — IDs 9100..9199 reserved
+    public static HOUSEKEEPING_FIND_USER_BY_NAME = 9100;
 }

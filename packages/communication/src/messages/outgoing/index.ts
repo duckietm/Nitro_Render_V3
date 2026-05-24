@@ -21,6 +21,7 @@ export * from './group';
 export * from './groupforums';
 export * from './handshake';
 export * from './help';
+export * from './housekeeping';
 export * from './inventory';
 export * from './inventory/avatareffect';
 export * from './inventory/badges';

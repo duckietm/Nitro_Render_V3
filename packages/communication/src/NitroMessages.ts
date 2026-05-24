@@ -7,6 +7,7 @@ import { ConfInvisStateMessageEvent } from './messages';
 import { HanditemBlockStateMessageEvent } from './messages';
 import { TranslationLanguagesEvent, TranslationLanguagesRequestComposer, TranslationResultEvent, TranslationTextRequestComposer } from './messages';
 import { YouTubeRoomBroadcastEvent, YouTubeRoomPlayComposer, YouTubeRoomSettingsComposer, YouTubeRoomSettingsEvent, YouTubeRoomWatchersEvent, YouTubeRoomWatchingComposer } from './messages';
+import { HousekeepingFindUserByNameComposer, HousekeepingUserDetailEvent } from './messages';
 export class NitroMessages implements IMessageConfiguration
 {
     private _events: Map<number, Function>;
@@ -505,6 +506,9 @@ export class NitroMessages implements IMessageConfiguration
         this._events.set(IncomingHeader.YOUTUBE_ROOM_BROADCAST, YouTubeRoomBroadcastEvent);
         this._events.set(IncomingHeader.YOUTUBE_ROOM_SETTINGS, YouTubeRoomSettingsEvent);
         this._events.set(IncomingHeader.YOUTUBE_ROOM_WATCHERS, YouTubeRoomWatchersEvent);
+
+        // Housekeeping (in-client admin panel)
+        this._events.set(IncomingHeader.HOUSEKEEPING_USER_DETAIL, HousekeepingUserDetailEvent);
         this._events.set(IncomingHeader.WIRED_REWARD, WiredRewardResultMessageEvent);
         this._events.set(IncomingHeader.WIRED_SAVE, WiredSaveSuccessEvent);
         this._events.set(IncomingHeader.WIRED_ERROR, WiredValidationErrorEvent);
@@ -1255,6 +1259,9 @@ export class NitroMessages implements IMessageConfiguration
         this._composers.set(OutgoingHeader.YOUTUBE_ROOM_PLAY, YouTubeRoomPlayComposer);
         this._composers.set(OutgoingHeader.YOUTUBE_ROOM_SETTINGS, YouTubeRoomSettingsComposer);
         this._composers.set(OutgoingHeader.YOUTUBE_ROOM_WATCHING, YouTubeRoomWatchingComposer);
+
+        // Housekeeping (in-client admin panel)
+        this._composers.set(OutgoingHeader.HOUSEKEEPING_FIND_USER_BY_NAME, HousekeepingFindUserByNameComposer);
     }
 
     public get events(): Map<number, Function>

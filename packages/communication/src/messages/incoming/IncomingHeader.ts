@@ -503,4 +503,7 @@ export class IncomingHeader
     public static YOUTUBE_ROOM_BROADCAST = 8001;
     public static YOUTUBE_ROOM_WATCHERS = 8002;
     public static YOUTUBE_ROOM_SETTINGS = 8003;
+
+    // Housekeeping (in-client admin panel) — IDs 9200..9299 reserved
+    public static HOUSEKEEPING_USER_DETAIL = 9200;
 }
