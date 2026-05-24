@@ -136,6 +136,12 @@ export class RoomPreviewer
 
     public updatePreviewModel(model: string, wallHeight: number, scale: boolean = true): void
     {
+        // Defensive: dispose() nulls _planeParser, and React 19
+        // StrictMode dev double-mount can leave a stale reference
+        // briefly pointing at a disposed instance. Bail rather
+        // than crashing with "cannot read property reset of null".
+        if(!this._planeParser) return;
+
         const parser = new FloorHeightMapMessageParser();
 
         parser.flush();
