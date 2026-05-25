@@ -20,6 +20,7 @@ export class UserProfileParser implements IMessageParser
     private _standId: number;
     private _overlayId: number;
     private _cardBackgroundId: number;
+    private _totalBadges: number;
     private _nickIcon: string;
     private _prefixText: string;
     private _prefixColor: string;
@@ -47,6 +48,7 @@ export class UserProfileParser implements IMessageParser
         this._standId = 0;
         this._overlayId = 0;
         this._cardBackgroundId = 0;
+        this._totalBadges = 0;
         this._nickIcon = '';
         this._prefixText = '';
         this._prefixColor = '';
@@ -102,6 +104,11 @@ export class UserProfileParser implements IMessageParser
                     this._prefixEffect = wrapper.readString();
                     this._prefixFont = wrapper.readString();
                     this._displayOrder = wrapper.readString();
+
+                    if(wrapper.bytesAvailable)
+                    {
+                        this._totalBadges = wrapper.readInt();
+                    }
                 }
             }
         }
@@ -192,6 +199,11 @@ export class UserProfileParser implements IMessageParser
     public get cardBackgroundId(): number
     {
         return this._cardBackgroundId;
+    }
+
+    public get totalBadges(): number
+    {
+        return this._totalBadges;
     }
 
     public get nickIcon(): string
