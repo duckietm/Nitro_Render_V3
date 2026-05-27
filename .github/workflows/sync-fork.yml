@@ -1,0 +1,43 @@
+name: Safe Sync - Nitro_Render_V3
+
+on:
+  schedule:
+    - cron: '0 0 * * *'
+  workflow_dispatch:
+
+jobs:
+  sync-safe:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout Fork
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Configure Git Credentials
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Fetch and Merge Upstream
+        run: |
+          git remote add upstream https://github.com/duckietm/Nitro_Render_V3.git
+          git fetch upstream
+          
+          for branch in $(git branch -r | grep 'upstream/' | grep -v 'HEAD'); do
+              local_branch=${branch#upstream/}
+              echo "Elaborazione branch: $local_branch"
+              
+              git checkout $local_branch || git checkout -b $local_branch upstream/$local_branch
+              
+              if git merge upstream/$local_branch --no-edit; then
+                  echo "Merge completato con successo per $local_branch. Invio gli aggiornamenti..."
+                  git push origin $local_branch
+              else
+                  echo "Rilevato conflitto di merge su $local_branch! Il tuo lavoro è al sicuro. Salto il push per questo branch."
+                  git merge --abort
+              fi
+          done
