@@ -518,4 +518,6 @@ export class IncomingHeader
     public static WHEEL_RESULT = 9402;
     public static WHEEL_RECENT_WINS = 9403;
     public static WHEEL_ADMIN_PRIZES = 9404;
+    public static SOUNDBOARD_SETTINGS = 9405;
+    public static SOUNDBOARD_PLAY = 9406;
 }

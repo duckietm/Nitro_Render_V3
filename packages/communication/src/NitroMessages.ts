@@ -11,6 +11,7 @@ import { HousekeepingActionLogEvent, HousekeepingActionResultEvent, Housekeeping
 import { RareValuesEvent, RequestRareValuesComposer } from './messages';
 import { WheelBuySpinComposer, WheelDataEvent, WheelOpenComposer, WheelRecentWinsEvent, WheelResultEvent, WheelSpinComposer } from './messages';
 import { WheelAdminGetPrizesComposer, WheelAdminPrizesEvent, WheelAdminSavePrizesComposer } from './messages';
+import { SoundboardPlayEvent, SoundboardSettingsEvent, SoundboardPlayComposer, SoundboardSetEnabledComposer } from './messages';
 export class NitroMessages implements IMessageConfiguration
 {
     private _events: Map<number, Function>;
@@ -524,6 +525,8 @@ export class NitroMessages implements IMessageConfiguration
         this._events.set(IncomingHeader.WHEEL_RESULT, WheelResultEvent);
         this._events.set(IncomingHeader.WHEEL_RECENT_WINS, WheelRecentWinsEvent);
         this._events.set(IncomingHeader.WHEEL_ADMIN_PRIZES, WheelAdminPrizesEvent);
+        this._events.set(IncomingHeader.SOUNDBOARD_SETTINGS, SoundboardSettingsEvent);
+        this._events.set(IncomingHeader.SOUNDBOARD_PLAY, SoundboardPlayEvent);
         this._events.set(IncomingHeader.WIRED_REWARD, WiredRewardResultMessageEvent);
         this._events.set(IncomingHeader.WIRED_SAVE, WiredSaveSuccessEvent);
         this._events.set(IncomingHeader.WIRED_ERROR, WiredValidationErrorEvent);
@@ -1308,6 +1311,8 @@ export class NitroMessages implements IMessageConfiguration
         this._composers.set(OutgoingHeader.WHEEL_BUY_SPIN, WheelBuySpinComposer);
         this._composers.set(OutgoingHeader.WHEEL_ADMIN_GET_PRIZES, WheelAdminGetPrizesComposer);
         this._composers.set(OutgoingHeader.WHEEL_ADMIN_SAVE_PRIZES, WheelAdminSavePrizesComposer);
+        this._composers.set(OutgoingHeader.SOUNDBOARD_PLAY, SoundboardPlayComposer);
+        this._composers.set(OutgoingHeader.SOUNDBOARD_SET_ENABLED, SoundboardSetEnabledComposer);
     }
 
     public get events(): Map<number, Function>

@@ -556,4 +556,6 @@ export class OutgoingHeader
     public static WHEEL_BUY_SPIN = 9303;
     public static WHEEL_ADMIN_GET_PRIZES = 9304;
     public static WHEEL_ADMIN_SAVE_PRIZES = 9305;
+    public static SOUNDBOARD_PLAY = 9306;
+    public static SOUNDBOARD_SET_ENABLED = 9307;
 }
