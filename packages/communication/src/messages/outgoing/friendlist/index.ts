@@ -1,4 +1,5 @@
 export * from './AcceptFriendMessageComposer';
+export * from './AddFriendCategoryComposer';
 export * from './DeclineFriendMessageComposer';
 export * from './FindNewFriendsMessageComposer';
 export * from './FollowFriendMessageComposer';
@@ -6,7 +7,10 @@ export * from './FriendListUpdateComposer';
 export * from './GetFriendRequestsComposer';
 export * from './HabboSearchComposer';
 export * from './MessengerInitComposer';
+export * from './MoveFriendToCategoryComposer';
+export * from './RemoveFriendCategoryComposer';
 export * from './RemoveFriendComposer';
+export * from './RenameFriendCategoryComposer';
 export * from './RequestFriendComposer';
 export * from './SendMessageComposer';
 export * from './SendRoomInviteComposer';

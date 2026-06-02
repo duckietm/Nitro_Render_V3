@@ -125,6 +125,10 @@ export class OutgoingHeader
     public static SEND_ROOM_INVITE = 1276;
     public static HABBO_SEARCH = 1210;
     public static FRIEND_LIST_UPDATE = 1419;
+    public static ADD_FRIEND_CATEGORY = 4081;
+    public static RENAME_FRIEND_CATEGORY = 4082;
+    public static REMOVE_FRIEND_CATEGORY = 4083;
+    public static MOVE_FRIEND_TO_CATEGORY = 4084;
     public static MOD_TOOL_USER_INFO = 3295;
     public static GET_USER_FLAT_CATS = 3027;
     public static NAVIGATOR_INIT = 2110;
