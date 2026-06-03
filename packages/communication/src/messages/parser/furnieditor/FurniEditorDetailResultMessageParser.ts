@@ -7,12 +7,14 @@ export class FurniEditorDetailResultMessageParser implements IMessageParser
     private _item: FurniDetailData;
     private _catalogItems: CatalogRefData[];
     private _furniDataJson: string;
+    private _resolverPreviewJson: string;
 
     public flush(): boolean
     {
         this._item = null;
         this._catalogItems = [];
         this._furniDataJson = '';
+        this._resolverPreviewJson = '';
 
         return true;
     }
@@ -37,6 +39,15 @@ export class FurniEditorDetailResultMessageParser implements IMessageParser
 
         this._furniDataJson = wrapper.readString();
 
+        try
+        {
+            this._resolverPreviewJson = wrapper.readString();
+        }
+        catch(e)
+        {
+            this._resolverPreviewJson = '{"fields":[]}';
+        }
+
         return true;
     }
 
@@ -53,5 +64,10 @@ export class FurniEditorDetailResultMessageParser implements IMessageParser
     public get furniDataJson(): string
     {
         return this._furniDataJson;
+    }
+
+    public get resolverPreviewJson(): string
+    {
+        return this._resolverPreviewJson;
     }
 }
