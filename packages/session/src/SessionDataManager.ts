@@ -224,6 +224,21 @@ export class SessionDataManager implements ISessionDataManager
         ];
     }
 
+    // Mergia a runtime un chunk furnidata (es. custom/imported.json5) nelle Map
+    // esistenti, SENZA reload del client. Ritorna gli entry aggiunti cosi il
+    // chiamante puo' aggiornare anche il RoomContentLoader. Fa comparire i furni
+    // appena importati nel catalogo in tempo reale.
+    public async mergeFurnitureDataFromUrl(url: string): Promise<IFurnitureData[]>
+    {
+        if(!url || !url.length) return [];
+
+        const added = await this._furnitureData.mergeFromUrl(url);
+
+        if(added && added.length) GetEventDispatcher().dispatchEvent(new NitroEvent(NitroEventType.SESSION_DATA_UPDATED));
+
+        return added;
+    }
+
     public async applyFurnitureDataOverrides(url: string): Promise<void>
     {
         if(!url || !url.length)
