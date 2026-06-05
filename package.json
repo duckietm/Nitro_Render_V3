@@ -37,7 +37,7 @@
     "json5": "^2.2.3",
     "pako": "^2.1.0",
     "pixi-filters": "^6.1.5",
-    "pixi.js": "^8.18.1"
+    "pixi.js": "^8.19.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.13.0",

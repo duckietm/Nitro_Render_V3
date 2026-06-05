@@ -496,6 +496,8 @@ export class IncomingHeader
 
 	// Catalog Admin
     public static CATALOG_ADMIN_RESULT = 10059;
+    public static CATALOG_ADMIN_OFFER_DETAILS = 10062;
+    public static CATALOG_ADMIN_PAGE_DETAILS = 10063;
 
     // Custom Prefixes
     public static USER_PREFIXES = 7001;

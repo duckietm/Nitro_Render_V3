@@ -507,7 +507,9 @@ export class OutgoingHeader
     public static CATALOG_ADMIN_MOVE_OFFER = 10056;
     public static CATALOG_ADMIN_MOVE_PAGE = 10057;
     public static CATALOG_ADMIN_PUBLISH = 10058;
-	
+    public static CATALOG_ADMIN_LOAD_OFFER = 10062;
+    public static CATALOG_ADMIN_LOAD_PAGE = 10063;
+
 	public static DELETE_ITEM = 10018;
 	public static DELETE_PET = 10030;
 	public static DELETE_BADGE = 10031;

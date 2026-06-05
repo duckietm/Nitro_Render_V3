@@ -37,9 +37,38 @@ export class FurnitureDataLoader
         if(responseData.wallitemtypes) this.parseWallItems(responseData.wallitemtypes);
     }
 
-    private parseFloorItems(data: any): void
+    // Ri-carica un singolo chunk furnidata (es. custom/imported.json5) e
+    // mergia i suoi entry nelle Map esistenti. Ritorna gli entry aggiunti/aggiornati
+    // cosi il chiamante puo' aggiornare anche il RoomContentLoader senza reload.
+    public async mergeFromUrl(url: string): Promise<IFurnitureData[]>
     {
-        if(!data || !data.furnitype) return;
+        if(!url || !url.length) return [];
+
+        let responseData: any;
+
+        try
+        {
+            responseData = await loadGamedata(url);
+        }
+        catch(err)
+        {
+            return [];
+        }
+
+        const added: IFurnitureData[] = [];
+
+        if(responseData.roomitemtypes) added.push(...this.parseFloorItems(responseData.roomitemtypes));
+
+        if(responseData.wallitemtypes) added.push(...this.parseWallItems(responseData.wallitemtypes));
+
+        return added;
+    }
+
+    private parseFloorItems(data: any): IFurnitureData[]
+    {
+        const added: IFurnitureData[] = [];
+
+        if(!data || !data.furnitype) return added;
 
         for(const furniture of data.furnitype)
         {
@@ -76,13 +105,19 @@ export class FurnitureDataLoader
 
             this._floorItems.set(furnitureData.id, furnitureData);
 
+            added.push(furnitureData);
+
             this.updateLocalizations(furnitureData);
         }
+
+        return added;
     }
 
-    private parseWallItems(data: any): void
+    private parseWallItems(data: any): IFurnitureData[]
     {
-        if(!data || !data.furnitype) return;
+        const added: IFurnitureData[] = [];
+
+        if(!data || !data.furnitype) return added;
 
         for(const furniture of data.furnitype)
         {
@@ -93,8 +128,12 @@ export class FurnitureDataLoader
 
             this._wallItems.set(furnitureData.id, furnitureData);
 
+            added.push(furnitureData);
+
             this.updateLocalizations(furnitureData);
         }
+
+        return added;
     }
 
     private updateLocalizations(furniture: FurnitureData): void

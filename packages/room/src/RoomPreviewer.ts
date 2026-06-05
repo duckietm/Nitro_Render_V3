@@ -136,10 +136,6 @@ export class RoomPreviewer
 
     public updatePreviewModel(model: string, wallHeight: number, scale: boolean = true): void
     {
-        // Defensive: dispose() nulls _planeParser, and React 19
-        // StrictMode dev double-mount can leave a stale reference
-        // briefly pointing at a disposed instance. Bail rather
-        // than crashing with "cannot read property reset of null".
         if(!this._planeParser) return;
 
         const parser = new FloorHeightMapMessageParser();
@@ -392,6 +388,11 @@ export class RoomPreviewer
 
             if(this._currentPreviewObjectCategory !== RoomObjectCategory.UNIT) this._roomEngine.changeObjectState(this._previewRoomId, RoomPreviewer.PREVIEW_OBJECT_ID, this._currentPreviewObjectCategory);
         }
+    }
+
+    public setAutomaticStateChange(enabled: boolean): void
+    {
+        this._automaticStateChange = enabled;
     }
 
     public changeRoomObjectDirection(): void
