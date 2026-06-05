@@ -277,3 +277,24 @@ for the React-side bridge code.
 - `../Nitro-V3` — React 19 client (consumes this lib via link)
 - `../Arcturus-Morningstar-Extended` — Java emulator (server side)
 - `../NitroV3-Housekeeping` — Next.js + Prisma admin CMS
+
+## Live furnidata updates: `FurnitureDataReload` (incoming header 10047)
+
+Server-pushed furni name/description changes (pairs with Arcturus'
+`FurnitureDataReloadComposer`). `SessionDataManager.applyFurnidataDelta` (pure
+`applyFurnidataDeltaTo` in `packages/session/src/furniture/`) patches
+`_floorItems`/`_wallItems` by id + the `roomItem/wallItem.name/desc.{id}`
+localization keys, then dispatches the window event `nitro-localization-updated`
+so the client's already-subscribed surfaces refresh. `mode` 0 = delta, 1 =
+reload-hint (re-runs `FurnitureDataLoader.init()`). Kept SEPARATE from the
+furni-editor's `applyLiveFurnitureNameUpdate`.
+
+**Adding an incoming packet:** id in `IncomingHeader.ts` -> map in
+`NitroMessages.ts` (`this._events.set(IncomingHeader.X, XEvent)`) -> Event +
+Parser under `messages/incoming/<area>` + `messages/parser/<area>` -> wire the
+barrel chain (`<area>/index.ts` -> parent `index.ts` -> package `src/index.ts`).
+
+**Gotchas:**
+- A branch based on `origin/Dev` may NOT contain the furni-editor slice
+  (`FurniDataUpdatedEvent` / `applyLiveFurnitureNameUpdate`) — verify, don't assume.
+- Building the renderer in a fresh git worktree needs its own `yarn install`.
