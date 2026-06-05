@@ -1311,6 +1311,10 @@ export class RoomPlane implements IRoomPlane
 
         this._maskChanged = false;
 
+        if(!this._maskFilter) this._maskFilter = new PlaneMaskFilter({});
+
+        if(!container.filters) container.filters = [ this._maskFilter ];
+
         return true;
     }
 
