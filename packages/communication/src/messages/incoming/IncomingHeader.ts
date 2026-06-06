@@ -494,6 +494,7 @@ export class IncomingHeader
 	public static FURNI_EDITOR_INTERACTIONS_RESULT = 10043;
 	public static FURNI_EDITOR_RESULT = 10044;
 	public static FURNITURE_DATA_RELOAD = 10047;
+	public static FURNI_EDITOR_IMPORT_TEXT_RESULT = 10049;
 
 	// Catalog Admin
     public static CATALOG_ADMIN_RESULT = 10059;
