@@ -1,5 +1,7 @@
 import { IFurnitureData, IGroupInformationManager, IMessageComposer, IMessageEvent, IProductData, ISessionDataManager, IUserDataSnapshot, NoobnessLevelEnum, SecurityLevel } from '@nitrots/api';
-import { AccountSafetyLockStatusChangeMessageEvent, AccountSafetyLockStatusChangeParser, AvailabilityStatusMessageEvent, ChangeUserNameResultMessageEvent, EmailStatusResultEvent, FigureUpdateEvent, GetCommunication, GetUserTagsComposer, InClientLinkEvent, MysteryBoxKeysEvent, NoobnessLevelMessageEvent, PetRespectComposer, PetScratchFailedMessageEvent, RoomReadyMessageEvent, RoomUnitChatComposer, UserInfoEvent, UserNameChangeMessageEvent, UserPermissionsEvent, UserRespectComposer, UserTagsMessageEvent } from '@nitrots/communication';
+import { AccountSafetyLockStatusChangeMessageEvent, AccountSafetyLockStatusChangeParser, AvailabilityStatusMessageEvent, ChangeUserNameResultMessageEvent, EmailStatusResultEvent, FigureUpdateEvent, FurnitureDataReloadEvent, GetCommunication, GetUserTagsComposer, InClientLinkEvent, MysteryBoxKeysEvent, NoobnessLevelMessageEvent, PetRespectComposer, PetScratchFailedMessageEvent, RoomReadyMessageEvent, RoomUnitChatComposer, UserInfoEvent, UserNameChangeMessageEvent, UserPermissionsEvent, UserRespectComposer, UserTagsMessageEvent } from '@nitrots/communication';
+import type { FurnidataDeltaEntry } from '@nitrots/communication';
+import { applyFurnidataDeltaTo } from './furniture/applyFurnidataDelta';
 import { GetConfiguration } from '@nitrots/configuration';
 import { GetLocalizationManager } from '@nitrots/localization';
 import { GetEventDispatcher, MysteryBoxKeysUpdateEvent, NitroEvent, NitroEventType, NitroSettingsEvent, SessionDataPreferencesEvent, UserNameUpdateEvent } from '@nitrots/events';
@@ -171,7 +173,13 @@ export class SessionDataManager implements ISessionDataManager
             GetCommunication().registerMessageEvent(new MysteryBoxKeysEvent(this.onMysteryBoxKeysEvent.bind(this))),
             GetCommunication().registerMessageEvent(new NoobnessLevelMessageEvent(this.onNoobnessLevelMessageEvent.bind(this))),
             GetCommunication().registerMessageEvent(new AccountSafetyLockStatusChangeMessageEvent(this.onAccountSafetyLockStatusChangeMessageEvent.bind(this))),
-            GetCommunication().registerMessageEvent(new EmailStatusResultEvent(this.onEmailStatus.bind(this)))
+            GetCommunication().registerMessageEvent(new EmailStatusResultEvent(this.onEmailStatus.bind(this))),
+            GetCommunication().registerMessageEvent(new FurnitureDataReloadEvent((event: FurnitureDataReloadEvent) =>
+            {
+                const parser = event.getParser();
+                if(parser.mode === 1) { void this.applyFurnidataReloadHint(); }
+                else { this.applyFurnidataDelta(parser.entries); }
+            }))
         );
 
         // Store event dispatcher callback for cleanup
@@ -562,6 +570,17 @@ export class SessionDataManager implements ISessionDataManager
             localizationManager.setValue(('wallItem.name.' + item.id), resolvedItem.name);
             localizationManager.setValue(('wallItem.desc.' + item.id), resolvedItem.description);
         }
+    }
+
+    public applyFurnidataDelta(entries: FurnidataDeltaEntry[]): void
+    {
+        applyFurnidataDeltaTo(entries, this._floorItems as any, this._wallItems as any, GetLocalizationManager(), (typeof window !== 'undefined') ? window : { dispatchEvent: () => {} } as any);
+    }
+
+    public async applyFurnidataReloadHint(): Promise<void>
+    {
+        await this._furnitureData.init();
+        if(typeof window !== 'undefined') window.dispatchEvent(new CustomEvent('nitro-localization-updated'));
     }
 
     public getBadgeUrl(name: string): string

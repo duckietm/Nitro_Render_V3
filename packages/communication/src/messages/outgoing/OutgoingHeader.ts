@@ -497,6 +497,9 @@ export class OutgoingHeader
 	public static FURNI_EDITOR_INTERACTIONS = 10043;
 	public static FURNI_EDITOR_UPDATE = 10044;
 	public static FURNI_EDITOR_DELETE = 10045;
+	public static FURNI_EDITOR_UPDATE_FURNIDATA = 10046;
+	public static FURNI_EDITOR_REVERT_FURNIDATA = 10048;
+	public static FURNI_EDITOR_IMPORT_TEXT = 10049;
 
 	public static CATALOG_ADMIN_SAVE_PAGE = 10050;
     public static CATALOG_ADMIN_CREATE_PAGE = 10051;

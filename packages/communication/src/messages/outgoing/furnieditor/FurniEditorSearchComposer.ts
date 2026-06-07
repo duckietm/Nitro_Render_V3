@@ -4,9 +4,9 @@ export class FurniEditorSearchComposer implements IMessageComposer<ConstructorPa
 {
     private _data: ConstructorParameters<typeof FurniEditorSearchComposer>;
 
-    constructor(query: string, type: string, page: number)
+    constructor(query: string, type: string, page: number, sortField: string = 'id', sortDir: string = 'asc')
     {
-        this._data = [ query, type, page ];
+        this._data = [ query, type, page, sortField, sortDir ];
     }
 
     dispose(): void
