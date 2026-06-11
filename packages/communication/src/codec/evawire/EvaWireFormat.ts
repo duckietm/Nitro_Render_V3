@@ -66,23 +66,27 @@ export class EvaWireFormat implements ICodec
     {
         if(!connection || !connection.dataBuffer || !connection.dataBuffer.byteLength) return null;
 
+        const buffer = connection.dataBuffer;
+        const totalLength = buffer.byteLength;
+        const dataView = new DataView(buffer);
         const wrappers: IMessageDataWrapper[] = [];
+        let offset = 0;
 
-        while(connection.dataBuffer.byteLength)
+        while(offset + 4 <= totalLength)
         {
-            if(connection.dataBuffer.byteLength < 4) break;
+            const length = dataView.getInt32(offset);
 
-            const container = new BinaryReader(connection.dataBuffer);
-            const length = container.readInt();
+            if(length < 0 || (offset + 4 + length) > totalLength) break;
 
-            if(length > (connection.dataBuffer.byteLength - 4)) break;
+            const bodyStart = offset + 4;
+            const body = new BinaryReader(buffer.slice(bodyStart, bodyStart + length) as ArrayBuffer);
 
-            const extracted = container.readBytes(length);
+            wrappers.push(new EvaWireDataWrapper(body.readShort(), body));
 
-            wrappers.push(new EvaWireDataWrapper(extracted.readShort(), extracted));
-
-            connection.dataBuffer = connection.dataBuffer.slice(length + 4);
+            offset = bodyStart + length;
         }
+
+        connection.dataBuffer = (offset >= totalLength) ? new ArrayBuffer(0) : buffer.slice(offset);
 
         return wrappers;
     }
