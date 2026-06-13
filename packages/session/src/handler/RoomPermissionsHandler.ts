@@ -22,6 +22,8 @@ export class RoomPermissionsHandler extends BaseHandler
         if(!session) return;
 
         session.setControllerLevel(event.getParser().controllerLevel);
+
+        this.listener.invalidateRoomSessionSnapshot();
     }
 
     private onRoomRightsClearEvent(event: RoomRightsClearEvent): void
@@ -33,6 +35,8 @@ export class RoomPermissionsHandler extends BaseHandler
         if(!session) return;
 
         session.setControllerLevel(RoomControllerLevel.NONE);
+
+        this.listener.invalidateRoomSessionSnapshot();
     }
 
     private onRoomRightsOwnerEvent(event: RoomRightsOwnerEvent): void
@@ -44,5 +48,7 @@ export class RoomPermissionsHandler extends BaseHandler
         if(!session) return;
 
         session.setRoomOwner();
+
+        this.listener.invalidateRoomSessionSnapshot();
     }
 }
