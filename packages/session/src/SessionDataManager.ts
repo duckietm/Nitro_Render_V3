@@ -242,7 +242,12 @@ export class SessionDataManager implements ISessionDataManager
 
         const added = await this._furnitureData.mergeFromUrl(url);
 
-        if(added && added.length) GetEventDispatcher().dispatchEvent(new NitroEvent(NitroEventType.SESSION_DATA_UPDATED));
+        // Refresh the furni name/desc surfaces (catalog, inventory, infostand)
+        // via the window event they actually listen to — same signal
+        // applyFurnidataDelta uses. SESSION_DATA_UPDATED only drives the userData
+        // snapshot and, dispatched here without invalidateUserDataSnapshot(), was
+        // a no-op (the snapshot ref never changed, so consumers bailed out).
+        if(added && added.length && (typeof window !== 'undefined')) window.dispatchEvent(new CustomEvent('nitro-localization-updated'));
 
         return added;
     }
