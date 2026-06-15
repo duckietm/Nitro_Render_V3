@@ -7,6 +7,7 @@ export * from './catalog';
 export * from './competition';
 export * from './crafting';
 export * from './desktop';
+export * from './earnings';
 export * from './friendfurni';
 export * from './friendlist';
 export * from './furnieditor';

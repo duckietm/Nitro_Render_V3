@@ -10,6 +10,7 @@ export * from './catalog';
 export * from './client';
 export * from './commands';
 export * from './competition';
+export * from './earnings';
 export * from './crafting';
 export * from './desktop';
 export * from './friendlist';
