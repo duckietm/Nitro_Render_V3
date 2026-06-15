@@ -294,6 +294,18 @@ furni-editor's `applyLiveFurnitureNameUpdate`.
 Parser under `messages/incoming/<area>` + `messages/parser/<area>` -> wire the
 barrel chain (`<area>/index.ts` -> parent `index.ts` -> package `src/index.ts`).
 
+**Adding an outgoing composer:** id in `OutgoingHeader.ts` -> register in
+`NitroMessages.ts` (`this._composers.set(OutgoingHeader.X, XComposer)`) -> Composer
+under `messages/outgoing/<area>` -> wire the barrel chain. An unregistered composer
+makes `getComposerId()` return -1, logs "Unknown Composer", and the packet is
+silently DROPPED — the request never reaches the server.
+
+**A feature usually needs BOTH directions registered.** `NitroMessages` holds two
+maps — `_events` (incoming) and `_composers` (outgoing). When a panel is "dead",
+audit BOTH, not just `_events`: the inventory Prefixes panel was broken because
+`UserPrefixesEvent` (7001, incoming) AND `RequestPrefixesComposer` (7011, outgoing)
+were both defined+exported but never `set()` in `NitroMessages`.
+
 **Gotchas:**
 - A branch based on `origin/Dev` may NOT contain the furni-editor slice
   (`FurniDataUpdatedEvent` / `applyLiveFurnitureNameUpdate`) — verify, don't assume.
