@@ -89,6 +89,7 @@ export class UserProfileParser implements IMessageParser
         //   block 2: card background (1 int)
         //   block 3: nick icon (1 string)
         //   block 4: prefix decoration set (6 strings)
+        //   block 5: total badge count (1 int)
         // Each tier early-returns to keep the parser tolerant of older
         // servers that don't ship the later blocks. Defaults set by flush().
         if(!wrapper.bytesAvailable) return true;
@@ -113,6 +114,10 @@ export class UserProfileParser implements IMessageParser
         this._prefixEffect = wrapper.readString();
         this._prefixFont = wrapper.readString();
         this._displayOrder = wrapper.readString();
+
+        if(!wrapper.bytesAvailable) return true;
+
+        this._totalBadges = wrapper.readInt();
 
         return true;
     }

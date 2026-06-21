@@ -39,6 +39,8 @@ export class RoomDataHandler extends BaseHandler
         roomSession.allowPets = roomData.allowPets;
         roomSession.moderationSettings = parser.moderation;
 
+        this.listener.invalidateRoomSessionSnapshot();
+
         GetEventDispatcher().dispatchEvent(new RoomSessionPropertyUpdateEvent(RoomSessionPropertyUpdateEvent.RSDUE_ALLOW_PETS, roomSession));
         GetEventDispatcher().dispatchEvent(new RoomSessionEvent(RoomSessionEvent.ROOM_DATA, roomSession));
     }

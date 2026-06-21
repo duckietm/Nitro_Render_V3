@@ -28,7 +28,7 @@ export class RoomSessionManager implements IRoomSessionManager, IRoomHandlerList
     private _savedPosY: number = -1;
     private _activeRoomSessionSnapshot: Readonly<IRoomSessionSnapshot> | null = null;
 
-    private invalidateRoomSessionSnapshot(): void
+    public invalidateRoomSessionSnapshot(): void
     {
         this._activeRoomSessionSnapshot = null;
 

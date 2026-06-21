@@ -574,4 +574,7 @@ export class OutgoingHeader
     public static WHEEL_ADMIN_SAVE_PRIZES = 9305;
     public static SOUNDBOARD_PLAY = 9306;
     public static SOUNDBOARD_SET_ENABLED = 9307;
+    public static EARNINGS_REQUEST = 9308;
+    public static EARNINGS_CLAIM = 9309;
+    public static EARNINGS_CLAIM_ALL = 9310;
 }
