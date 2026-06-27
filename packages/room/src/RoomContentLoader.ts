@@ -97,6 +97,10 @@ export class RoomContentLoader implements IRoomContentLoader
                 this._wallItemTypeIds.set(className, id);
 
                 if(!this._wallItems[name]) this._wallItems[name] = 1;
+
+                const normalizedName = this.removeColorIndex(className);
+
+                if(normalizedName && !this._wallItems[normalizedName]) this._wallItems[normalizedName] = 1;
             }
 
             const existingRevision = this._furniRevisions.get(name);
@@ -245,9 +249,9 @@ export class RoomContentLoader implements IRoomContentLoader
     {
         if(!type) return RoomObjectCategory.MINIMUM;
 
-        if(this._activeObjects[type] !== undefined) return RoomObjectCategory.FLOOR;
-
         if(this._wallItems[type] !== undefined) return RoomObjectCategory.WALL;
+
+        if(this._activeObjects[type] !== undefined) return RoomObjectCategory.FLOOR;
 
         if(this._pets[type] !== undefined) return RoomObjectCategory.UNIT;
 
