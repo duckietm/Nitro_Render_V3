@@ -249,9 +249,9 @@ export class RoomContentLoader implements IRoomContentLoader
     {
         if(!type) return RoomObjectCategory.MINIMUM;
 
-        if(this._activeObjects[type] !== undefined) return RoomObjectCategory.FLOOR;
-
         if(this._wallItems[type] !== undefined) return RoomObjectCategory.WALL;
+
+        if(this._activeObjects[type] !== undefined) return RoomObjectCategory.FLOOR;
 
         if(this._pets[type] !== undefined) return RoomObjectCategory.UNIT;
 
