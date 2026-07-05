@@ -1,5 +1,7 @@
 export * from './ChestDepositComposer';
 export * from './ChestDepositFurniComposer';
+export * from './ChestStartDepositComposer';
+export * from './ChestDepositInventoryItemComposer';
 export * from './ChestWithdrawComposer';
 export * from './ChestWithdrawFurniComposer';
 export * from './ChestSaveSettingsComposer';

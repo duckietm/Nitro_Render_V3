@@ -1,16 +1,16 @@
 import { IMessageComposer } from '@nitrots/api';
 
 /**
- * Player withdraws stored furni from a wired furni chest (Scrigno furni). [itemId, baseItemId, amount].
- * amount < 0 = withdraw all of that base type. The server creates that many items into the inventory.
+ * Player withdraws stored furni (official Dul wire shape):
+ * [chestItemId, isWallItem, typeId, legacyPosterId, amount]. amount < 0 = all matching rows.
  */
 export class ChestWithdrawFurniComposer implements IMessageComposer<ConstructorParameters<typeof ChestWithdrawFurniComposer>>
 {
     private _data: ConstructorParameters<typeof ChestWithdrawFurniComposer>;
 
-    constructor(itemId: number, baseItemId: number, amount: number)
+    constructor(chestItemId: number, isWallItem: boolean, typeId: number, legacyPosterId: string, amount: number)
     {
-        this._data = [itemId, baseItemId, amount];
+        this._data = [chestItemId, isWallItem, typeId, legacyPosterId, amount];
     }
 
     public getMessageArray()
