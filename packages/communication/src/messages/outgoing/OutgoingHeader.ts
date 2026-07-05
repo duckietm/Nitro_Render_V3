@@ -119,6 +119,7 @@ export class OutgoingHeader
     public static CHEST_START_DEPOSIT = 9324;
     public static CHEST_DEPOSIT_INVENTORY_ITEM = 9325;
     public static CHEST_WITHDRAW_ALL_FURNI = 9326;
+    public static CHEST_OPEN = 9327;
     public static ITEM_DIMMER_TOGGLE = 2296;
     public static ITEM_EXCHANGE_REDEEM = 3115;
     public static ITEM_PAINT = 711;

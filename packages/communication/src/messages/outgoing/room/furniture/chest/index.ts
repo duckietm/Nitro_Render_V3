@@ -1,3 +1,4 @@
+export * from './ChestOpenComposer';
 export * from './ChestDepositComposer';
 export * from './ChestDepositFurniComposer';
 export * from './ChestStartDepositComposer';

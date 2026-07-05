@@ -17,6 +17,7 @@ export * from './RentableSpaceRentFailedMessageParser';
 export * from './RentableSpaceRentOkMessageParser';
 export * from './RentableSpaceStatusMessageParser';
 export * from './RequestSpamWallPostItMessageParser';
+export * from './ChestOpenMessageParser';
 export * from './ChestDataMessageParser';
 export * from './ChestFurniChunkMessageParser';
 export * from './ChestFurniDeltaMessageParser';

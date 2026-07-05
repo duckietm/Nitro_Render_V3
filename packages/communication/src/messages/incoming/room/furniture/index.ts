@@ -17,6 +17,7 @@ export * from './RentableSpaceRentFailedMessageEvent';
 export * from './RentableSpaceRentOkMessageEvent';
 export * from './RentableSpaceStatusMessageEvent';
 export * from './RequestSpamWallPostItMessageEvent';
+export * from './ChestOpenEvent';
 export * from './ChestDataEvent';
 export * from './ChestFurniChunkEvent';
 export * from './ChestFurniDeltaEvent';

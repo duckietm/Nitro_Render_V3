@@ -96,6 +96,7 @@ export class IncomingHeader
     public static CHEST_LOG = 9319;
     public static CHEST_FURNI_CHUNK = 9322;
     public static CHEST_FURNI_DELTA = 9323;
+    public static CHEST_OPEN = 9327;
     public static ITEM_STACK_HELPER = 2816;
     public static ITEM_WALL = 1369;
     public static ITEM_WALL_ADD = 2187;
