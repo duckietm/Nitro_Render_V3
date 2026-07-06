@@ -17,6 +17,8 @@ export * from './RentableSpaceRentFailedMessageParser';
 export * from './RentableSpaceRentOkMessageParser';
 export * from './RentableSpaceStatusMessageParser';
 export * from './RequestSpamWallPostItMessageParser';
+export * from './ChestDataMessageParser';
+export * from './ChestLogMessageParser';
 export * from './RoomDimmerPresetsMessageData';
 export * from './RoomDimmerPresetsMessageParser';
 export * from './RoomMessageNotificationMessageParser';

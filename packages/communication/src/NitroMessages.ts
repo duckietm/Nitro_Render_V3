@@ -10,7 +10,9 @@ import { HousekeepingActionLogEvent, HousekeepingActionResultEvent, Housekeeping
 import { RareValuesEvent, RequestRareValuesComposer } from './messages';
 import { WheelBuySpinComposer, WheelDataEvent, WheelOpenComposer, WheelRecentWinsEvent, WheelResultEvent, WheelSpinComposer } from './messages';
 import { WheelAdminGetPrizesComposer, WheelAdminPrizesEvent, WheelAdminSavePrizesComposer } from './messages';
+import { ChestDataEvent, ChestDepositComposer, ChestWithdrawComposer, ChestWithdrawFurniComposer, ChestLogEvent, ChestSaveSettingsComposer, ChestSaveNotificationsComposer, ChestUpgradeCapacityComposer, ChestRequestLogComposer } from './messages';
 import { SoundboardPlayEvent, SoundboardSettingsEvent, SoundboardPlayComposer, SoundboardSetEnabledComposer } from './messages';
+import { PressKeybindComposer } from './messages';
 import { EarningsCenterEvent, EarningsClaimResultEvent, RequestEarningsCenterComposer, ClaimEarningsRewardComposer, ClaimAllEarningsRewardsComposer } from './messages';
 import { DeleteMentionComposer, MarkMentionsReadComposer, MentionReceivedEvent, MentionsListEvent, RequestMentionsComposer } from './messages';
 export class NitroMessages implements IMessageConfiguration
@@ -442,6 +444,8 @@ export class NitroMessages implements IMessageConfiguration
         this._events.set(IncomingHeader.ITEM_STACK_HELPER, FurnitureStackHeightEvent);
         this._events.set(IncomingHeader.FURNITURE_STATE, OneWayDoorStatusMessageEvent);
         this._events.set(IncomingHeader.ITEM_DIMMER_SETTINGS, RoomDimmerPresetsEvent);
+        this._events.set(IncomingHeader.CHEST_DATA, ChestDataEvent);
+        this._events.set(IncomingHeader.CHEST_LOG, ChestLogEvent);
         this._events.set(IncomingHeader.FURNITURE_STATE_2, DiceValueMessageEvent);
         this._events.set(IncomingHeader.LOVELOCK_FURNI_FINISHED, LoveLockFurniFinishedEvent);
         this._events.set(IncomingHeader.LOVELOCK_FURNI_FRIEND_COMFIRMED, LoveLockFurniFriendConfirmedEvent);
@@ -1080,6 +1084,15 @@ export class NitroMessages implements IMessageConfiguration
         this._composers.set(OutgoingHeader.ITEM_DIMMER_SAVE, MoodlightSettingsSaveComposer);
         this._composers.set(OutgoingHeader.ITEM_DIMMER_TOGGLE, MoodlightTogggleStateComposer);
 
+        // Player-facing wired chest (Scrigno)
+        this._composers.set(OutgoingHeader.CHEST_DEPOSIT, ChestDepositComposer);
+        this._composers.set(OutgoingHeader.CHEST_WITHDRAW, ChestWithdrawComposer);
+        this._composers.set(OutgoingHeader.CHEST_WITHDRAW_FURNI, ChestWithdrawFurniComposer);
+        this._composers.set(OutgoingHeader.CHEST_SAVE_SETTINGS, ChestSaveSettingsComposer);
+        this._composers.set(OutgoingHeader.CHEST_SAVE_NOTIFICATIONS, ChestSaveNotificationsComposer);
+        this._composers.set(OutgoingHeader.CHEST_UPGRADE_CAPACITY, ChestUpgradeCapacityComposer);
+        this._composers.set(OutgoingHeader.CHEST_REQUEST_LOG, ChestRequestLogComposer);
+
         // Toners
         this._composers.set(OutgoingHeader.ROOM_TONER_APPLY, ApplyTonerComposer);
 
@@ -1348,6 +1361,7 @@ export class NitroMessages implements IMessageConfiguration
         this._composers.set(OutgoingHeader.WHEEL_ADMIN_SAVE_PRIZES, WheelAdminSavePrizesComposer);
         this._composers.set(OutgoingHeader.SOUNDBOARD_PLAY, SoundboardPlayComposer);
         this._composers.set(OutgoingHeader.SOUNDBOARD_SET_ENABLED, SoundboardSetEnabledComposer);
+        this._composers.set(OutgoingHeader.PRESS_KEYBIND, PressKeybindComposer);
         this._composers.set(OutgoingHeader.EARNINGS_REQUEST, RequestEarningsCenterComposer);
         this._composers.set(OutgoingHeader.EARNINGS_CLAIM, ClaimEarningsRewardComposer);
         this._composers.set(OutgoingHeader.EARNINGS_CLAIM_ALL, ClaimAllEarningsRewardsComposer);

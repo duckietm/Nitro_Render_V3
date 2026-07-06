@@ -47,6 +47,10 @@ export class RoomObjectVisualizationFactory implements IRoomObjectVisualizationF
             case RoomObjectVisualizationType.FURNITURE_STATIC:
                 visualization = FurnitureVisualization;
                 break;
+            // Gen-3 "Origins" chest furni use custom visualization types that map to the standard
+            // animated visualization (their .nitro carries normal animations/spritesheet).
+            case 'furniture_coinschest':
+            case 'furniture_furnichest':
             case RoomObjectVisualizationType.FURNITURE_ANIMATED:
                 visualization = FurnitureAnimatedVisualization;
                 break;
@@ -168,6 +172,8 @@ export class RoomObjectVisualizationFactory implements IRoomObjectVisualizationF
             case RoomObjectVisualizationType.FURNITURE_BUILDER_PLACEHOLDER:
                 visualizationData = new FurnitureVisualizationData();
                 break;
+            case 'furniture_coinschest':
+            case 'furniture_furnichest':
             case RoomObjectVisualizationType.FURNITURE_ANIMATED:
             case RoomObjectVisualizationType.FURNITURE_RESETTING_ANIMATED:
             case RoomObjectVisualizationType.FURNITURE_POSTER:

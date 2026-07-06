@@ -17,6 +17,8 @@ export * from './RentableSpaceRentFailedMessageEvent';
 export * from './RentableSpaceRentOkMessageEvent';
 export * from './RentableSpaceStatusMessageEvent';
 export * from './RequestSpamWallPostItMessageEvent';
+export * from './ChestDataEvent';
+export * from './ChestLogEvent';
 export * from './RoomDimmerPresetsMessageEvent';
 export * from './RoomMessageNotificationMessageEvent';
 export * from './WelcomeGiftStatusEvent';

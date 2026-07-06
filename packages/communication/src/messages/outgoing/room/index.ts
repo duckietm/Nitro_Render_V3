@@ -14,6 +14,7 @@ export * from './furniture/wall';
 export * from './furniture/youtube';
 export * from './layout';
 export * from './RedeemItemClothingComposer';
+export * from './PressKeybindComposer';
 export * from './session';
 export * from './unit';
 export * from './unit/chat';

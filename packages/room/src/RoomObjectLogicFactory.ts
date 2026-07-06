@@ -170,6 +170,9 @@ export class RoomObjectLogicFactory implements IRoomObjectLogicFactory
             case RoomObjectLogicType.FURNITURE_MULTIHEIGHT:
                 logic = FurnitureMultiHeightLogic;
                 break;
+            // Gen-3 "Origins" chest furni: route their custom logic to the standard multi-state logic.
+            case 'furniture_coinschest':
+            case 'furniture_furnichest':
             case RoomObjectLogicType.FURNITURE_MULTISTATE:
                 logic = FurnitureMultiStateLogic;
                 break;

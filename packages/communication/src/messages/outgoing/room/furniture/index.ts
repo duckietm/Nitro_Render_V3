@@ -1,4 +1,5 @@
 export * from './AddSpamWallPostItMessageComposer';
+export * from './chest';
 export * from './dimmer';
 export * from './ExtendRentOrBuyoutFurniMessageComposer';
 export * from './ExtendRentOrBuyoutStripItemMessageComposer';

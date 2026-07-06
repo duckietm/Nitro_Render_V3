@@ -92,6 +92,8 @@ export class IncomingHeader
     public static GUILD_EDIT_FAILED = 3988;
     public static GUILD_MEMBER_MGMT_FAILED = 818;
     public static ITEM_DIMMER_SETTINGS = 2710;
+    public static CHEST_DATA = 9312;
+    public static CHEST_LOG = 9319;
     public static ITEM_STACK_HELPER = 2816;
     public static ITEM_WALL = 1369;
     public static ITEM_WALL_ADD = 2187;
