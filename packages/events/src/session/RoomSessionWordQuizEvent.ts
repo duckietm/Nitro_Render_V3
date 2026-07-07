@@ -17,11 +17,11 @@ export class RoomSessionWordQuizEvent extends RoomSessionEvent
     private _value: string;
     private _answerCounts: Map<string, number>;
 
-    constructor(k: string, _arg_2: IRoomSession, _arg_3: number = -1)
+    constructor(type: string, session: IRoomSession, id: number = -1)
     {
-        super(k, _arg_2);
+        super(type, session);
 
-        this._id = _arg_3;
+        this._id = id;
     }
 
     public get id(): number
@@ -44,9 +44,9 @@ export class RoomSessionWordQuizEvent extends RoomSessionEvent
         return this._pollId;
     }
 
-    public set pollId(k: number)
+    public set pollId(value: number)
     {
-        this._pollId = k;
+        this._pollId = value;
     }
 
     public get questionId(): number
@@ -54,9 +54,9 @@ export class RoomSessionWordQuizEvent extends RoomSessionEvent
         return this._questionId;
     }
 
-    public set questionId(k: number)
+    public set questionId(value: number)
     {
-        this._questionId = k;
+        this._questionId = value;
     }
 
     public get duration(): number
@@ -64,9 +64,9 @@ export class RoomSessionWordQuizEvent extends RoomSessionEvent
         return this._duration;
     }
 
-    public set duration(k: number)
+    public set duration(value: number)
     {
-        this._duration = k;
+        this._duration = value;
     }
 
     public get question(): IQuestion
@@ -74,9 +74,9 @@ export class RoomSessionWordQuizEvent extends RoomSessionEvent
         return this._question;
     }
 
-    public set question(k: IQuestion)
+    public set question(value: IQuestion)
     {
-        this._question = k;
+        this._question = value;
     }
 
     public get userId(): number
@@ -84,9 +84,9 @@ export class RoomSessionWordQuizEvent extends RoomSessionEvent
         return this._userId;
     }
 
-    public set userId(k: number)
+    public set userId(value: number)
     {
-        this._userId = k;
+        this._userId = value;
     }
 
     public get value(): string
@@ -104,8 +104,8 @@ export class RoomSessionWordQuizEvent extends RoomSessionEvent
         return this._answerCounts;
     }
 
-    public set answerCounts(k: Map<string, number>)
+    public set answerCounts(value: Map<string, number>)
     {
-        this._answerCounts = k;
+        this._answerCounts = value;
     }
 }

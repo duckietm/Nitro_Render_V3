@@ -28,9 +28,9 @@ export class AnimationStateData
         return this._animationOver;
     }
 
-    public set animationOver(k: boolean)
+    public set animationOver(flag: boolean)
     {
-        this._animationOver = k;
+        this._animationOver = flag;
     }
 
     public get frameCounter(): number
@@ -38,9 +38,9 @@ export class AnimationStateData
         return this._frameCounter;
     }
 
-    public set frameCounter(k: number)
+    public set frameCounter(value: number)
     {
-        this._frameCounter = k;
+        this._frameCounter = value;
     }
 
     public get animationId(): number
@@ -62,9 +62,9 @@ export class AnimationStateData
         return this._animationAfterTransitionId;
     }
 
-    public set animationAfterTransitionId(k: number)
+    public set animationAfterTransitionId(animationId: number)
     {
-        this._animationAfterTransitionId = k;
+        this._animationAfterTransitionId = animationId;
     }
 
     public dispose(): void
@@ -76,16 +76,16 @@ export class AnimationStateData
         this._animationPlayed = null;
     }
 
-    public setLayerCount(k: number): void
+    public setLayerCount(layerCount: number): void
     {
-        this._layerCount = k;
+        this._layerCount = layerCount;
 
         this.resetAnimationFrames();
     }
 
-    public resetAnimationFrames(k: boolean = true): void
+    public resetAnimationFrames(reset: boolean = true): void
     {
-        if(k || (!this._frames))
+        if(reset || (!this._frames))
         {
             this.recycleFrames();
 
@@ -101,7 +101,7 @@ export class AnimationStateData
 
         while(layerId < this._layerCount)
         {
-            if(k || (this._frames.length <= layerId))
+            if(reset || (this._frames.length <= layerId))
             {
                 this._frames[layerId] = null;
             }

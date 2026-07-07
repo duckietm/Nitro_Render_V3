@@ -5,12 +5,12 @@
     private _leftSideLength: number;
     private _rightSideLength: number;
 
-    constructor(k: number, _arg_2: number, _arg_3: number, _arg_4: number)
+    constructor(leftSideLoc: number, rightSideLoc: number, leftSideLength: number, rightSideLength: number)
     {
-        this._leftSideLoc = k;
-        this._rightSideLoc = _arg_2;
-        this._leftSideLength = _arg_3;
-        this._rightSideLength = _arg_4;
+        this._leftSideLoc = leftSideLoc;
+        this._rightSideLoc = rightSideLoc;
+        this._leftSideLength = leftSideLength;
+        this._rightSideLength = rightSideLength;
     }
 
     public get leftSideLoc(): number

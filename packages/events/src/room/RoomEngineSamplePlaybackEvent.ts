@@ -10,9 +10,9 @@ export class RoomEngineSamplePlaybackEvent extends RoomEngineObjectEvent
     private _sampleId: number;
     private _pitch: number;
 
-    constructor(k: string, roomId: number, objectId: number, objectCategory: number, sampleId: number, pitch: number = 1)
+    constructor(type: string, roomId: number, objectId: number, objectCategory: number, sampleId: number, pitch: number = 1)
     {
-        super(k, roomId, objectId, objectCategory);
+        super(type, roomId, objectId, objectCategory);
 
         this._sampleId = sampleId;
         this._pitch = pitch;

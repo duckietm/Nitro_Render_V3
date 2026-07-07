@@ -1742,12 +1742,12 @@ export class RoomMessageHandler
         this.updateGuideMarker();
     }
 
-    private onGuideSessionEndedMessageEvent(k: GuideSessionEndedMessageEvent): void
+    private onGuideSessionEndedMessageEvent(event: GuideSessionEndedMessageEvent): void
     {
         this.removeGuideMarker();
     }
 
-    private onGuideSessionErrorMessageEvent(k: GuideSessionErrorMessageEvent): void
+    private onGuideSessionErrorMessageEvent(event: GuideSessionErrorMessageEvent): void
     {
         this.removeGuideMarker();
     }

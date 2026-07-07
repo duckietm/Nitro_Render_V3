@@ -2,18 +2,18 @@ import { Point } from 'pixi.js';
 
 export class PointMath
 {
-    public static sum(k: Point, _arg_2: Point): Point
+    public static sum(point1: Point, point2: Point): Point
     {
-        return new Point((k.x + _arg_2.x), (k.y + _arg_2.y));
+        return new Point((point1.x + point2.x), (point1.y + point2.y));
     }
 
-    public static sub(k: Point, _arg_2: Point): Point
+    public static sub(point1: Point, point2: Point): Point
     {
-        return new Point((k.x - _arg_2.x), (k.y - _arg_2.y));
+        return new Point((point1.x - point2.x), (point1.y - point2.y));
     }
 
-    public static mul(k: Point, _arg_2: number): Point
+    public static mul(point: Point, factor: number): Point
     {
-        return new Point((k.x * _arg_2), (k.y * _arg_2));
+        return new Point((point.x * factor), (point.y * factor));
     }
 }

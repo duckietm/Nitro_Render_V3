@@ -28,27 +28,27 @@ export class DropBounce extends Interval
         this.target.style.top = (((this._offset - this._height) + (this.getBounceOffset(time) * this._height)) + 'px');
     }
 
-    protected getBounceOffset(k: number): number
+    protected getBounceOffset(progress: number): number
     {
-        if(k < 0.364) return (7.5625 * k) * k;
+        if(progress < 0.364) return (7.5625 * progress) * progress;
 
-        if(k < 0.727)
+        if(progress < 0.727)
         {
-            k = (k - 0.545);
+            progress = (progress - 0.545);
 
-            return ((7.5625 * k) * k) + 0.75;
+            return ((7.5625 * progress) * progress) + 0.75;
         }
 
-        if(k < 0.909)
+        if(progress < 0.909)
         {
-            k = (k - 0.9091);
+            progress = (progress - 0.9091);
 
-            return ((7.5625 * k) * k) + 0.9375;
+            return ((7.5625 * progress) * progress) + 0.9375;
         }
 
-        k = (k - 0.955);
+        progress = (progress - 0.955);
 
-        return ((7.5625 * k) * k) + 0.984375;
+        return ((7.5625 * progress) * progress) + 0.984375;
     }
 
     public stop(): void

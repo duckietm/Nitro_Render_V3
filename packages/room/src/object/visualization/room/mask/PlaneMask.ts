@@ -52,16 +52,16 @@ export class PlaneMask
         return visualization;
     }
 
-    private getSizeIndex(k: number): number
+    private getSizeIndex(size: number): number
     {
         let sizeIndex = 0;
         let index = 1;
 
         while(index < this._sizes.length)
         {
-            if(this._sizes[index] > k)
+            if(this._sizes[index] > size)
             {
-                if((this._sizes[index] - k) < (k - this._sizes[(index - 1)])) sizeIndex = index;
+                if((this._sizes[index] - size) < (size - this._sizes[(index - 1)])) sizeIndex = index;
 
                 break;
             }
@@ -74,11 +74,11 @@ export class PlaneMask
         return sizeIndex;
     }
 
-    protected getMaskVisualization(k: number): PlaneMaskVisualization
+    protected getMaskVisualization(size: number): PlaneMaskVisualization
     {
-        if(k === this._lastSize) return this._lastMaskVisualization;
+        if(size === this._lastSize) return this._lastMaskVisualization;
 
-        const sizeIndex = this.getSizeIndex(k);
+        const sizeIndex = this.getSizeIndex(size);
 
         if(sizeIndex < this._sizes.length)
         {
@@ -89,31 +89,31 @@ export class PlaneMask
             this._lastMaskVisualization = null;
         }
 
-        this._lastSize = k;
+        this._lastSize = size;
 
         return this._lastMaskVisualization;
     }
 
-    public getGraphicAsset(k: number, _arg_2: IVector3D): IGraphicAsset
+    public getGraphicAsset(size: number, normal: IVector3D): IGraphicAsset
     {
-        const visualization = this.getMaskVisualization(k);
+        const visualization = this.getMaskVisualization(size);
 
         if(!visualization) return null;
 
-        return visualization.getAsset(_arg_2);
+        return visualization.getAsset(normal);
     }
 
-    public getAssetName(k: number): string
+    public getAssetName(size: number): string
     {
         if(!this._assetNames) return null;
 
-        return this._assetNames.get(k) || null;
+        return this._assetNames.get(size) || null;
     }
 
-    public setAssetName(k: number, _arg_2: string): void
+    public setAssetName(size: number, assetName: string): void
     {
         if(!this._assetNames) return;
 
-        this._assetNames.set(k, _arg_2);
+        this._assetNames.set(size, assetName);
     }
 }

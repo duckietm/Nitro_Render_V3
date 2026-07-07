@@ -15,96 +15,96 @@ export class Motions
         return (1000 / GetTickerFPS());
     }
 
-    public static runMotion(k: Motion): Motion
+    public static runMotion(motion: Motion): Motion
     {
-        if(((Motions._RUNNING_MOTIONS.indexOf(k) === -1) && (Motions._QUEUED_MOTIONS.indexOf(k) === -1)))
+        if(((Motions._RUNNING_MOTIONS.indexOf(motion) === -1) && (Motions._QUEUED_MOTIONS.indexOf(motion) === -1)))
         {
             if(Motions._IS_UPDATING)
             {
-                Motions._QUEUED_MOTIONS.push(k);
+                Motions._QUEUED_MOTIONS.push(motion);
             }
             else
             {
-                Motions._RUNNING_MOTIONS.push(k);
+                Motions._RUNNING_MOTIONS.push(motion);
 
-                k.start();
+                motion.start();
             }
 
             Motions.startTimer();
         }
 
-        return k;
+        return motion;
     }
 
-    public static removeMotion(k: Motion): void
+    public static removeMotion(motion: Motion): void
     {
-        let _local_2: number = Motions._RUNNING_MOTIONS.indexOf(k);
+        let index: number = Motions._RUNNING_MOTIONS.indexOf(motion);
 
-        if(_local_2 > -1)
+        if(index > -1)
         {
             if(Motions._IS_UPDATING)
             {
-                _local_2 = Motions._REMOVED_MOTIONS.indexOf(k);
+                index = Motions._REMOVED_MOTIONS.indexOf(motion);
 
-                if(_local_2 == -1) Motions._REMOVED_MOTIONS.push(k);
+                if(index == -1) Motions._REMOVED_MOTIONS.push(motion);
             }
             else
             {
-                Motions._RUNNING_MOTIONS.splice(_local_2, 1);
+                Motions._RUNNING_MOTIONS.splice(index, 1);
 
-                if(k.running) k.stop();
+                if(motion.running) motion.stop();
 
                 if(!Motions._RUNNING_MOTIONS.length) Motions.stopTimer();
             }
         }
         else
         {
-            _local_2 = Motions._QUEUED_MOTIONS.indexOf(k);
+            index = Motions._QUEUED_MOTIONS.indexOf(motion);
 
-            if(_local_2 > -1) Motions._QUEUED_MOTIONS.splice(_local_2, 1);
+            if(index > -1) Motions._QUEUED_MOTIONS.splice(index, 1);
         }
     }
 
-    public static getMotionByTag(k: string): Motion
+    public static getMotionByTag(tag: string): Motion
     {
-        for(const _local_2 of Motions._RUNNING_MOTIONS)
+        for(const motion of Motions._RUNNING_MOTIONS)
         {
-            if(_local_2.tag == k) return _local_2;
+            if(motion.tag == tag) return motion;
         }
 
-        for(const _local_2 of Motions._QUEUED_MOTIONS)
+        for(const motion of Motions._QUEUED_MOTIONS)
         {
-            if(_local_2.tag == k) return _local_2;
+            if(motion.tag == tag) return motion;
         }
 
         return null;
     }
 
-    public static getMotionByTarget(k: HTMLElement): Motion
+    public static getMotionByTarget(target: HTMLElement): Motion
     {
-        for(const _local_2 of Motions._RUNNING_MOTIONS)
+        for(const motion of Motions._RUNNING_MOTIONS)
         {
-            if(_local_2.target == k) return _local_2;
+            if(motion.target == target) return motion;
         }
 
-        for(const _local_2 of Motions._QUEUED_MOTIONS)
+        for(const motion of Motions._QUEUED_MOTIONS)
         {
-            if(_local_2.target == k) return _local_2;
+            if(motion.target == target) return motion;
         }
 
         return null;
     }
 
-    public static getMotionByTagAndTarget(k: string, _arg_2: HTMLElement): Motion
+    public static getMotionByTagAndTarget(tag: string, target: HTMLElement): Motion
     {
-        for(const _local_3 of Motions._RUNNING_MOTIONS)
+        for(const motion of Motions._RUNNING_MOTIONS)
         {
-            if(((_local_3.tag == k) && (_local_3.target == _arg_2))) return _local_3;
+            if(((motion.tag == tag) && (motion.target == target))) return motion;
         }
 
-        for(const _local_3 of Motions._QUEUED_MOTIONS)
+        for(const motion of Motions._QUEUED_MOTIONS)
         {
-            if(((_local_3.tag == k) && (_local_3.target == _arg_2))) return _local_3;
+            if(((motion.tag == tag) && (motion.target == target))) return motion;
         }
 
         return null;
@@ -124,35 +124,35 @@ export class Motions
     {
         Motions._IS_UPDATING = true;
 
-        const _local_2: number = GetTickerTime();
+        const time: number = GetTickerTime();
 
-        let _local_3: Motion = null;
-
-        // eslint-disable-next-line no-cond-assign
-        while(_local_3 = Motions._QUEUED_MOTIONS.pop()) Motions._RUNNING_MOTIONS.push(_local_3);
+        let motion: Motion = null;
 
         // eslint-disable-next-line no-cond-assign
-        while(_local_3 = Motions._REMOVED_MOTIONS.pop())
+        while(motion = Motions._QUEUED_MOTIONS.pop()) Motions._RUNNING_MOTIONS.push(motion);
+
+        // eslint-disable-next-line no-cond-assign
+        while(motion = Motions._REMOVED_MOTIONS.pop())
         {
-            Motions._RUNNING_MOTIONS.splice(Motions._RUNNING_MOTIONS.indexOf(_local_3), 1);
+            Motions._RUNNING_MOTIONS.splice(Motions._RUNNING_MOTIONS.indexOf(motion), 1);
 
-            if(_local_3.running) _local_3.stop();
+            if(motion.running) motion.stop();
         }
 
-        for(_local_3 of Motions._RUNNING_MOTIONS)
+        for(motion of Motions._RUNNING_MOTIONS)
         {
-            if(_local_3.running)
+            if(motion.running)
             {
-                _local_3.tick(_local_2);
+                motion.tick(time);
 
-                if(_local_3.complete)
+                if(motion.complete)
                 {
-                    Motions.removeMotion(_local_3);
+                    Motions.removeMotion(motion);
                 }
             }
             else
             {
-                Motions.removeMotion(_local_3);
+                Motions.removeMotion(motion);
             }
         }
 
@@ -180,15 +180,15 @@ export class Motions
     }
 
 
-    public getNumRunningMotions(k: HTMLElement): number
+    public getNumRunningMotions(target: HTMLElement): number
     {
-        let _local_2 = 0;
+        let count = 0;
 
-        for(const _local_3 of Motions._RUNNING_MOTIONS)
+        for(const motion of Motions._RUNNING_MOTIONS)
         {
-            if(_local_3.target === k) _local_2++;
+            if(motion.target === target) count++;
         }
 
-        return _local_2;
+        return count;
     }
 }

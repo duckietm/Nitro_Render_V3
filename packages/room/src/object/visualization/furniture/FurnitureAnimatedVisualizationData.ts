@@ -52,13 +52,13 @@ export class FurnitureAnimatedVisualizationData extends FurnitureVisualizationDa
         return size.getAnimationId(animationId);
     }
 
-    public isImmediateChange(scale: number, animationId: number, _arg_3: number): boolean
+    public isImmediateChange(scale: number, animationId: number, state: number): boolean
     {
         const size = this.getSizeData(scale) as AnimationSizeData;
 
         if(!size) return null;
 
-        return size.isImmediateChange(animationId, _arg_3);
+        return size.isImmediateChange(animationId, state);
     }
 
     public getStartFrame(scale: number, animationId: number, direction: number): number

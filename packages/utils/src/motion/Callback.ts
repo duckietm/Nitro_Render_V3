@@ -4,11 +4,11 @@ export class Callback extends Motion
 {
     protected _callback: Function;
 
-    constructor(k: Function)
+    constructor(callback: Function)
     {
         super(null);
 
-        this._callback = k;
+        this._callback = callback;
     }
 
     public get running(): boolean
@@ -16,9 +16,9 @@ export class Callback extends Motion
         return (this._running && !!this._callback);
     }
 
-    public tick(k: number): void
+    public tick(time: number): void
     {
-        super.tick(k);
+        super.tick(time);
 
         if(this._callback)
         {

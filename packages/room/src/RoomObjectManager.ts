@@ -104,15 +104,15 @@ export class RoomObjectManager implements IRoomObjectManager
         this._objectsPerType.reset();
     }
 
-    private getTypeMap(k: string, _arg_2: boolean = true): IAdvancedMap<number, IRoomObjectController>
+    private getTypeMap(type: string, create: boolean = true): IAdvancedMap<number, IRoomObjectController>
     {
-        let existing = this._objectsPerType.getValue(k);
+        let existing = this._objectsPerType.getValue(type);
 
-        if(!existing && _arg_2)
+        if(!existing && create)
         {
             existing = new AdvancedMap();
 
-            this._objectsPerType.add(k, existing);
+            this._objectsPerType.add(type, existing);
         }
 
         return existing;

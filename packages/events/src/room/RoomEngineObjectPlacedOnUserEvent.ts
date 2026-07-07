@@ -5,9 +5,9 @@ export class RoomEngineObjectPlacedOnUserEvent extends RoomEngineObjectEvent
     private _droppedObjectId: number;
     private _droppedObjectCategory: number;
 
-    constructor(k: string, roomId: number, objectId: number, category: number, droppedObjectId: number, droppedObjectCategory: number)
+    constructor(type: string, roomId: number, objectId: number, category: number, droppedObjectId: number, droppedObjectCategory: number)
     {
-        super(k, roomId, objectId, category);
+        super(type, roomId, objectId, category);
 
         this._droppedObjectId = droppedObjectId;
         this._droppedObjectCategory = droppedObjectCategory;

@@ -22,11 +22,11 @@ export class RoomPlaneBitmapMaskData
         return this._loc;
     }
 
-    public set loc(k: IVector3D)
+    public set loc(location: IVector3D)
     {
         if(!this._loc) this._loc = new Vector3d();
 
-        this._loc.assign(k);
+        this._loc.assign(location);
     }
 
     public get type(): string

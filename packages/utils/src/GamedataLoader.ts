@@ -137,9 +137,9 @@ export const mergeGamedata = (a: any, b: any, idKeys: readonly string[] = DEFAUL
     {
         const out: Record<string, any> = { ...a };
 
-        for(const k of Object.keys(b))
+        for(const key of Object.keys(b))
         {
-            out[k] = mergeGamedata(a[k], b[k], idKeys, sourceLabel);
+            out[key] = mergeGamedata(a[key], b[key], idKeys, sourceLabel);
         }
 
         return out;

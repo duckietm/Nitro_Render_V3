@@ -158,11 +158,11 @@ export class Vector3d implements IVector3D
 
     public normalize(): void
     {
-        const k = (1 / this.length);
+        const factor = (1 / this.length);
 
-        this._x = (this._x * k);
-        this._y = (this._y * k);
-        this._z = (this._z * k);
+        this._x = (this._x * factor);
+        this._y = (this._y * factor);
+        this._z = (this._z * factor);
     }
 
     public get x(): number
@@ -170,9 +170,9 @@ export class Vector3d implements IVector3D
         return this._x;
     }
 
-    public set x(k: number)
+    public set x(value: number)
     {
-        this._x = k;
+        this._x = value;
         this._length = NaN;
     }
 
@@ -181,9 +181,9 @@ export class Vector3d implements IVector3D
         return this._y;
     }
 
-    public set y(k: number)
+    public set y(value: number)
     {
-        this._y = k;
+        this._y = value;
         this._length = NaN;
     }
 
@@ -192,9 +192,9 @@ export class Vector3d implements IVector3D
         return this._z;
     }
 
-    public set z(k: number)
+    public set z(value: number)
     {
-        this._z = k;
+        this._z = value;
         this._length = NaN;
     }
 

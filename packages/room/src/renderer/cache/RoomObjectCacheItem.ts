@@ -35,9 +35,9 @@ export class RoomObjectCacheItem
         return this._objectId;
     }
 
-    public set objectId(k: number)
+    public set objectId(objectId: number)
     {
-        this._objectId = k;
+        this._objectId = objectId;
     }
 
     public get location(): RoomObjectLocationCacheItem

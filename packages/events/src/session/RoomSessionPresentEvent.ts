@@ -13,9 +13,9 @@ export class RoomSessionPresentEvent extends RoomSessionEvent
     private _placedInRoom: boolean;
     private _petFigureString: string;
 
-    constructor(k: string, _arg_2: IRoomSession, classId: number, itemType: string, productCode: string, placedItemId: number, placedItemType: string, placedInRoom: boolean, petFigureString: string)
+    constructor(type: string, session: IRoomSession, classId: number, itemType: string, productCode: string, placedItemId: number, placedItemType: string, placedInRoom: boolean, petFigureString: string)
     {
-        super(k, _arg_2);
+        super(type, session);
 
         this._classId = classId;
         this._itemType = itemType;

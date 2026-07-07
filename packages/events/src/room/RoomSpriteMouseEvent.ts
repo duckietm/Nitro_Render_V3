@@ -100,9 +100,9 @@ export class RoomSpriteMouseEvent implements IRoomSpriteMouseEvent
         return this._spriteOffsetX;
     }
 
-    public set spriteOffsetX(k: number)
+    public set spriteOffsetX(value: number)
     {
-        this._spriteOffsetX = k;
+        this._spriteOffsetX = value;
     }
 
     public get spriteOffsetY(): number
@@ -110,8 +110,8 @@ export class RoomSpriteMouseEvent implements IRoomSpriteMouseEvent
         return this._spriteOffsetY;
     }
 
-    public set spriteOffsetY(k: number)
+    public set spriteOffsetY(value: number)
     {
-        this._spriteOffsetY = k;
+        this._spriteOffsetY = value;
     }
 }

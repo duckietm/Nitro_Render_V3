@@ -16,11 +16,11 @@ export class RoomSessionPollEvent extends RoomSessionEvent
     private _questionArray: IPollQuestion[] = null;
     private _npsPoll: boolean = false;
 
-    constructor(k: string, _arg_2: IRoomSession, _arg_3: number)
+    constructor(type: string, session: IRoomSession, id: number)
     {
-        super(k, _arg_2);
+        super(type, session);
 
-        this._id = _arg_3;
+        this._id = id;
     }
 
     public get id(): number
@@ -33,9 +33,9 @@ export class RoomSessionPollEvent extends RoomSessionEvent
         return this._headline;
     }
 
-    public set headline(k: string)
+    public set headline(value: string)
     {
-        this._headline = k;
+        this._headline = value;
     }
 
     public get summary(): string
@@ -43,9 +43,9 @@ export class RoomSessionPollEvent extends RoomSessionEvent
         return this._summary;
     }
 
-    public set summary(k: string)
+    public set summary(value: string)
     {
-        this._summary = k;
+        this._summary = value;
     }
 
     public get numQuestions(): number
@@ -53,9 +53,9 @@ export class RoomSessionPollEvent extends RoomSessionEvent
         return this._numQuestions;
     }
 
-    public set numQuestions(k: number)
+    public set numQuestions(value: number)
     {
-        this._numQuestions = k;
+        this._numQuestions = value;
     }
 
     public get startMessage(): string
@@ -63,9 +63,9 @@ export class RoomSessionPollEvent extends RoomSessionEvent
         return this._startMessage;
     }
 
-    public set startMessage(k: string)
+    public set startMessage(value: string)
     {
-        this._startMessage = k;
+        this._startMessage = value;
     }
 
     public get endMessage(): string
@@ -73,9 +73,9 @@ export class RoomSessionPollEvent extends RoomSessionEvent
         return this._endMessage;
     }
 
-    public set endMessage(k: string)
+    public set endMessage(value: string)
     {
-        this._endMessage = k;
+        this._endMessage = value;
     }
 
     public get questionArray(): IPollQuestion[]
@@ -83,9 +83,9 @@ export class RoomSessionPollEvent extends RoomSessionEvent
         return this._questionArray;
     }
 
-    public set questionArray(k: IPollQuestion[])
+    public set questionArray(value: IPollQuestion[])
     {
-        this._questionArray = k;
+        this._questionArray = value;
     }
 
     public get npsPoll(): boolean
@@ -93,8 +93,8 @@ export class RoomSessionPollEvent extends RoomSessionEvent
         return this._npsPoll;
     }
 
-    public set npsPoll(k: boolean)
+    public set npsPoll(value: boolean)
     {
-        this._npsPoll = k;
+        this._npsPoll = value;
     }
 }

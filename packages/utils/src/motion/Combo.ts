@@ -22,9 +22,9 @@ export class Combo extends Motion
         for(const motion of this._runningMotions) motion.start();
     }
 
-    public tick(k: number): void
+    public tick(time: number): void
     {
-        super.tick(k);
+        super.tick(time);
 
         let motion: Motion = null;
 
@@ -37,7 +37,7 @@ export class Combo extends Motion
 
         for(const motion of this._runningMotions)
         {
-            if(motion.running) motion.tick(k);
+            if(motion.running) motion.tick(time);
 
             if(motion.complete) this._removedMotions.push(motion);
         }

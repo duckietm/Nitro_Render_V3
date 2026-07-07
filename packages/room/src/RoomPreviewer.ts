@@ -120,7 +120,7 @@ export class RoomPreviewer
         }
     }
 
-    public reset(k: boolean): void
+    public reset(skipViewUpdate: boolean): void
     {
         if(this.isRoomEngineReady)
         {
@@ -128,7 +128,7 @@ export class RoomPreviewer
             this._roomEngine.removeRoomObjectWall(this._previewRoomId, RoomPreviewer.PREVIEW_OBJECT_ID);
             this._roomEngine.removeRoomObjectUser(this._previewRoomId, RoomPreviewer.PREVIEW_OBJECT_ID);
 
-            if(!k) this.updatePreviewRoomView();
+            if(!skipViewUpdate) this.updatePreviewRoomView();
         }
 
         this._currentPreviewObjectCategory = RoomObjectCategory.MINIMUM;
@@ -642,9 +642,9 @@ export class RoomPreviewer
         }
     }
 
-    public updateObjectRoom(floorType: string = null, wallType: string = null, landscapeType: string = null, _arg_4: boolean = false): boolean
+    public updateObjectRoom(floorType: string = null, wallType: string = null, landscapeType: string = null, forceUpdate: boolean = false): boolean
     {
-        if(this.isRoomEngineReady) return this._roomEngine.updateRoomInstancePlaneType(this._previewRoomId, floorType, wallType, landscapeType, _arg_4);
+        if(this.isRoomEngineReady) return this._roomEngine.updateRoomInstancePlaneType(this._previewRoomId, floorType, wallType, landscapeType, forceUpdate);
 
         return false;
     }
@@ -686,12 +686,12 @@ export class RoomPreviewer
 
         if((offsetX !== 0) || (offsetY !== 0))
         {
-            const _local_7 = Math.sqrt(((offsetX * offsetX) + (offsetY * offsetY)));
+            const distance = Math.sqrt(((offsetX * offsetX) + (offsetY * offsetY)));
 
-            if(_local_7 > 10)
+            if(distance > 10)
             {
-                x = (point.x + ((offsetX * 10) / _local_7));
-                y = (point.y + ((offsetY * 10) / _local_7));
+                x = (point.x + ((offsetX * 10) / distance));
+                y = (point.y + ((offsetY * 10) / distance));
             }
 
             return new Point(x, y);
@@ -700,9 +700,9 @@ export class RoomPreviewer
         return null;
     }
 
-    public updatePreviewRoomView(k: boolean = false): void
+    public updatePreviewRoomView(force: boolean = false): void
     {
-        if(this._disableUpdate && !k) return;
+        if(this._disableUpdate && !force) return;
 
         this.checkAutomaticRoomObjectStateChange();
 

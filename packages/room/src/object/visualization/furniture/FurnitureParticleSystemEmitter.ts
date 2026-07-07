@@ -39,7 +39,7 @@ export class FurnitureParticleSystemEmitter extends FurnitureParticleSystemParti
 
     public dispose(): void
     {
-        for(const k of this._particles) k.dispose();
+        for(const particle of this._particles) particle.dispose();
 
         this._particles = null;
         this._particleConfigurations = null;
@@ -249,7 +249,7 @@ export class FurnitureParticleSystemEmitter extends FurnitureParticleSystemParti
 
     private accumulateForces(): void
     {
-        for(const k of this._particles)
+        for(const particle of this._particles)
         {
             //
         }
@@ -265,9 +265,9 @@ export class FurnitureParticleSystemEmitter extends FurnitureParticleSystemParti
         return this._hasIgnited;
     }
 
-    private randomBoolean(k: number): boolean
+    private randomBoolean(probability: number): boolean
     {
-        return Math.random() < k;
+        return Math.random() < probability;
     }
 
     public get roomObjectSpriteId(): number

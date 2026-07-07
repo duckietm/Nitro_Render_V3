@@ -47,29 +47,29 @@ export class FurniturePartyBeamerVisualization extends FurnitureAnimatedVisualiz
         const animationSpeed: number = this._animSpeedIndex[layerId];
         const animationFactor: number = this._animFactorIndex[layerId];
 
-        let _local_7 = 1;
+        let stepScale = 1;
 
         if(scale == 32)
         {
             diameter = FurniturePartyBeamerVisualization.AREA_DIAMETER_SMALL;
-            _local_7 = 0.5;
+            stepScale = 0.5;
         }
         else
         {
             diameter = FurniturePartyBeamerVisualization.AREA_DIAMETER_LARGE;
         }
 
-        const _local_9: number = (animationPhase + (animationDirection * animationSpeed));
+        const nextPhase: number = (animationPhase + (animationDirection * animationSpeed));
 
-        if(Math.abs(_local_9) >= diameter)
+        if(Math.abs(nextPhase) >= diameter)
         {
             if(animationDirection > 0)
             {
-                animationPhase = (animationPhase - (_local_9 - diameter));
+                animationPhase = (animationPhase - (nextPhase - diameter));
             }
             else
             {
-                animationPhase = (animationPhase + (-(diameter) - _local_9));
+                animationPhase = (animationPhase + (-(diameter) - nextPhase));
             }
 
             animationDirection = -(animationDirection);
@@ -77,26 +77,26 @@ export class FurniturePartyBeamerVisualization extends FurnitureAnimatedVisualiz
             this._animDirectionIndex[layerId] = animationDirection;
         }
 
-        const _local_10: number = ((diameter - Math.abs(animationPhase)) * animationFactor);
+        const amplitude: number = ((diameter - Math.abs(animationPhase)) * animationFactor);
 
-        let _local_11: number = ((animationDirection * Math.sin(Math.abs((animationPhase / 4)))) * _local_10);
+        let offsetY: number = ((animationDirection * Math.sin(Math.abs((animationPhase / 4)))) * amplitude);
 
         if(animationDirection > 0)
         {
-            _local_11 = (_local_11 - _local_10);
+            offsetY = (offsetY - amplitude);
         }
         else
         {
-            _local_11 = (_local_11 + _local_10);
+            offsetY = (offsetY + amplitude);
         }
 
-        animationPhase = (animationPhase + ((animationDirection * animationSpeed) * _local_7));
+        animationPhase = (animationPhase + ((animationDirection * animationSpeed) * stepScale));
 
         this._animPhaseIndex[layerId] = animationPhase;
 
-        if(Math.trunc(_local_11) == 0) this._animFactorIndex[layerId] = this.getRandomAmplitudeFactor();
+        if(Math.trunc(offsetY) == 0) this._animFactorIndex[layerId] = this.getRandomAmplitudeFactor();
 
-        return new Point(animationPhase, _local_11);
+        return new Point(animationPhase, offsetY);
     }
 
     private initItems(scale: number): void

@@ -57,14 +57,14 @@ export class AnimationData
         this._immediateChanges = null;
     }
 
-    public setImmediateChanges(k: number[]): void
+    public setImmediateChanges(changes: number[]): void
     {
-        this._immediateChanges = k;
+        this._immediateChanges = changes;
     }
 
-    public isImmediateChange(k: number): boolean
+    public isImmediateChange(state: number): boolean
     {
-        if(!this._immediateChanges || (this._immediateChanges.indexOf(k) === -1)) return false;
+        if(!this._immediateChanges || (this._immediateChanges.indexOf(state) === -1)) return false;
 
         return true;
     }
@@ -76,15 +76,15 @@ export class AnimationData
         return Math.random() * this._frameCount;
     }
 
-    public initialize(k: IAssetVisualAnimation): boolean
+    public initialize(animation: IAssetVisualAnimation): boolean
     {
-        if(k.randomStart) this._randomStart = true;
+        if(animation.randomStart) this._randomStart = true;
 
-        if(k.layers)
+        if(animation.layers)
         {
-            for(const key in k.layers)
+            for(const key in animation.layers)
             {
-                const layer = k.layers[key];
+                const layer = animation.layers[key];
 
                 if(!layer) return false;
 

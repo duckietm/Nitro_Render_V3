@@ -11,9 +11,9 @@ export class RoomObjectSamplePlaybackEvent extends RoomObjectEvent
     private _sampleId: number;
     private _pitch: number;
 
-    constructor(k: string, object: IRoomObject, sampleId: number, pitch: number = 1)
+    constructor(type: string, object: IRoomObject, sampleId: number, pitch: number = 1)
     {
-        super(k, object);
+        super(type, object);
 
         this._sampleId = sampleId;
         this._pitch = pitch;

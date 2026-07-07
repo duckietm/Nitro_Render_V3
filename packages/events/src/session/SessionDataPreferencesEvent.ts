@@ -6,11 +6,11 @@ export class SessionDataPreferencesEvent extends NitroEvent
 
     private _uiFlags: number;
 
-    constructor(k: number)
+    constructor(uiFlags: number)
     {
         super(SessionDataPreferencesEvent.UPDATED);
 
-        this._uiFlags = k;
+        this._uiFlags = uiFlags;
     }
 
     public get uiFlags(): number

@@ -131,11 +131,11 @@ export class FurnitureAnimatedVisualization extends FurnitureVisualization
         this.setSubAnimation(this._animationData, animationId, (this._state >= 0));
     }
 
-    protected setSubAnimation(animationData: AnimationStateData, animationId: number, _arg_3: boolean = true): boolean
+    protected setSubAnimation(animationData: AnimationStateData, animationId: number, useTransitions: boolean = true): boolean
     {
         const currentAnimation = animationData.animationId;
 
-        if(_arg_3)
+        if(useTransitions)
         {
             if(this.isPlayingTransition(animationData, animationId)) return false;
 

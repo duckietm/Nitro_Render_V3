@@ -15,11 +15,11 @@ export class RoomRotatingEffect
     private static _SafeStr_4516: number = 5000;
     private static _SafeStr_4524: ReturnType<typeof setTimeout>;
 
-    public static init(_arg_1: number, _arg_2: number): void
+    public static init(delay: number, duration: number): void
     {
         this._SafeStr_4513 = 0;
-        this._SafeStr_4515 = _arg_1;
-        this._SafeStr_4516 = _arg_2;
+        this._SafeStr_4515 = delay;
+        this._SafeStr_4516 = duration;
         this._SafeStr_4514 = GetTickerTime();
         this._SafeStr_448 = 1;
     }
@@ -30,9 +30,9 @@ export class RoomRotatingEffect
 
         if(!this._SafeStr_4524) this._SafeStr_4524 = setTimeout(() => this.turnVisualizationOff(), this._SafeStr_4516);
 
-        const _local_1 = (GetTickerTime() - this._SafeStr_4514);
+        const elapsed = (GetTickerTime() - this._SafeStr_4514);
 
-        if(_local_1 > (this._SafeStr_4515 + this._SafeStr_4516))
+        if(elapsed > (this._SafeStr_4515 + this._SafeStr_4516))
         {
             this._SafeStr_448 = 3;
 
@@ -41,7 +41,7 @@ export class RoomRotatingEffect
 
         this._SafeStr_4512 = true;
 
-        if(_local_1 < this._SafeStr_4515)
+        if(elapsed < this._SafeStr_4515)
         {
             this._SafeStr_448 = 1;
 
@@ -49,7 +49,7 @@ export class RoomRotatingEffect
         }
 
         this._SafeStr_448 = 2;
-        this._SafeStr_4513 = ((_local_1 - this._SafeStr_4515) / this._SafeStr_4516);
+        this._SafeStr_4513 = ((elapsed - this._SafeStr_4515) / this._SafeStr_4516);
     }
 
     public static turnVisualizationOff(): void

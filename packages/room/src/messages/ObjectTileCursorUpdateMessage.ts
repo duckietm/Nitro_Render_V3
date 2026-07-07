@@ -8,9 +8,9 @@ export class ObjectTileCursorUpdateMessage extends RoomObjectUpdateMessage
     private _visible: boolean;
     private _toggleVisibility: boolean;
 
-    constructor(k: IVector3D, height: number, visible: boolean, sourceEventId: string, toggleVisibility: boolean = false)
+    constructor(location: IVector3D, height: number, visible: boolean, sourceEventId: string, toggleVisibility: boolean = false)
     {
-        super(k, null);
+        super(location, null);
 
         this._height = height;
         this._visible = visible;

@@ -145,7 +145,7 @@ export class AdvancedMap<T, U> implements IAdvancedMap<T, U>
 
     public concatenate(newValues: IAdvancedMap<T, U>): void
     {
-        for(const k of (newValues as AdvancedMap<T, U>)._keys) this.add(k, newValues.getValue(k));
+        for(const key of (newValues as AdvancedMap<T, U>)._keys) this.add(key, newValues.getValue(key));
     }
 
     public clone(): IAdvancedMap<T, U>

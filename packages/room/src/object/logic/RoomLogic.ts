@@ -117,14 +117,14 @@ export class RoomLogic extends RoomObjectLogicBase
 
     }
 
-    private updateBackgroundColor(k: number): void
+    private updateBackgroundColor(time: number): void
     {
         if(!this.object || !this._colorChangedTime) return;
 
         let color = this._color;
         let newColor = this._light;
 
-        if((k - this._colorChangedTime) >= this._colorTransitionLength)
+        if((time - this._colorChangedTime) >= this._colorTransitionLength)
         {
             color = this._targetColor;
             newColor = this._targetLight;
@@ -133,30 +133,30 @@ export class RoomLogic extends RoomObjectLogicBase
         }
         else
         {
-            let _local_7 = ((this._originalColor >> 16) & 0xFF);
-            let _local_8 = ((this._originalColor >> 8) & 0xFF);
-            let _local_9 = (this._originalColor & 0xFF);
+            let r = ((this._originalColor >> 16) & 0xFF);
+            let g = ((this._originalColor >> 8) & 0xFF);
+            let b = (this._originalColor & 0xFF);
 
-            const _local_10 = ((this._targetColor >> 16) & 0xFF);
-            const _local_11 = ((this._targetColor >> 8) & 0xFF);
-            const _local_12 = (this._targetColor & 0xFF);
-            const _local_13 = ((k - this._colorChangedTime) / this._colorTransitionLength);
+            const targetR = ((this._targetColor >> 16) & 0xFF);
+            const targetG = ((this._targetColor >> 8) & 0xFF);
+            const targetB = (this._targetColor & 0xFF);
+            const progress = ((time - this._colorChangedTime) / this._colorTransitionLength);
 
-            _local_7 = (_local_7 + ((_local_10 - _local_7) * _local_13));
-            _local_8 = (_local_8 + ((_local_11 - _local_8) * _local_13));
-            _local_9 = (_local_9 + ((_local_12 - _local_9) * _local_13));
+            r = (r + ((targetR - r) * progress));
+            g = (g + ((targetG - g) * progress));
+            b = (b + ((targetB - b) * progress));
 
-            color = (((_local_7 << 16) + (_local_8 << 8)) + _local_9);
-            newColor = (this._originalLight + ((this._targetLight - this._originalLight) * _local_13));
+            color = (((r << 16) + (g << 8)) + b);
+            newColor = (this._originalLight + ((this._targetLight - this._originalLight) * progress));
 
             this._color = color;
             this._light = newColor;
         }
 
-        let _local_5 = ColorConverter.rgbToHSL(color);
+        let hsl = ColorConverter.rgbToHSL(color);
 
-        _local_5 = ((_local_5 & 0xFFFF00) + newColor);
-        color = ColorConverter.hslToRGB(_local_5);
+        hsl = ((hsl & 0xFFFF00) + newColor);
+        color = ColorConverter.hslToRGB(hsl);
 
         if(this.object.model) this.object.model.setValue(RoomObjectVariable.ROOM_BACKGROUND_COLOR, color);
     }
@@ -233,7 +233,7 @@ export class RoomLogic extends RoomObjectLogicBase
         }
     }
 
-    private onObjectRoomMaskUpdateMessage(message: ObjectRoomMaskUpdateMessage, _arg_2: IRoomObjectModel): void
+    private onObjectRoomMaskUpdateMessage(message: ObjectRoomMaskUpdateMessage, model: IRoomObjectModel): void
     {
         let maskType: string = null;
         let update = false;
@@ -255,7 +255,7 @@ export class RoomLogic extends RoomObjectLogicBase
 
         }
 
-        if(update) _arg_2.setValue(RoomObjectVariable.ROOM_PLANE_MASK_XML, this._planeBitmapMaskParser.getXML());
+        if(update) model.setValue(RoomObjectVariable.ROOM_PLANE_MASK_XML, this._planeBitmapMaskParser.getXML());
     }
 
     private onObjectRoomPlaneVisibilityUpdateMessage(message: ObjectRoomPlaneVisibilityUpdateMessage, model: IRoomObjectModel): void
@@ -387,14 +387,14 @@ export class RoomLogic extends RoomObjectLogicBase
             return;
         }
 
-        const _local_18 = Vector3d.product(planeLeftSide, (planePosition.x / leftSideLength));
+        const worldPosition = Vector3d.product(planeLeftSide, (planePosition.x / leftSideLength));
 
-        _local_18.add(Vector3d.product(planeRightSide, (planePosition.y / rightSideLength)));
-        _local_18.add(planeLocation);
+        worldPosition.add(Vector3d.product(planeRightSide, (planePosition.y / rightSideLength)));
+        worldPosition.add(planeLocation);
 
-        const tileX = _local_18.x;
-        const tileY = _local_18.y;
-        const tileZ = _local_18.z;
+        const tileX = worldPosition.x;
+        const tileY = worldPosition.y;
+        const tileZ = worldPosition.z;
 
         if(((((planePosition.x >= 0) && (planePosition.x < leftSideLength)) && (planePosition.y >= 0)) && (planePosition.y < rightSideLength)))
         {
@@ -440,10 +440,10 @@ export class RoomLogic extends RoomObjectLogicBase
                         if(direction > 360) direction -= 360;
                     }
 
-                    const _local_27 = ((planeLeftSide.length * planePosition.x) / leftSideLength);
-                    const _local_28 = ((planeRightSide.length * planePosition.y) / rightSideLength);
+                    const wallX = ((planeLeftSide.length * planePosition.x) / leftSideLength);
+                    const wallY = ((planeRightSide.length * planePosition.y) / rightSideLength);
 
-                    newEvent = new RoomObjectWallMouseEvent(eventType, this.object, event.eventId, planeLocation, planeLeftSide, planeRightSide, _local_27, _local_28, direction, event.altKey, event.ctrlKey, event.shiftKey, event.buttonDown);
+                    newEvent = new RoomObjectWallMouseEvent(eventType, this.object, event.eventId, planeLocation, planeLeftSide, planeRightSide, wallX, wallY, direction, event.altKey, event.ctrlKey, event.shiftKey, event.buttonDown);
                 }
 
                 if(this.eventDispatcher) this.eventDispatcher.dispatchEvent(newEvent);

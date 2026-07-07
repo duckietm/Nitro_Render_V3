@@ -5,10 +5,10 @@ export class EaseRate extends Ease
 {
     protected _rate: number;
 
-    constructor(k: Interval, _arg_2: number)
+    constructor(interval: Interval, rate: number)
     {
-        super(k);
+        super(interval);
 
-        this._rate = _arg_2;
+        this._rate = rate;
     }
 }

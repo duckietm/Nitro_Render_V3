@@ -4,11 +4,11 @@ export class Ease extends Interval
 {
     protected _interval: Interval;
 
-    constructor(k: Interval)
+    constructor(interval: Interval)
     {
-        super(k.target, k.duration);
+        super(interval.target, interval.duration);
 
-        this._interval = k;
+        this._interval = interval;
     }
 
     public start(): void
@@ -18,11 +18,11 @@ export class Ease extends Interval
         this._interval.start();
     }
 
-    public update(k: number): void
+    public update(progress: number): void
     {
-        super.update(k);
+        super.update(progress);
 
-        this._interval.update(k);
+        this._interval.update(progress);
     }
 
     public stop(): void

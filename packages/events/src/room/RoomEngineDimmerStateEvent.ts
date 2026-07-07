@@ -10,9 +10,9 @@ export class RoomEngineDimmerStateEvent extends RoomEngineEvent
     private _color: number;
     private _brightness: number;
 
-    constructor(k: number, state: number, presetId: number, effectId: number, color: number, brightness: number)
+    constructor(roomId: number, state: number, presetId: number, effectId: number, color: number, brightness: number)
     {
-        super(RoomEngineDimmerStateEvent.ROOM_COLOR, k);
+        super(RoomEngineDimmerStateEvent.ROOM_COLOR, roomId);
 
         this._state = state;
         this._presetId = presetId;

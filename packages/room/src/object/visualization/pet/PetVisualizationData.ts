@@ -91,13 +91,13 @@ export class PetVisualizationData extends FurnitureAnimatedVisualizationData
         return size.animationToGesture(index);
     }
 
-    public getGestureForAnimationId(scale: number, _arg_2: number): string
+    public getGestureForAnimationId(scale: number, animationId: number): string
     {
         const size = this.getSizeData(scale) as PetSizeData;
 
         if(!size) return null;
 
-        return size.getGestureForAnimationId(_arg_2);
+        return size.getGestureForAnimationId(animationId);
     }
 
     public totalPostures(scale: number): number

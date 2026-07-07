@@ -9,14 +9,14 @@ export class RoomObjectHSLColorEnabledEvent extends RoomEngineEvent
     private _saturation: number;
     private _lightness: number;
 
-    constructor(k: string, _arg_2: number, _arg_3: boolean, _arg_4: number, _arg_5: number, _arg_6: number)
+    constructor(type: string, roomId: number, enable: boolean, hue: number, saturation: number, lightness: number)
     {
-        super(k, _arg_2);
+        super(type, roomId);
 
-        this._enable = _arg_3;
-        this._hue = _arg_4;
-        this._saturation = _arg_5;
-        this._lightness = _arg_6;
+        this._enable = enable;
+        this._hue = hue;
+        this._saturation = saturation;
+        this._lightness = lightness;
     }
 
     public get enable(): boolean

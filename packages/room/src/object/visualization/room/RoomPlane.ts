@@ -446,22 +446,22 @@ export class RoomPlane implements IRoomPlane
             switch(this._type)
             {
                 case RoomPlane.TYPE_FLOOR: {
-                    const _local_10 = planeGeometry.getScreenPoint(new Vector3d(0, 0, 0));
-                    const _local_11 = planeGeometry.getScreenPoint(new Vector3d(0, (height / planeGeometry.scale), 0));
-                    const _local_12 = planeGeometry.getScreenPoint(new Vector3d((width / planeGeometry.scale), 0, 0));
+                    const screenOrigin = planeGeometry.getScreenPoint(new Vector3d(0, 0, 0));
+                    const screenHeightPoint = planeGeometry.getScreenPoint(new Vector3d(0, (height / planeGeometry.scale), 0));
+                    const screenWidthPoint = planeGeometry.getScreenPoint(new Vector3d((width / planeGeometry.scale), 0, 0));
 
                     let x = 0;
                     let y = 0;
 
-                    if(_local_10 && _local_11 && _local_12)
+                    if(screenOrigin && screenHeightPoint && screenWidthPoint)
                     {
-                        width = Math.round(Math.abs((_local_10.x - _local_12.x)));
-                        height = Math.round(Math.abs((_local_10.x - _local_11.x)));
+                        width = Math.round(Math.abs((screenOrigin.x - screenWidthPoint.x)));
+                        height = Math.round(Math.abs((screenOrigin.x - screenHeightPoint.x)));
 
-                        const _local_15 = (_local_10.x - planeGeometry.getScreenPoint(new Vector3d(1, 0, 0)).x);
+                        const pixelsPerUnit = (screenOrigin.x - planeGeometry.getScreenPoint(new Vector3d(1, 0, 0)).x);
 
-                        x = (this._textureOffsetX * Math.trunc(Math.abs(_local_15)));
-                        y = (this._textureOffsetY * Math.trunc(Math.abs(_local_15)));
+                        x = (this._textureOffsetX * Math.trunc(Math.abs(pixelsPerUnit)));
+                        y = (this._textureOffsetY * Math.trunc(Math.abs(pixelsPerUnit)));
                     }
 
                     if((x !== 0) || (y !== 0))
@@ -485,14 +485,14 @@ export class RoomPlane implements IRoomPlane
                     break;
                 }
                 case RoomPlane.TYPE_WALL: {
-                    const _local_8 = planeGeometry.getScreenPoint(new Vector3d(0, 0, 0));
-                    const _local_9 = planeGeometry.getScreenPoint(new Vector3d(0, 0, (height / planeGeometry.scale)));
-                    const _local_10 = planeGeometry.getScreenPoint(new Vector3d(0, (width / planeGeometry.scale), 0));
+                    const screenOrigin = planeGeometry.getScreenPoint(new Vector3d(0, 0, 0));
+                    const screenHeightPoint = planeGeometry.getScreenPoint(new Vector3d(0, 0, (height / planeGeometry.scale)));
+                    const screenWidthPoint = planeGeometry.getScreenPoint(new Vector3d(0, (width / planeGeometry.scale), 0));
 
-                    if(_local_8 && _local_9 && _local_10)
+                    if(screenOrigin && screenHeightPoint && screenWidthPoint)
                     {
-                        width = Math.round(Math.abs((_local_8.x - _local_10.x)));
-                        height = Math.round(Math.abs((_local_8.y - _local_9.y)));
+                        width = Math.round(Math.abs((screenOrigin.x - screenWidthPoint.x)));
+                        height = Math.round(Math.abs((screenOrigin.y - screenHeightPoint.y)));
                     }
 
                     this._planeSprite = new TilingSprite({
@@ -509,20 +509,20 @@ export class RoomPlane implements IRoomPlane
                     break;
                 }
                 case RoomPlane.TYPE_LANDSCAPE: {
-                    const _local_13 = planeGeometry.getScreenPoint(new Vector3d(0, 0, 0));
-                    const _local_14 = planeGeometry.getScreenPoint(new Vector3d(0, 0, 1));
-                    const _local_15 = planeGeometry.getScreenPoint(new Vector3d(0, 1, 0));
+                    const screenOrigin = planeGeometry.getScreenPoint(new Vector3d(0, 0, 0));
+                    const screenDepthPoint = planeGeometry.getScreenPoint(new Vector3d(0, 0, 1));
+                    const screenWidthPoint = planeGeometry.getScreenPoint(new Vector3d(0, 1, 0));
 
-                    if(_local_13 && _local_14 && _local_15)
+                    if(screenOrigin && screenDepthPoint && screenWidthPoint)
                     {
-                        width = Math.round(Math.abs((((_local_13.x - _local_15.x) * width) / planeGeometry.scale)));
-                        height = Math.round(Math.abs((((_local_13.y - _local_14.y) * height) / planeGeometry.scale)));
+                        width = Math.round(Math.abs((((screenOrigin.x - screenWidthPoint.x) * width) / planeGeometry.scale)));
+                        height = Math.round(Math.abs((((screenOrigin.y - screenDepthPoint.y) * height) / planeGeometry.scale)));
                     }
 
-                    const renderMaxX = Math.trunc(this._textureMaxX * Math.abs((_local_13.x - _local_15.x)));
-                    const renderMaxY = Math.trunc(this._textureMaxY * Math.abs((_local_13.y - _local_14.y)));
-                    const renderOffsetX = Math.trunc(this._textureOffsetX * Math.abs((_local_13.x - _local_15.x)));
-                    const renderOffsetY = Math.trunc(this._textureOffsetY * Math.abs((_local_13.y - _local_14.y)));
+                    const renderMaxX = Math.trunc(this._textureMaxX * Math.abs((screenOrigin.x - screenWidthPoint.x)));
+                    const renderMaxY = Math.trunc(this._textureMaxY * Math.abs((screenOrigin.y - screenDepthPoint.y)));
+                    const renderOffsetX = Math.trunc(this._textureOffsetX * Math.abs((screenOrigin.x - screenWidthPoint.x)));
+                    const renderOffsetY = Math.trunc(this._textureOffsetY * Math.abs((screenOrigin.y - screenDepthPoint.y)));
 
                     this._landscapeRenderWidth = width;
                     this._landscapeRenderHeight = height;
@@ -1353,9 +1353,9 @@ export class RoomPlane implements IRoomPlane
         return this._color;
     }
 
-    public set color(k: number)
+    public set color(value: number)
     {
-        this._color = k;
+        this._color = value;
     }
 
     public get type(): number
@@ -1383,16 +1383,16 @@ export class RoomPlane implements IRoomPlane
         return this._normal;
     }
 
-    public set id(k: string)
+    public set id(value: string)
     {
-        if(k === this._id) return;
+        if(value === this._id) return;
 
-        this._id = k;
+        this._id = value;
     }
 
-    public set maskManager(k: PlaneMaskManager)
+    public set maskManager(value: PlaneMaskManager)
     {
-        this._maskManager = k;
+        this._maskManager = value;
     }
 
     public get uniqueId(): number

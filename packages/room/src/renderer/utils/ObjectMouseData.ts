@@ -14,9 +14,9 @@
         return this._objectId;
     }
 
-    public set objectId(k: string)
+    public set objectId(objectId: string)
     {
-        this._objectId = k;
+        this._objectId = objectId;
     }
 
     public get spriteTag(): string
@@ -24,8 +24,8 @@
         return this._spriteTag;
     }
 
-    public set spriteTag(k: string)
+    public set spriteTag(spriteTag: string)
     {
-        this._spriteTag = k;
+        this._spriteTag = spriteTag;
     }
 }

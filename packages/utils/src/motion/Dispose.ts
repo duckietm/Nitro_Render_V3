@@ -2,14 +2,14 @@
 
 export class Dispose extends Motion
 {
-    constructor(k: HTMLElement)
+    constructor(target: HTMLElement)
     {
-        super(k);
+        super(target);
     }
 
-    public tick(k: number): void
+    public tick(time: number): void
     {
-        super.tick(k);
+        super.tick(time);
 
         if(this.target)
         {

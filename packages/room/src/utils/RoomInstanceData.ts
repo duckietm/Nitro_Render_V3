@@ -196,13 +196,13 @@ export class RoomInstanceData
         return this.getPendingFurnitureWall(keys.next().value as number);
     }
 
-    public addButtonMouseCursorOwner(k: string): boolean
+    public addButtonMouseCursorOwner(owner: string): boolean
     {
-        const _local_2 = this._mouseButtonCursorOwners.indexOf(k);
+        const index = this._mouseButtonCursorOwners.indexOf(owner);
 
-        if(_local_2 === -1)
+        if(index === -1)
         {
-            this._mouseButtonCursorOwners.push(k);
+            this._mouseButtonCursorOwners.push(owner);
 
             return true;
         }
@@ -210,13 +210,13 @@ export class RoomInstanceData
         return false;
     }
 
-    public removeButtonMouseCursorOwner(k: string): boolean
+    public removeButtonMouseCursorOwner(owner: string): boolean
     {
-        const _local_2 = this._mouseButtonCursorOwners.indexOf(k);
+        const index = this._mouseButtonCursorOwners.indexOf(owner);
 
-        if(_local_2 > -1)
+        if(index > -1)
         {
-            this._mouseButtonCursorOwners.splice(_local_2, 1);
+            this._mouseButtonCursorOwners.splice(index, 1);
 
             return true;
         }

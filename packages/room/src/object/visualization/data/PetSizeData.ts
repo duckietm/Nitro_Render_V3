@@ -52,9 +52,9 @@ export class PetSizeData extends AnimationSizeData
         return this._posturesToAnimations.get(posture);
     }
 
-    public getGestureDisabled(k: string): boolean
+    public getGestureDisabled(gesture: string): boolean
     {
-        if(k === 'ded') return true;
+        if(gesture === 'ded') return true;
 
         return false;
     }
@@ -66,9 +66,9 @@ export class PetSizeData extends AnimationSizeData
         return this._gesturesToAnimations.get(gesture);
     }
 
-    public animationToPosture(k: number, _arg_2: boolean): string
+    public animationToPosture(animationIndex: number, useDefault: boolean): string
     {
-        if((k >= 0) && (k < this._posturesToAnimations.size))
+        if((animationIndex >= 0) && (animationIndex < this._posturesToAnimations.size))
         {
             const keys = this._posturesToAnimations.keys();
 
@@ -78,13 +78,13 @@ export class PetSizeData extends AnimationSizeData
 
                 if(key.done) return null;
 
-                if(k <= 0) return key.value;
+                if(animationIndex <= 0) return key.value;
 
-                --k;
+                --animationIndex;
             }
         }
 
-        return (_arg_2) ? this._defaultPosture : null;
+        return (useDefault) ? this._defaultPosture : null;
     }
 
     public animationToGesture(index: number): string
@@ -108,11 +108,11 @@ export class PetSizeData extends AnimationSizeData
         return null;
     }
 
-    public getGestureForAnimationId(k: number): string
+    public getGestureForAnimationId(animationId: number): string
     {
-        for(const _local_2 of this._gesturesToAnimations.keys())
+        for(const gesture of this._gesturesToAnimations.keys())
         {
-            if(this._gesturesToAnimations.get(_local_2) === k) return _local_2;
+            if(this._gesturesToAnimations.get(gesture) === animationId) return gesture;
         }
 
         return null;

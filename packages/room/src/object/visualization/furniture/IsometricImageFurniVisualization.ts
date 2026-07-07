@@ -42,8 +42,8 @@ export class IsometricImageFurniVisualization extends FurnitureAnimatedVisualiza
         return !(this._thumbnailImageNormal == null);
     }
 
-    public setThumbnailImages(k: Texture, url?: string): void {
-        this._thumbnailImageNormal = k;
+    public setThumbnailImages(texture: Texture, url?: string): void {
+        this._thumbnailImageNormal = texture;
         this._photoUrl = url || null;
         this._thumbnailChanged = true;
     }
@@ -83,7 +83,7 @@ export class IsometricImageFurniVisualization extends FurnitureAnimatedVisualiza
         this._thumbnailDirection = this.direction;
     }
 
-    private addThumbnailAsset(k: Texture, scale: number): void {
+    private addThumbnailAsset(texture: Texture, scale: number): void {
         let layerId = 0;
 
         while (layerId < this.totalSprites) {
@@ -99,7 +99,7 @@ export class IsometricImageFurniVisualization extends FurnitureAnimatedVisualiza
                     if (this._thumbnailTexture instanceof RenderTexture) {
                         this._thumbnailTexture.destroy(true);
                     }
-                    this._thumbnailTexture = this.generateTransformedThumbnail(k, asset);
+                    this._thumbnailTexture = this.generateTransformedThumbnail(texture, asset);
                 }
 
                 return;

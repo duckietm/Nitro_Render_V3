@@ -9,12 +9,12 @@ export class MoveTo extends Interval
     protected _deltaX: number;
     protected _deltaY: number;
 
-    constructor(k: HTMLElement, _arg_2: number, _arg_3: number, _arg_4: number)
+    constructor(target: HTMLElement, duration: number, endX: number, endY: number)
     {
-        super(k, _arg_2);
+        super(target, duration);
 
-        this._endX = _arg_3;
-        this._endY = _arg_4;
+        this._endX = endX;
+        this._endY = endY;
     }
 
     public start(): void
@@ -27,9 +27,9 @@ export class MoveTo extends Interval
         this._deltaY = (this._endY - this._startY);
     }
 
-    public update(k: number): void
+    public update(progress: number): void
     {
-        this.target.style.left = ((this._startX + (this._deltaX * k)) + 'px');
-        this.target.style.top = ((this._startY + (this._deltaY * k)) + 'px');
+        this.target.style.left = ((this._startX + (this._deltaX * progress)) + 'px');
+        this.target.style.top = ((this._startY + (this._deltaY * progress)) + 'px');
     }
 }

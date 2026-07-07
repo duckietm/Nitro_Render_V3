@@ -18,11 +18,11 @@ export class RoomSessionErrorMessageEvent extends RoomSessionEvent
 
     private _message: string;
 
-    constructor(k: string, _arg_2: IRoomSession, _arg_3: string = null)
+    constructor(type: string, session: IRoomSession, message: string = null)
     {
-        super(k, _arg_2);
+        super(type, session);
 
-        this._message = _arg_3;
+        this._message = message;
     }
 
     public get message(): string

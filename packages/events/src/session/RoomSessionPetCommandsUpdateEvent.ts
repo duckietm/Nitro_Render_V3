@@ -9,9 +9,9 @@ export class RoomSessionPetCommandsUpdateEvent extends RoomSessionEvent
     private _allCommandIds: number[];
     private _enabledCommandIds: number[];
 
-    constructor(k: IRoomSession, id: number, commands: number[], enabledCommands: number[])
+    constructor(session: IRoomSession, id: number, commands: number[], enabledCommands: number[])
     {
-        super(RoomSessionPetCommandsUpdateEvent.PET_COMMANDS, k);
+        super(RoomSessionPetCommandsUpdateEvent.PET_COMMANDS, session);
 
         this._petId = id;
         this._allCommandIds = commands;

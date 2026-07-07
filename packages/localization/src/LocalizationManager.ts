@@ -314,9 +314,9 @@ export class LocalizationManager implements ILocalizationManager
         return '';
     }
 
-    private fixBadLocalization(k: string): string
+    private fixBadLocalization(value: string): string
     {
-        return k.replace('${', '$')
+        return value.replace('${', '$')
             .replace('{', '$')
             .replace('}', '$');
     }

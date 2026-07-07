@@ -35,13 +35,13 @@ export class FurnitureVoteCounterLogic extends FurnitureMultiStateLogic
         }
     }
 
-    private updateTotal(k: number): void
+    private updateTotal(total: number): void
     {
-        this._total = k;
+        this._total = total;
 
         if(!this._lastUpdate)
         {
-            this.object.model.setValue(RoomObjectVariable.FURNITURE_VOTE_COUNTER_COUNT, k);
+            this.object.model.setValue(RoomObjectVariable.FURNITURE_VOTE_COUNTER_COUNT, total);
 
             this._lastUpdate = GetTickerTime();
 
@@ -73,17 +73,17 @@ export class FurnitureVoteCounterLogic extends FurnitureMultiStateLogic
         {
             if((this.currentTotal !== this._total) && (time >= (this._lastUpdate + this._interval)))
             {
-                const _local_2 = (time - this._lastUpdate);
-                let _local_3 = (_local_2 / this._interval);
-                let _local_4 = 1;
+                const elapsed = (time - this._lastUpdate);
+                let steps = (elapsed / this._interval);
+                let direction = 1;
 
-                if(this._total < this.currentTotal) _local_4 = -1;
+                if(this._total < this.currentTotal) direction = -1;
 
-                if(_local_3 > (_local_4 * (this._total - this.currentTotal))) _local_3 = (_local_4 * (this._total - this.currentTotal));
+                if(steps > (direction * (this._total - this.currentTotal))) steps = (direction * (this._total - this.currentTotal));
 
-                this.object.model.setValue(RoomObjectVariable.FURNITURE_VOTE_COUNTER_COUNT, (this.currentTotal + (_local_4 * _local_3)));
+                this.object.model.setValue(RoomObjectVariable.FURNITURE_VOTE_COUNTER_COUNT, (this.currentTotal + (direction * steps)));
 
-                this._lastUpdate = (time - (_local_2 - (_local_3 * this._interval)));
+                this._lastUpdate = (time - (elapsed - (steps * this._interval)));
             }
         }
     }

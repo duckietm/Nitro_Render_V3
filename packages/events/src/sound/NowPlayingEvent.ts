@@ -10,9 +10,9 @@ export class NowPlayingEvent extends NitroEvent
     private _position:number;
     private _priority:number;
 
-    constructor(k:string, priority:number, id:number, position:number)
+    constructor(type:string, priority:number, id:number, position:number)
     {
-        super(k);
+        super(type);
         this._id = id;
         this._position = position;
         this._priority = priority;

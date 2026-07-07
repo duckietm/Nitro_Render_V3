@@ -7,11 +7,11 @@ export class RoomSessionPetInfoUpdateEvent extends RoomSessionEvent
 
     private _petInfo: IRoomPetData;
 
-    constructor(k: IRoomSession, _arg_2: IRoomPetData)
+    constructor(session: IRoomSession, petInfo: IRoomPetData)
     {
-        super(RoomSessionPetInfoUpdateEvent.PET_INFO, k);
+        super(RoomSessionPetInfoUpdateEvent.PET_INFO, session);
 
-        this._petInfo = _arg_2;
+        this._petInfo = petInfo;
     }
 
     public get petInfo(): IRoomPetData

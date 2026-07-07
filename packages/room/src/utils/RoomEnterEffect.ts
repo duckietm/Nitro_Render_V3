@@ -27,9 +27,9 @@ export class RoomEnterEffect
     {
         if((RoomEnterEffect._state === RoomEnterEffect.STATE_NOT_INITIALIZED) || (RoomEnterEffect._state === RoomEnterEffect.STATE_OVER)) return;
 
-        const k = (GetTickerTime() - RoomEnterEffect._initializationTimeMs);
+        const elapsed = (GetTickerTime() - RoomEnterEffect._initializationTimeMs);
 
-        if(k > (RoomEnterEffect._startDelayMs + RoomEnterEffect._effectDurationMs))
+        if(elapsed > (RoomEnterEffect._startDelayMs + RoomEnterEffect._effectDurationMs))
         {
             RoomEnterEffect._state = RoomEnterEffect.STATE_OVER;
 
@@ -38,7 +38,7 @@ export class RoomEnterEffect
 
         RoomEnterEffect._visualizationOn = true;
 
-        if(k < RoomEnterEffect._startDelayMs)
+        if(elapsed < RoomEnterEffect._startDelayMs)
         {
             RoomEnterEffect._state = RoomEnterEffect.STATE_START_DELAY;
 
@@ -46,7 +46,7 @@ export class RoomEnterEffect
         }
 
         RoomEnterEffect._state = RoomEnterEffect.STATE_RUNNING;
-        RoomEnterEffect._currentDelta = ((k - RoomEnterEffect._startDelayMs) / RoomEnterEffect._effectDurationMs);
+        RoomEnterEffect._currentDelta = ((elapsed - RoomEnterEffect._startDelayMs) / RoomEnterEffect._effectDurationMs);
     }
 
     public static turnVisualizationOff(): void
@@ -66,9 +66,9 @@ export class RoomEnterEffect
         return false;
     }
 
-    public static getDelta(k: number = 0, _arg_2: number = 1): number
+    public static getDelta(min: number = 0, max: number = 1): number
     {
-        return Math.min(Math.max(RoomEnterEffect._currentDelta, k), _arg_2);
+        return Math.min(Math.max(RoomEnterEffect._currentDelta, min), max);
     }
 
     public static get totalRunningTime(): number

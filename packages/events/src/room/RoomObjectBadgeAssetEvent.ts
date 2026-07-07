@@ -8,9 +8,9 @@ export class RoomObjectBadgeAssetEvent extends RoomObjectEvent
     private _badgeId: string;
     private _groupBadge: boolean;
 
-    constructor(k: string, _arg_2: IRoomObject, badgeId: string, groupBadge: boolean = true)
+    constructor(type: string, object: IRoomObject, badgeId: string, groupBadge: boolean = true)
     {
-        super(k, _arg_2);
+        super(type, object);
 
         this._badgeId = badgeId;
         this._groupBadge = groupBadge;
