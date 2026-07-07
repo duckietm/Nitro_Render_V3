@@ -3,16 +3,16 @@
     private _reservedNumbers: number[];
     private _freeNumbers: number[];
 
-    constructor(k: number)
+    constructor(count: number)
     {
-        if(k < 0) k = 0;
+        if(count < 0) count = 0;
 
         this._reservedNumbers = [];
         this._freeNumbers = [];
 
         let i = 0;
 
-        while(i < k)
+        while(i < count)
         {
             this._freeNumbers.push(i);
 
@@ -30,25 +30,25 @@
     {
         if(this._freeNumbers.length > 0)
         {
-            const k = this._freeNumbers.pop();
+            const number = this._freeNumbers.pop();
 
-            this._reservedNumbers.push(k);
+            this._reservedNumbers.push(number);
 
-            return k;
+            return number;
         }
 
         return -1;
     }
 
-    public freeNumber(k: number): void
+    public freeNumber(number: number): void
     {
-        const i = this._reservedNumbers.indexOf(k);
+        const index = this._reservedNumbers.indexOf(number);
 
-        if(i >= 0)
+        if(index >= 0)
         {
-            this._reservedNumbers.splice(i, 1);
+            this._reservedNumbers.splice(index, 1);
 
-            this._freeNumbers.push(k);
+            this._freeNumbers.push(number);
         }
     }
 }

@@ -35,9 +35,9 @@ export class RoomPetData implements IRoomPetData
         return this._id;
     }
 
-    public set id(k: number)
+    public set id(value: number)
     {
-        this._id = k;
+        this._id = value;
     }
 
     public get level(): number
@@ -55,9 +55,9 @@ export class RoomPetData implements IRoomPetData
         return this._maximumLevel;
     }
 
-    public set maximumLevel(k: number)
+    public set maximumLevel(value: number)
     {
-        this._maximumLevel = k;
+        this._maximumLevel = value;
     }
 
     public get experience(): number
@@ -75,9 +75,9 @@ export class RoomPetData implements IRoomPetData
         return this._levelExperienceGoal;
     }
 
-    public set levelExperienceGoal(k: number)
+    public set levelExperienceGoal(value: number)
     {
-        this._levelExperienceGoal = k;
+        this._levelExperienceGoal = value;
     }
 
     public get energy(): number
@@ -95,9 +95,9 @@ export class RoomPetData implements IRoomPetData
         return this._maximumEnergy;
     }
 
-    public set maximumEnergy(k: number)
+    public set maximumEnergy(value: number)
     {
-        this._maximumEnergy = k;
+        this._maximumEnergy = value;
     }
 
     public get happyness(): number
@@ -105,9 +105,9 @@ export class RoomPetData implements IRoomPetData
         return this._happyness;
     }
 
-    public set happyness(k: number)
+    public set happyness(value: number)
     {
-        this._happyness = k;
+        this._happyness = value;
     }
 
     public get maximumHappyness(): number
@@ -115,9 +115,9 @@ export class RoomPetData implements IRoomPetData
         return this._maximumHappyness;
     }
 
-    public set maximumHappyness(k: number)
+    public set maximumHappyness(value: number)
     {
-        this._maximumHappyness = k;
+        this._maximumHappyness = value;
     }
 
     public get ownerId(): number
@@ -125,9 +125,9 @@ export class RoomPetData implements IRoomPetData
         return this._ownerId;
     }
 
-    public set ownerId(k: number)
+    public set ownerId(value: number)
     {
-        this._ownerId = k;
+        this._ownerId = value;
     }
 
     public get ownerName(): string
@@ -145,9 +145,9 @@ export class RoomPetData implements IRoomPetData
         return this._respect;
     }
 
-    public set respect(k: number)
+    public set respect(value: number)
     {
-        this._respect = k;
+        this._respect = value;
     }
 
     public get age(): number
@@ -165,9 +165,9 @@ export class RoomPetData implements IRoomPetData
         return this._unknownRarity;
     }
 
-    public set unknownRarity(k: number)
+    public set unknownRarity(value: number)
     {
-        this._unknownRarity = k;
+        this._unknownRarity = value;
     }
 
     public get saddle(): boolean
@@ -175,9 +175,9 @@ export class RoomPetData implements IRoomPetData
         return this._saddle;
     }
 
-    public set saddle(k: boolean)
+    public set saddle(value: boolean)
     {
-        this._saddle = k;
+        this._saddle = value;
     }
 
     public get rider(): boolean
@@ -185,9 +185,9 @@ export class RoomPetData implements IRoomPetData
         return this._rider;
     }
 
-    public set rider(k: boolean)
+    public set rider(value: boolean)
     {
-        this._rider = k;
+        this._rider = value;
     }
 
     public get skillTresholds(): number[]
@@ -195,9 +195,9 @@ export class RoomPetData implements IRoomPetData
         return this._skillThresholds;
     }
 
-    public set skillTresholds(k: number[])
+    public set skillTresholds(value: number[])
     {
-        this._skillThresholds = k;
+        this._skillThresholds = value;
     }
 
     public get publiclyRideable(): number
@@ -205,9 +205,9 @@ export class RoomPetData implements IRoomPetData
         return this._publiclyRideable;
     }
 
-    public set publiclyRideable(k: number)
+    public set publiclyRideable(value: number)
     {
-        this._publiclyRideable = k;
+        this._publiclyRideable = value;
     }
 
     public get breedable(): boolean
@@ -215,9 +215,9 @@ export class RoomPetData implements IRoomPetData
         return this._breedable;
     }
 
-    public set breedable(k: boolean)
+    public set breedable(value: boolean)
     {
-        this._breedable = k;
+        this._breedable = value;
     }
 
     public get fullyGrown(): boolean
@@ -225,9 +225,9 @@ export class RoomPetData implements IRoomPetData
         return this._fullyGrown;
     }
 
-    public set fullyGrown(k: boolean)
+    public set fullyGrown(value: boolean)
     {
-        this._fullyGrown = k;
+        this._fullyGrown = value;
     }
 
     public get dead(): boolean
@@ -235,9 +235,9 @@ export class RoomPetData implements IRoomPetData
         return this._dead;
     }
 
-    public set dead(k: boolean)
+    public set dead(value: boolean)
     {
-        this._dead = k;
+        this._dead = value;
     }
 
     public get rarityLevel(): number
@@ -255,9 +255,9 @@ export class RoomPetData implements IRoomPetData
         return this._maximumTimeToLive;
     }
 
-    public set maximumTimeToLive(k: number)
+    public set maximumTimeToLive(value: number)
     {
-        this._maximumTimeToLive = k;
+        this._maximumTimeToLive = value;
     }
 
     public get remainingTimeToLive(): number
@@ -265,9 +265,9 @@ export class RoomPetData implements IRoomPetData
         return this._remainingTimeToLive;
     }
 
-    public set remainingTimeToLive(k: number)
+    public set remainingTimeToLive(value: number)
     {
-        this._remainingTimeToLive = k;
+        this._remainingTimeToLive = value;
     }
 
     public get remainingGrowTime(): number
@@ -275,9 +275,9 @@ export class RoomPetData implements IRoomPetData
         return this._remainingGrowTime;
     }
 
-    public set remainingGrowTime(k: number)
+    public set remainingGrowTime(value: number)
     {
-        this._remainingGrowTime = k;
+        this._remainingGrowTime = value;
     }
 
     public get publiclyBreedable(): boolean
@@ -285,9 +285,9 @@ export class RoomPetData implements IRoomPetData
         return this._publiclyBreedable;
     }
 
-    public set publiclyBreedable(k: boolean)
+    public set publiclyBreedable(value: boolean)
     {
-        this._publiclyBreedable = k;
+        this._publiclyBreedable = value;
     }
 
     public get adultLevel(): number

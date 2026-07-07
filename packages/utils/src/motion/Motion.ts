@@ -20,9 +20,9 @@
         return this._complete;
     }
 
-    public set target(k: HTMLElement)
+    public set target(value: HTMLElement)
     {
-        this._target = k;
+        this._target = value;
     }
 
     public get target(): HTMLElement
@@ -30,9 +30,9 @@
         return this._target;
     }
 
-    public set tag(k: string)
+    public set tag(value: string)
     {
-        this._tag = k;
+        this._tag = value;
     }
 
     public get tag(): string
@@ -45,7 +45,7 @@
         this._running = true;
     }
 
-    public update(k: number): void
+    public update(progress: number): void
     {
     }
 
@@ -55,7 +55,7 @@
         this._running = false;
     }
 
-    public tick(k: number): void
+    public tick(time: number): void
     {
     }
 }

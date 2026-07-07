@@ -357,7 +357,7 @@ export class FurnitureVisualization extends RoomObjectSpriteVisualization
         return asset.source;
     }
 
-    protected getPostureForAssetFile(scale: number, _arg_2: string): string
+    protected getPostureForAssetFile(scale: number, assetName: string): string
     {
         return null;
     }

@@ -7,12 +7,12 @@ export class RoomSessionUserTagsEvent extends NitroEvent
     private _userId: number;
     private _tags: string[];
 
-    constructor(k: number, _arg_2: string[])
+    constructor(userId: number, tags: string[])
     {
         super(RoomSessionUserTagsEvent.UTRE_USER_TAGS_RECEIVED);
 
-        this._userId = k;
-        this._tags = _arg_2;
+        this._userId = userId;
+        this._tags = tags;
     }
 
     public get userId(): number

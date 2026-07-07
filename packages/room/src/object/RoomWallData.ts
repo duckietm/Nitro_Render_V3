@@ -45,15 +45,15 @@ export class RoomWallData
         this._count = 0;
     }
 
-    public addWall(k: Point, _arg_2: number, _arg_3: number, _arg_4: boolean, _arg_5: boolean): void
+    public addWall(corner: Point, direction: number, length: number, border: boolean, leftTurn: boolean): void
     {
-        if(((this._addDuplicates) || (this.checkIsNotDuplicate(k, _arg_2, _arg_3, _arg_4, _arg_5))))
+        if(((this._addDuplicates) || (this.checkIsNotDuplicate(corner, direction, length, border, leftTurn))))
         {
-            this._corners.push(k);
-            this._directions.push(_arg_2);
-            this._lengths.push(_arg_3);
-            this._borders.push(_arg_4);
-            this._leftTurns.push(_arg_5);
+            this._corners.push(corner);
+            this._directions.push(direction);
+            this._lengths.push(length);
+            this._borders.push(border);
+            this._leftTurns.push(leftTurn);
             this._hideWalls.push(false);
             this._manuallyLeftCut.push(false);
             this._manuallyRightCut.push(false);
@@ -61,17 +61,17 @@ export class RoomWallData
         }
     }
 
-    private checkIsNotDuplicate(k: Point, _arg_2: number, _arg_3: number, _arg_4: boolean, _arg_5: boolean): boolean
+    private checkIsNotDuplicate(corner: Point, direction: number, length: number, border: boolean, leftTurn: boolean): boolean
     {
-        let _local_6 = 0;
+        let index = 0;
 
-        while(_local_6 < this._count)
+        while(index < this._count)
         {
-            if(((((((this._corners[_local_6].x == k.x) && (this._corners[_local_6].y == k.y)) && (this._directions[_local_6] == _arg_2)) && (this._lengths[_local_6] == _arg_3)) && (this._borders[_local_6] == _arg_4)) && (this._leftTurns[_local_6] == _arg_5)))
+            if(((((((this._corners[index].x == corner.x) && (this._corners[index].y == corner.y)) && (this._directions[index] == direction)) && (this._lengths[index] == length)) && (this._borders[index] == border)) && (this._leftTurns[index] == leftTurn)))
             {
                 return false;
             }
-            _local_6++;
+            index++;
         }
         return true;
     }
@@ -81,101 +81,101 @@ export class RoomWallData
         return this._count;
     }
 
-    public getCorner(k: number): Point
+    public getCorner(index: number): Point
     {
-        return this._corners[k];
+        return this._corners[index];
     }
 
-    public getEndPoint(k: number): Point
+    public getEndPoint(index: number): Point
     {
         this.calculateWallEndPoints();
-        return this._endPoints[k];
+        return this._endPoints[index];
     }
 
-    public getLength(k: number): number
+    public getLength(index: number): number
     {
-        return this._lengths[k];
+        return this._lengths[index];
     }
 
-    public getDirection(k: number): number
+    public getDirection(index: number): number
     {
-        return this._directions[k];
+        return this._directions[index];
     }
 
-    public getBorder(k: number): boolean
+    public getBorder(index: number): boolean
     {
-        return this._borders[k];
+        return this._borders[index];
     }
 
-    public getHideWall(k: number): boolean
+    public getHideWall(index: number): boolean
     {
-        return this._hideWalls[k];
+        return this._hideWalls[index];
     }
 
-    public getLeftTurn(k: number): boolean
+    public getLeftTurn(index: number): boolean
     {
-        return this._leftTurns[k];
+        return this._leftTurns[index];
     }
 
-    public getManuallyLeftCut(k: number): boolean
+    public getManuallyLeftCut(index: number): boolean
     {
-        return this._manuallyLeftCut[k];
+        return this._manuallyLeftCut[index];
     }
 
-    public getManuallyRightCut(k: number): boolean
+    public getManuallyRightCut(index: number): boolean
     {
-        return this._manuallyRightCut[k];
+        return this._manuallyRightCut[index];
     }
 
-    public setHideWall(k: number, _arg_2: boolean): void
+    public setHideWall(index: number, hide: boolean): void
     {
-        this._hideWalls[k] = _arg_2;
+        this._hideWalls[index] = hide;
     }
 
-    public setLength(k: number, _arg_2: number): void
+    public setLength(index: number, length: number): void
     {
-        if(_arg_2 < this._lengths[k])
+        if(length < this._lengths[index])
         {
-            this._lengths[k] = _arg_2;
-            this._manuallyRightCut[k] = true;
+            this._lengths[index] = length;
+            this._manuallyRightCut[index] = true;
         }
     }
 
-    public moveCorner(k: number, _arg_2: number): void
+    public moveCorner(index: number, offset: number): void
     {
-        let _local_3: IVector3D;
-        if(((_arg_2 > 0) && (_arg_2 < this._lengths[k])))
+        let directionVector: IVector3D;
+        if(((offset > 0) && (offset < this._lengths[index])))
         {
-            const corner = this._corners[k];
+            const corner = this._corners[index];
 
-            _local_3 = RoomWallData.WALL_DIRECTION_VECTORS[this.getDirection(k)];
-            this._corners[k] = new Point((corner.x + (_arg_2 * _local_3.x)), (corner.y + (_arg_2 * _local_3.y)));
-            this._lengths[k] = (this._lengths[k] - _arg_2);
-            this._manuallyLeftCut[k] = true;
+            directionVector = RoomWallData.WALL_DIRECTION_VECTORS[this.getDirection(index)];
+            this._corners[index] = new Point((corner.x + (offset * directionVector.x)), (corner.y + (offset * directionVector.y)));
+            this._lengths[index] = (this._lengths[index] - offset);
+            this._manuallyLeftCut[index] = true;
         }
     }
 
     private calculateWallEndPoints(): void
     {
-        let k: number;
-        let _local_2: Point;
-        let _local_3: Point;
-        let _local_4: IVector3D;
-        let _local_5: number;
+        let index: number;
+        let corner: Point;
+        let endPoint: Point;
+        let directionVector: IVector3D;
+        let length: number;
         if(this._endPoints.length != this.count)
         {
             this._endPoints = [];
-            k = 0;
-            while(k < this.count)
+            index = 0;
+            while(index < this.count)
             {
-                _local_2 = this.getCorner(k);
-                _local_3 = new Point(_local_2.x, _local_2.y);
-                _local_4 = RoomWallData.WALL_DIRECTION_VECTORS[this.getDirection(k)];
-                _local_5 = this.getLength(k);
-                _local_3.x = (_local_3.x + (_local_4.x * _local_5));
-                _local_3.y = (_local_3.y + (_local_4.y * _local_5));
-                this._endPoints.push(_local_3);
-                k++;
+                corner = this.getCorner(index);
+                endPoint = new Point(corner.x, corner.y);
+                directionVector = RoomWallData.WALL_DIRECTION_VECTORS[this.getDirection(index)];
+                length = this.getLength(index);
+                endPoint.x = (endPoint.x + (directionVector.x * length));
+                endPoint.y = (endPoint.y + (directionVector.y * length));
+                this._endPoints.push(endPoint);
+                index++;
             }
         }
     }

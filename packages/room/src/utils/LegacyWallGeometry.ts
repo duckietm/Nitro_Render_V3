@@ -35,9 +35,9 @@ export class LegacyWallGeometry implements ILegacyWallGeometry
         return this._scale;
     }
 
-    public set scale(k: number)
+    public set scale(scale: number)
     {
-        this._scale = k;
+        this._scale = scale;
     }
 
     public dispose(): void
@@ -115,208 +115,208 @@ export class LegacyWallGeometry implements ILegacyWallGeometry
 
     public getLocation(width: number, height: number, localX: number, localY: number, direction: string): IVector3D
     {
-        let _local_7: number;
+        let column: number;
         if(((width == 0) && (height == 0)))
         {
             width = this._width;
             height = this._height;
-            const _local_12 = Math.round((this.scale / 10));
+            const offset = Math.round((this.scale / 10));
             if(direction == LegacyWallGeometry.R)
             {
-                let _local_7 = (this._width - 1);
-                while(_local_7 >= 0)
+                let column = (this._width - 1);
+                while(column >= 0)
                 {
-                    let _local_6 = 1;
-                    while(_local_6 < this._height)
+                    let row = 1;
+                    while(row < this._height)
                     {
-                        if(this.getHeight(_local_7, _local_6) <= this._floorHeight)
+                        if(this.getHeight(column, row) <= this._floorHeight)
                         {
-                            if((_local_6 - 1) < height)
+                            if((row - 1) < height)
                             {
-                                width = _local_7;
-                                height = (_local_6 - 1);
+                                width = column;
+                                height = (row - 1);
                             }
                             break;
                         }
-                        _local_6++;
+                        row++;
                     }
-                    _local_7--;
+                    column--;
                 }
-                localY = (localY + ((this.scale / 4) - (_local_12 / 2)));
+                localY = (localY + ((this.scale / 4) - (offset / 2)));
                 localX = (localX + (this.scale / 2));
             }
             else
             {
-                let _local_6 = (this._height - 1);
-                while(_local_6 >= 0)
+                let row = (this._height - 1);
+                while(row >= 0)
                 {
-                    let _local_7 = 1;
-                    while(_local_7 < this._width)
+                    let column = 1;
+                    while(column < this._width)
                     {
-                        if(this.getHeight(_local_7, _local_6) <= this._floorHeight)
+                        if(this.getHeight(column, row) <= this._floorHeight)
                         {
-                            if((_local_7 - 1) < width)
+                            if((column - 1) < width)
                             {
-                                width = (_local_7 - 1);
-                                height = _local_6;
+                                width = (column - 1);
+                                height = row;
                             }
                             break;
                         }
-                        _local_7++;
+                        column++;
                     }
-                    _local_6--;
+                    row--;
                 }
-                localY = (localY + ((this.scale / 4) - (_local_12 / 2)));
-                localX = (localX - _local_12);
+                localY = (localY + ((this.scale / 4) - (offset / 2)));
+                localX = (localX - offset);
             }
         }
-        let _local_8: number = width;
-        let _local_9: number = height;
-        let _local_10: number = this.getHeight(width, height);
+        let locationX: number = width;
+        let locationY: number = height;
+        let altitude: number = this.getHeight(width, height);
         if(direction == LegacyWallGeometry.R)
         {
-            _local_8 = (_local_8 + ((localX / (this._scale / 2)) - 0.5));
-            _local_9 = (_local_9 + 0.5);
-            _local_10 = (_local_10 - ((localY - (localX / 2)) / (this._scale / 2)));
+            locationX = (locationX + ((localX / (this._scale / 2)) - 0.5));
+            locationY = (locationY + 0.5);
+            altitude = (altitude - ((localY - (localX / 2)) / (this._scale / 2)));
         }
         else
         {
-            _local_9 = (_local_9 + ((((this._scale / 2) - localX) / (this._scale / 2)) - 0.5));
-            _local_8 = (_local_8 + 0.5);
-            _local_10 = (_local_10 - ((localY - (((this._scale / 2) - localX) / 2)) / (this._scale / 2)));
+            locationY = (locationY + ((((this._scale / 2) - localX) / (this._scale / 2)) - 0.5));
+            locationX = (locationX + 0.5);
+            altitude = (altitude - ((localY - (((this._scale / 2) - localX) / 2)) / (this._scale / 2)));
         }
-        const _local_11: IVector3D = new Vector3d(_local_8, _local_9, _local_10);
-        return _local_11;
+        const location: IVector3D = new Vector3d(locationX, locationY, altitude);
+        return location;
     }
 
-    public getLocationOldFormat(k: number, _arg_2: number, _arg_3: string): IVector3D
+    public getLocationOldFormat(coordinate: number, offset: number, direction: string): IVector3D
     {
-        let _local_4: number;
-        let _local_5: number;
-        let _local_6 = 0;
-        let _local_7 = 0;
-        _local_5 = Math.ceil(k);
-        _local_6 = (_local_5 - k);
-        let _local_8: number;
-        let _local_9: number;
-        let _local_11: number;
-        let _local_12 = 0;
-        _local_4 = 0;
-        while(_local_4 < this._width)
+        let column: number;
+        let row: number;
+        let fraction = 0;
+        let tileOffset = 0;
+        row = Math.ceil(coordinate);
+        fraction = (row - coordinate);
+        let tileX: number;
+        let tileY: number;
+        let localY: number;
+        let altitude = 0;
+        column = 0;
+        while(column < this._width)
         {
-            if(((_local_5 >= 0) && (_local_5 < this._height)))
+            if(((row >= 0) && (row < this._height)))
             {
-                if(this.getHeight(_local_4, _local_5) <= this._floorHeight)
+                if(this.getHeight(column, row) <= this._floorHeight)
                 {
-                    _local_8 = (_local_4 - 1);
-                    _local_9 = _local_5;
-                    _local_7 = _local_4;
-                    _arg_3 = LegacyWallGeometry.L;
+                    tileX = (column - 1);
+                    tileY = row;
+                    tileOffset = column;
+                    direction = LegacyWallGeometry.L;
                     break;
                 }
-                if(this.getHeight(_local_4, (_local_5 + 1)) <= this._floorHeight)
+                if(this.getHeight(column, (row + 1)) <= this._floorHeight)
                 {
-                    _local_8 = _local_4;
-                    _local_9 = _local_5;
-                    _local_7 = (_local_9 - k);
-                    _arg_3 = LegacyWallGeometry.R;
+                    tileX = column;
+                    tileY = row;
+                    tileOffset = (tileY - coordinate);
+                    direction = LegacyWallGeometry.R;
                     break;
                 }
             }
-            _local_5++;
-            _local_4++;
+            row++;
+            column++;
         }
-        const _local_10 = ((this.scale / 2) * _local_6);
-        let _local_13: number = ((-(_local_7) * this.scale) / 2);
-        _local_13 = (_local_13 + ((((-(_arg_2) * 18) / 32) * this.scale) / 2));
-        _local_12 = this.getHeight(_local_8, _local_9);
-        _local_11 = (((_local_12 * this.scale) / 2) + _local_13);
-        if(_arg_3 == LegacyWallGeometry.R)
+        const localX = ((this.scale / 2) * fraction);
+        let verticalOffset: number = ((-(tileOffset) * this.scale) / 2);
+        verticalOffset = (verticalOffset + ((((-(offset) * 18) / 32) * this.scale) / 2));
+        altitude = this.getHeight(tileX, tileY);
+        localY = (((altitude * this.scale) / 2) + verticalOffset);
+        if(direction == LegacyWallGeometry.R)
         {
-            _local_11 = (_local_11 + ((_local_6 * this.scale) / 4));
+            localY = (localY + ((fraction * this.scale) / 4));
         }
         else
         {
-            _local_11 = (_local_11 + (((1 - _local_6) * this.scale) / 4));
+            localY = (localY + (((1 - fraction) * this.scale) / 4));
         }
-        return this.getLocation(_local_8, _local_9, _local_10, _local_11, _arg_3);
+        return this.getLocation(tileX, tileY, localX, localY, direction);
     }
 
-    public getOldLocation(k: IVector3D, _arg_2: number): [number, number, number, number, string]
+    public getOldLocation(location: IVector3D, direction: number): [number, number, number, number, string]
     {
-        if(k == null)
+        if(location == null)
         {
             return null;
         }
-        let _local_3 = 0;
-        let _local_4 = 0;
-        let _local_5 = 0;
-        let _local_6 = 0;
-        let _local_7 = '';
-        let _local_8 = 0;
-        if(_arg_2 == 90)
+        let tileX = 0;
+        let tileY = 0;
+        let localX = 0;
+        let localY = 0;
+        let side = '';
+        let altitude = 0;
+        if(direction == 90)
         {
-            _local_3 = Math.floor((k.x - 0.5));
-            _local_4 = Math.floor((k.y + 0.5));
-            _local_8 = this.getHeight(_local_3, _local_4);
-            _local_5 = ((this._scale / 2) - (((k.y - _local_4) + 0.5) * (this._scale / 2)));
-            _local_6 = (((_local_8 - k.z) * (this._scale / 2)) + (((this._scale / 2) - _local_5) / 2));
-            _local_7 = LegacyWallGeometry.L;
+            tileX = Math.floor((location.x - 0.5));
+            tileY = Math.floor((location.y + 0.5));
+            altitude = this.getHeight(tileX, tileY);
+            localX = ((this._scale / 2) - (((location.y - tileY) + 0.5) * (this._scale / 2)));
+            localY = (((altitude - location.z) * (this._scale / 2)) + (((this._scale / 2) - localX) / 2));
+            side = LegacyWallGeometry.L;
         }
         else
         {
-            if(_arg_2 == 180)
+            if(direction == 180)
             {
-                _local_3 = Math.floor((k.x + 0.5));
-                _local_4 = Math.floor((k.y - 0.5));
-                _local_8 = this.getHeight(_local_3, _local_4);
-                _local_5 = (((k.x + 0.5) - _local_3) * (this._scale / 2));
-                _local_6 = (((_local_8 - k.z) * (this._scale / 2)) + (_local_5 / 2));
-                _local_7 = LegacyWallGeometry.R;
+                tileX = Math.floor((location.x + 0.5));
+                tileY = Math.floor((location.y - 0.5));
+                altitude = this.getHeight(tileX, tileY);
+                localX = (((location.x + 0.5) - tileX) * (this._scale / 2));
+                localY = (((altitude - location.z) * (this._scale / 2)) + (localX / 2));
+                side = LegacyWallGeometry.R;
             }
             else
             {
                 return null;
             }
         }
-        return [_local_3, _local_4, _local_5, _local_6, _local_7];
+        return [tileX, tileY, localX, localY, side];
     }
 
-    public getOldLocationString(k: IVector3D, _arg_2: number): string
+    public getOldLocationString(location: IVector3D, direction: number): string
     {
-        const _local_3 = this.getOldLocation(k, _arg_2);
-        if(_local_3 == null)
+        const oldLocation = this.getOldLocation(location, direction);
+        if(oldLocation == null)
         {
             return null;
         }
-        const _local_4: number = Math.trunc(_local_3[0]);
-        const _local_5: number = Math.trunc(_local_3[1]);
-        const _local_6: number = Math.trunc(_local_3[2]);
-        const _local_7: number = Math.trunc(_local_3[3]);
-        const _local_8: string = _local_3[4];
-        const _local_9: string = (((((((((':w=' + _local_4) + ',') + _local_5) + ' l=') + _local_6) + ',') + _local_7) + ' ') + _local_8);
-        return _local_9;
+        const tileX: number = Math.trunc(oldLocation[0]);
+        const tileY: number = Math.trunc(oldLocation[1]);
+        const localX: number = Math.trunc(oldLocation[2]);
+        const localY: number = Math.trunc(oldLocation[3]);
+        const side: string = oldLocation[4];
+        const result: string = (((((((((':w=' + tileX) + ',') + tileY) + ' l=') + localX) + ',') + localY) + ' ') + side);
+        return result;
     }
 
-    public getDirection(k: string): number
+    public getDirection(direction: string): number
     {
-        if(k == LegacyWallGeometry.R)
+        if(direction == LegacyWallGeometry.R)
         {
             return 180;
         }
         return 90;
     }
 
-    public getFloorAltitude(k: number, _arg_2: number): number
+    public getFloorAltitude(x: number, y: number): number
     {
-        const _local_3 = this.getHeight(k, _arg_2);
-        const _local_4 = (_local_3 + 1);
+        const altitude = this.getHeight(x, y);
+        const neighbourAltitude = (altitude + 1);
 
-        return _local_3 + (((((((((Math.trunc(this.getHeight((k - 1), (_arg_2 - 1))) == _local_4) || (Math.trunc(this.getHeight(k, (_arg_2 - 1))) == _local_4)) || (Math.trunc(this.getHeight((k + 1), (_arg_2 - 1))) == _local_4)) || (Math.trunc(this.getHeight((k - 1), _arg_2)) == _local_4)) || (Math.trunc(this.getHeight((k + 1), _arg_2)) == _local_4)) || (Math.trunc(this.getHeight((k - 1), (_arg_2 + 1))) == _local_4)) || (Math.trunc(this.getHeight(k, (_arg_2 + 1))) == _local_4)) || (Math.trunc(this.getHeight((k + 1), (_arg_2 + 1))) == _local_4)) ? 0.5 : 0);
+        return altitude + (((((((((Math.trunc(this.getHeight((x - 1), (y - 1))) == neighbourAltitude) || (Math.trunc(this.getHeight(x, (y - 1))) == neighbourAltitude)) || (Math.trunc(this.getHeight((x + 1), (y - 1))) == neighbourAltitude)) || (Math.trunc(this.getHeight((x - 1), y)) == neighbourAltitude)) || (Math.trunc(this.getHeight((x + 1), y)) == neighbourAltitude)) || (Math.trunc(this.getHeight((x - 1), (y + 1))) == neighbourAltitude)) || (Math.trunc(this.getHeight(x, (y + 1))) == neighbourAltitude)) || (Math.trunc(this.getHeight((x + 1), (y + 1))) == neighbourAltitude)) ? 0.5 : 0);
     }
 
-    public isRoomTile(k: number, _arg_2: number): boolean
+    public isRoomTile(x: number, y: number): boolean
     {
-        return ((((k >= 0) && (k < this._width)) && (_arg_2 >= 0)) && (_arg_2 < this._height)) && (this._heightMap[_arg_2][k] >= 0);
+        return ((((x >= 0) && (x < this._width)) && (y >= 0)) && (y < this._height)) && (this._heightMap[y][x] >= 0);
     }
 }

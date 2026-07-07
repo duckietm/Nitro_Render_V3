@@ -62,48 +62,48 @@ export class FurnitureStackingHeightMap implements IFurnitureStackingHeightMap
         if(this.validPosition(x, y)) this._isRoomTile[((y * this._width) + x)] = isRoomTile;
     }
 
-    public validateLocation(k: number, _arg_2: number, _arg_3: number, _arg_4: number, _arg_5: number, _arg_6: number, _arg_7: number, _arg_8: number, _arg_9: boolean, _arg_10: number = -1): boolean
+    public validateLocation(x: number, y: number, sizeX: number, sizeY: number, areaX: number, areaY: number, areaWidth: number, areaHeight: number, stackable: boolean, altitude: number = -1): boolean
     {
-        let _local_12 = 0;
-        let _local_13 = 0;
+        let column = 0;
+        let index = 0;
 
-        if(!this.validPosition(k, _arg_2) || !this.validPosition(((k + _arg_3) - 1), ((_arg_2 + _arg_4) - 1))) return false;
+        if(!this.validPosition(x, y) || !this.validPosition(((x + sizeX) - 1), ((y + sizeY) - 1))) return false;
 
-        if(((_arg_5 < 0) || (_arg_5 >= this._width))) _arg_5 = 0;
+        if(((areaX < 0) || (areaX >= this._width))) areaX = 0;
 
-        if(((_arg_6 < 0) || (_arg_6 >= this._height))) _arg_6 = 0;
+        if(((areaY < 0) || (areaY >= this._height))) areaY = 0;
 
-        _arg_7 = Math.min(_arg_7, (this._width - _arg_5));
-        _arg_8 = Math.min(_arg_8, (this._height - _arg_6));
+        areaWidth = Math.min(areaWidth, (this._width - areaX));
+        areaHeight = Math.min(areaHeight, (this._height - areaY));
 
-        if(_arg_10 === -1) _arg_10 = this.getTileHeight(k, _arg_2);
+        if(altitude === -1) altitude = this.getTileHeight(x, y);
 
-        let _local_11 = _arg_2;
+        let row = y;
 
-        while(_local_11 < (_arg_2 + _arg_4))
+        while(row < (y + sizeY))
         {
-            _local_12 = k;
+            column = x;
 
-            while(_local_12 < (k + _arg_3))
+            while(column < (x + sizeX))
             {
-                if(((((_local_12 < _arg_5) || (_local_12 >= (_arg_5 + _arg_7))) || (_local_11 < _arg_6)) || (_local_11 >= (_arg_6 + _arg_8))))
+                if(((((column < areaX) || (column >= (areaX + areaWidth))) || (row < areaY)) || (row >= (areaY + areaHeight))))
                 {
-                    _local_13 = ((_local_11 * this._width) + _local_12);
+                    index = ((row * this._width) + column);
 
-                    if(_arg_9)
+                    if(stackable)
                     {
-                        if(!this._isRoomTile[_local_13]) return false;
+                        if(!this._isRoomTile[index]) return false;
                     }
                     else
                     {
-                        if(((this._isNotStackable[_local_13]) || (!(this._isRoomTile[_local_13]))) || (Math.abs((this._heights[_local_13] - _arg_10)) > 0.01)) return false;
+                        if(((this._isNotStackable[index]) || (!(this._isRoomTile[index]))) || (Math.abs((this._heights[index] - altitude)) > 0.01)) return false;
                     }
                 }
 
-                _local_12++;
+                column++;
             }
 
-            _local_11++;
+            row++;
         }
 
         return true;

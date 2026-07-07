@@ -7,40 +7,40 @@ export class TileObjectMap implements ITileObjectMap
     private _width: number;
     private _height: number;
 
-    constructor(k: number, _arg_2: number)
+    constructor(width: number, height: number)
     {
         this._tileObjectMap = new Map();
 
         let index = 0;
 
-        while(index < _arg_2)
+        while(index < height)
         {
             this._tileObjectMap.set(index, new Map());
 
             index++;
         }
 
-        this._width = k;
-        this._height = _arg_2;
+        this._width = width;
+        this._height = height;
     }
 
     public clear(): void
     {
-        for(const k of this._tileObjectMap.values())
+        for(const row of this._tileObjectMap.values())
         {
-            if(!k) continue;
+            if(!row) continue;
 
-            k.clear();
+            row.clear();
         }
 
         this._tileObjectMap.clear();
     }
 
-    public populate(k: IRoomObject[]): void
+    public populate(objects: IRoomObject[]): void
     {
         this.clear();
 
-        for(const _local_2 of k) this.addRoomObject(_local_2);
+        for(const object of objects) this.addRoomObject(object);
     }
 
     public dispose(): void
@@ -50,46 +50,46 @@ export class TileObjectMap implements ITileObjectMap
         this._height = 0;
     }
 
-    public getObjectIntTile(k: number, _arg_2: number): IRoomObject
+    public getObjectIntTile(x: number, y: number): IRoomObject
     {
-        if((((k >= 0) && (k < this._width)) && (_arg_2 >= 0)) && (_arg_2 < this._height))
+        if((((x >= 0) && (x < this._width)) && (y >= 0)) && (y < this._height))
         {
-            const existing = this._tileObjectMap.get(_arg_2);
+            const existing = this._tileObjectMap.get(y);
 
-            if(existing) return existing.get(k);
+            if(existing) return existing.get(x);
         }
 
         return null;
     }
 
-    public setObjectInTile(k: number, _arg_2: number, _arg_3: IRoomObject): void
+    public setObjectInTile(x: number, y: number, object: IRoomObject): void
     {
-        if(!_arg_3.isReady)
+        if(!object.isReady)
         {
             NitroLogger.log('Assigning non initialized object to tile object map!');
 
             return;
         }
 
-        if((((k >= 0) && (k < this._width)) && (_arg_2 >= 0)) && (_arg_2 < this._height))
+        if((((x >= 0) && (x < this._width)) && (y >= 0)) && (y < this._height))
         {
-            const existing = this._tileObjectMap.get(_arg_2);
+            const existing = this._tileObjectMap.get(y);
 
-            if(existing) existing.set(k, _arg_3);
+            if(existing) existing.set(x, object);
         }
     }
 
-    public addRoomObject(k: IRoomObject): void
+    public addRoomObject(object: IRoomObject): void
     {
-        if(!k || !k.model || !k.isReady) return;
+        if(!object || !object.model || !object.isReady) return;
 
-        const location = k.getLocation();
-        const direction = k.getDirection();
+        const location = object.getLocation();
+        const direction = object.getDirection();
 
         if(!location || !direction) return;
 
-        let sizeX = k.model.getValue<number>(RoomObjectVariable.FURNITURE_SIZE_X);
-        let sizeY = k.model.getValue<number>(RoomObjectVariable.FURNITURE_SIZE_Y);
+        let sizeX = object.model.getValue<number>(RoomObjectVariable.FURNITURE_SIZE_X);
+        let sizeY = object.model.getValue<number>(RoomObjectVariable.FURNITURE_SIZE_Y);
 
         if(sizeX < 1) sizeX = 1;
         if(sizeY < 1) sizeY = 1;
@@ -108,9 +108,9 @@ export class TileObjectMap implements ITileObjectMap
             {
                 const roomObject = this.getObjectIntTile(x, y);
 
-                if((!(roomObject)) || ((!(roomObject === k)) && (roomObject.getLocation().z <= location.z)))
+                if((!(roomObject)) || ((!(roomObject === object)) && (roomObject.getLocation().z <= location.z)))
                 {
-                    this.setObjectInTile(x, y, k);
+                    this.setObjectInTile(x, y, object);
                 }
 
                 x++;

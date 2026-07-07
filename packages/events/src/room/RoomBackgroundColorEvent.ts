@@ -8,13 +8,13 @@ export class RoomBackgroundColorEvent extends RoomEngineEvent
     private _brightness: number;
     private _bgOnly: boolean;
 
-    constructor(roomId: number, color: number, _arg_3: number, _arg_4: boolean)
+    constructor(roomId: number, color: number, brightness: number, bgOnly: boolean)
     {
         super(RoomBackgroundColorEvent.ROOM_COLOR, roomId);
 
         this._color = color;
-        this._brightness = _arg_3;
-        this._bgOnly = _arg_4;
+        this._brightness = brightness;
+        this._bgOnly = bgOnly;
     }
 
     public get color(): number

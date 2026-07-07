@@ -26,15 +26,15 @@ export class RoomPlaneBitmapMaskParser
         }
     }
 
-    public initialize(k: RoomMapMaskData): boolean
+    public initialize(maskData: RoomMapMaskData): boolean
     {
-        if(!k) return false;
+        if(!maskData) return false;
 
         this._masks.clear();
 
-        if(k.masks.length)
+        if(maskData.masks.length)
         {
-            for(const mask of k.masks)
+            for(const mask of maskData.masks)
             {
                 if(!mask) continue;
 
@@ -61,21 +61,21 @@ export class RoomPlaneBitmapMaskParser
         this._masks.clear();
     }
 
-    public addMask(k: string, _arg_2: string, _arg_3: IVector3D, _arg_4: string): void
+    public addMask(id: string, type: string, location: IVector3D, category: string): void
     {
-        const mask = new RoomPlaneBitmapMaskData(_arg_2, _arg_3, _arg_4);
+        const mask = new RoomPlaneBitmapMaskData(type, location, category);
 
-        this._masks.delete(k);
-        this._masks.set(k, mask);
+        this._masks.delete(id);
+        this._masks.set(id, mask);
     }
 
-    public removeMask(k: string): boolean
+    public removeMask(id: string): boolean
     {
-        const existing = this._masks.get(k);
+        const existing = this._masks.get(id);
 
         if(existing)
         {
-            this._masks.delete(k);
+            this._masks.delete(id);
 
             existing.dispose();
 

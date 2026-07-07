@@ -27,11 +27,11 @@ export class JumpBy extends Interval
         this._startY = this.target.offsetTop;
     }
 
-    public update(k: number): void
+    public update(progress: number): void
     {
-        super.update(k);
+        super.update(progress);
 
-        this.target.style.left = ((this._startX + (this._deltaX * k)) + 'px');
-        this.target.style.top = (((this._startY + (this._height * Math.abs(Math.sin(((k * Math.PI) * this._numJumps))))) + (this._deltaY * k)) + 'px');
+        this.target.style.left = ((this._startX + (this._deltaX * progress)) + 'px');
+        this.target.style.top = (((this._startY + (this._height * Math.abs(Math.sin(((progress * Math.PI) * this._numJumps))))) + (this._deltaY * progress)) + 'px');
     }
 }

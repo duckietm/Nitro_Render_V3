@@ -25,20 +25,20 @@ export class PlaneMaskVisualization
         this._bitmaps = null;
     }
 
-    public addBitmap(k: IGraphicAsset, _arg_2: number = -1, _arg_3: number = 1, _arg_4: number = -1, _arg_5: number = 1): void
+    public addBitmap(asset: IGraphicAsset, normalMinX: number = -1, normalMaxX: number = 1, normalMinY: number = -1, normalMaxY: number = 1): void
     {
-        this._bitmaps.push(new PlaneMaskBitmap(k, _arg_2, _arg_3, _arg_4, _arg_5));
+        this._bitmaps.push(new PlaneMaskBitmap(asset, normalMinX, normalMaxX, normalMinY, normalMaxY));
     }
 
-    public getAsset(k: IVector3D): IGraphicAsset
+    public getAsset(normal: IVector3D): IGraphicAsset
     {
-        if(!k) return null;
+        if(!normal) return null;
 
         for(const mask of this._bitmaps)
         {
             if(!mask) continue;
 
-            if((((k.x >= mask.normalMinX) && (k.x <= mask.normalMaxX)) && (k.y >= mask.normalMinY)) && (k.y <= mask.normalMaxY))
+            if((((normal.x >= mask.normalMinX) && (normal.x <= mask.normalMaxX)) && (normal.y >= mask.normalMinY)) && (normal.y <= mask.normalMaxY))
             {
                 return mask.asset;
             }

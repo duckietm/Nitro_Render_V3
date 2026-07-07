@@ -87,13 +87,13 @@
         return this._remainingFrameRepeats;
     }
 
-    public set remainingFrameRepeats(k: number)
+    public set remainingFrameRepeats(value: number)
     {
-        if(k < 0) k = 0;
+        if(value < 0) value = 0;
 
-        if((this._frameRepeats > 0) && (k > this._frameRepeats)) k = this._frameRepeats;
+        if((this._frameRepeats > 0) && (value > this._frameRepeats)) value = this._frameRepeats;
 
-        this._remainingFrameRepeats = k;
+        this._remainingFrameRepeats = value;
     }
 
     public get activeSequence(): number

@@ -61,7 +61,7 @@ export class MusicController implements IMusicController
         GetEventDispatcher().addEventListener(SoundManagerEvent.TRAX_SONG_COMPLETE, this.onTraxSongComplete);
     }
 
-    public getRoomItemPlaylist(_arg_1?: number): IPlaylistController
+    public getRoomItemPlaylist(roomId?: number): IPlaylistController
     {
         return this._roomItemPlaylist;
     }
@@ -76,32 +76,32 @@ export class MusicController implements IMusicController
         return this._songDiskInventory.length;
     }
 
-    public getSongDiskInventoryDiskId(k: number): number
+    public getSongDiskInventoryDiskId(index: number): number
     {
-        if(((k >= 0) && (k < this._songDiskInventory.length)))
+        if(((index >= 0) && (index < this._songDiskInventory.length)))
         {
-            return this._songDiskInventory.getKey(k);
+            return this._songDiskInventory.getKey(index);
         }
         return -1;
     }
 
-    public getSongDiskInventorySongId(k: number): number
+    public getSongDiskInventorySongId(index: number): number
     {
-        if(((k >= 0) && (k < this._songDiskInventory.length)))
+        if(((index >= 0) && (index < this._songDiskInventory.length)))
         {
-            return this._songDiskInventory.getWithIndex(k);
+            return this._songDiskInventory.getWithIndex(index);
         }
         return -1;
     }
 
     public getSongInfo(songId: number): ISongInfo
     {
-        const _local_2: SongDataEntry = this.getSongDataEntry(songId);
-        if(!_local_2)
+        const songDataEntry: SongDataEntry = this.getSongDataEntry(songId);
+        if(!songDataEntry)
         {
             this.requestSongInfoWithoutSamples(songId);
         }
-        return _local_2;
+        return songDataEntry;
     }
 
     public getSongIdPlayingAtPriority(priority: number): number
@@ -132,14 +132,14 @@ export class MusicController implements IMusicController
         }
     }
 
-    public addSongInfoRequest(k: number): void
+    public addSongInfoRequest(songId: number): void
     {
-        this.requestSong(k, true);
+        this.requestSong(songId, true);
     }
 
-    public requestSongInfoWithoutSamples(k: number): void
+    public requestSongInfoWithoutSamples(songId: number): void
     {
-        this.requestSong(k, false);
+        this.requestSong(songId, false);
     }
 
     public requestUserSongDisks(): void
@@ -147,9 +147,9 @@ export class MusicController implements IMusicController
         GetCommunication().connection.send(new GetUserSongDisksMessageComposer());
     }
 
-    public updateVolume(_arg_1: number): void
+    public updateVolume(volume: number): void
     {
-        this._musicPlayer.setVolume(_arg_1);
+        this._musicPlayer.setVolume(volume);
     }
 
     public dispose(): void
@@ -176,27 +176,27 @@ export class MusicController implements IMusicController
 
     public get samplesIdsInUse(): number[]
     {
-        let _local_3: SongStartRequestData;
-        let _local_4: SongDataEntry;
-        let k = [];
+        let request: SongStartRequestData;
+        let songEntry: SongDataEntry;
+        let sampleIds = [];
         for(let i = 0; i < this._songRequestsPerPriority.length; i++)
         {
             if(this._songRequestsPerPriority[i])
             {
-                _local_3 = this._songRequestsPerPriority[i];
-                _local_4 = this._availableSongs.get(_local_3.songId);
-                if(_local_4)
+                request = this._songRequestsPerPriority[i];
+                songEntry = this._availableSongs.get(request.songId);
+                if(songEntry)
                 {
-                    const songData = _local_4.songData;
+                    const songData = songEntry.songData;
                     if(songData.length > 0)
                     {
                         const traxData = new TraxData(songData);
-                        k = k.concat(traxData.getSampleIds());
+                        sampleIds = sampleIds.concat(traxData.getSampleIds());
                     }
                 }
             }
         }
-        return k;
+        return sampleIds;
     }
 
     public onSongLoaded(songId: number): void
@@ -212,14 +212,14 @@ export class MusicController implements IMusicController
         }
     }
 
-    public samplesUnloaded(_arg_1: number[]): void
+    public samplesUnloaded(sampleIds: number[]): void
     {
         throw new Error('Method not implemented.');
     }
 
-    protected onTraxSongComplete(k: SoundManagerEvent): void
+    protected onTraxSongComplete(event: SoundManagerEvent): void
     {
-        if(this.getSongIdPlayingAtPriority(this._priorityPlaying) === k.id)
+        if(this.getSongIdPlayingAtPriority(this._priorityPlaying) === event.id)
         {
             if(((this.getTopRequestPriority() === this._priorityPlaying) && (this.getSongRequestCountAtPriority(this._priorityPlaying) == this._requestNumberPlaying)))
             {
@@ -229,7 +229,7 @@ export class MusicController implements IMusicController
             this.playSongWithHighestPriority();
             if(priorityPlaying >= MusicPriorities.PRIORITY_SONG_PLAY)
             {
-                GetEventDispatcher().dispatchEvent(new NowPlayingEvent(NowPlayingEvent.NPW_USER_STOP_SONG, priorityPlaying, k.id, -1));
+                GetEventDispatcher().dispatchEvent(new NowPlayingEvent(NowPlayingEvent.NPW_USER_STOP_SONG, priorityPlaying, event.id, -1));
             }
         }
     }
@@ -313,21 +313,21 @@ export class MusicController implements IMusicController
         }
     }
 
-    private areSamplesRequested(k: number): boolean
+    private areSamplesRequested(songId: number): boolean
     {
-        if(!this._requestedSongs.get(k))
+        if(!this._requestedSongs.get(songId))
         {
             return false;
         }
-        return this._requestedSongs.get(k);
+        return this._requestedSongs.get(songId);
     }
 
-    private processSongEntryForPlaying(k: number, _arg_2: boolean = true): boolean
+    private processSongEntryForPlaying(songId: number, withSamples: boolean = true): boolean
     {
-        const songData: SongDataEntry = this.getSongDataEntry(k);
+        const songData: SongDataEntry = this.getSongDataEntry(songId);
         if(!songData)
         {
-            this.addSongInfoRequest(k);
+            this.addSongInfoRequest(songId);
             return false;
         }
         /* if(_local_3.soundObject == null)
@@ -365,17 +365,17 @@ export class MusicController implements IMusicController
         {
             return false;
         }
-        let _local_3 = false;
+        let stopped = false;
         if(this.stopSongAtPriority(this._priorityPlaying))
         {
-            _local_3 = true;
+            stopped = true;
         }
         const songData: SongDataEntry = this.getSongDataEntry(songId);
         if(!songData)
         {
             return false;
         }
-        if(_local_3)
+        if(stopped)
         {
             return true;
         }
@@ -426,14 +426,14 @@ export class MusicController implements IMusicController
         return true;
     }
 
-    private notifySongPlaying(k: SongDataEntry): void
+    private notifySongPlaying(song: SongDataEntry): void
     {
-        const _local_2 = 8000;
+        const notifyThreshold = 8000;
         const timeNow = Date.now();
-        if(((k.length >= _local_2) && ((!(this._previousNotifiedSongId == k.id)) || (timeNow > (this._previousNotificationTime + _local_2)))))
+        if(((song.length >= notifyThreshold) && ((!(this._previousNotifiedSongId == song.id)) || (timeNow > (this._previousNotificationTime + notifyThreshold)))))
         {
-            GetEventDispatcher().dispatchEvent(new NotifyPlayedSongEvent(k.name, k.creator));
-            this._previousNotifiedSongId = k.id;
+            GetEventDispatcher().dispatchEvent(new NotifyPlayedSongEvent(song.name, song.creator));
+            this._previousNotifiedSongId = song.id;
             this._previousNotificationTime = timeNow;
         }
     }
@@ -450,19 +450,19 @@ export class MusicController implements IMusicController
         return true;
     }
 
-    private getSongDataEntry(k: number): SongDataEntry
+    private getSongDataEntry(songId: number): SongDataEntry
     {
         let entry: SongDataEntry;
         if(this._availableSongs)
         {
-            entry = (this._availableSongs.get(k));
+            entry = (this._availableSongs.get(songId));
         }
         return entry;
     }
 
-    private getSongStartRequest(k: number): SongStartRequestData
+    private getSongStartRequest(priority: number): SongStartRequestData
     {
-        return this._songRequestsPerPriority[k];
+        return this._songRequestsPerPriority[priority];
     }
 
     private getTopRequestPriority(): number
@@ -479,31 +479,31 @@ export class MusicController implements IMusicController
         return this._songRequestsPerPriority[priorityIndex].songId;
     }
 
-    private getSongRequestCountAtPriority(k: number): number
+    private getSongRequestCountAtPriority(priority: number): number
     {
-        if(((k < 0) || (k >= MusicPriorities.PRIORITY_COUNT)))
+        if(((priority < 0) || (priority >= MusicPriorities.PRIORITY_COUNT)))
         {
             return -1;
         }
-        return this._songRequestCountsPerPriority[k];
+        return this._songRequestCountsPerPriority[priority];
     }
 
     private playSongWithHighestPriority(): void
     {
-        let _local_3: number;
+        let songId: number;
         this._priorityPlaying = -1;
         this._songIdPlaying = -1;
         this._requestNumberPlaying = -1;
-        const k = this.getTopRequestPriority();
-        let _local_2 = k;
-        while(_local_2 >= 0)
+        const topPriority = this.getTopRequestPriority();
+        let priority = topPriority;
+        while(priority >= 0)
         {
-            _local_3 = this.getSongIdRequestedAtPriority(_local_2);
-            if(((_local_3 >= 0) && (this.playSongObject(_local_2, _local_3))))
+            songId = this.getSongIdRequestedAtPriority(priority);
+            if(((songId >= 0) && (this.playSongObject(priority, songId))))
             {
                 return;
             }
-            _local_2--;
+            priority--;
         }
     }
 
@@ -515,9 +515,9 @@ export class MusicController implements IMusicController
         }
     }
 
-    private reRequestSongAtPriority(k: number): void
+    private reRequestSongAtPriority(priority: number): void
     {
-        this._songRequestCountsPerPriority[k] = (this._songRequestCountsPerPriority[k] + 1);
+        this._songRequestCountsPerPriority[priority] = (this._songRequestCountsPerPriority[priority] + 1);
     }
 
     private stopSongAtPriority(priority: number): boolean
@@ -536,18 +536,18 @@ export class MusicController implements IMusicController
         return false;
     }
 
-    private onSoundMachineInit(k: Event): void
+    private onSoundMachineInit(event: Event): void
     {
         this.disposeRoomPlaylist();
         //this._roomItemPlaylist = (new SoundMachinePlayListController(this._soundManager, this, this._events) as IPlaylistController);
     }
 
-    private onSoundMachineDispose(k: Event): void
+    private onSoundMachineDispose(event: Event): void
     {
         this.disposeRoomPlaylist();
     }
 
-    private onJukeboxInit(k: Event): void
+    private onJukeboxInit(event: Event): void
     {
         this.disposeRoomPlaylist();
         this._roomItemPlaylist = (new JukeboxPlaylistController() as IPlaylistController);
@@ -555,7 +555,7 @@ export class MusicController implements IMusicController
         GetCommunication().connection.send(new GetNowPlayingMessageComposer());
     }
 
-    private onJukeboxDispose(k: Event): void
+    private onJukeboxDispose(event: Event): void
     {
         this.disposeRoomPlaylist();
     }

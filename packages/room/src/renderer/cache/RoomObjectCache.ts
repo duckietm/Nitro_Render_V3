@@ -31,27 +31,27 @@ export class RoomObjectCache
         }
     }
 
-    public getObjectCache(k: string): RoomObjectCacheItem
+    public getObjectCache(id: string): RoomObjectCacheItem
     {
-        let existing = this._data.get(k);
+        let existing = this._data.get(id);
 
         if(!existing)
         {
             existing = new RoomObjectCacheItem(this._roomObjectVariableAccurateZ);
 
-            this._data.set(k, existing);
+            this._data.set(id, existing);
         }
 
         return existing;
     }
 
-    public removeObjectCache(k: string): void
+    public removeObjectCache(id: string): void
     {
-        const existing = this._data.get(k);
+        const existing = this._data.get(id);
 
         if(!existing) return;
 
-        this._data.delete(k);
+        this._data.delete(id);
 
         existing.dispose();
     }
@@ -117,13 +117,13 @@ export class RoomObjectCache
         return spriteData;
     }
 
-    private isSkewedSprite(k: IRoomObjectSprite): boolean
+    private isSkewedSprite(sprite: IRoomObjectSprite): boolean
     {
-        if(!k.type) return false;
-		
-        if((k.type.indexOf('external_image_wallitem') === 0) && (k.tag === 'THUMBNAIL')) return true;
+        if(!sprite.type) return false;
 
-        if((k.type.indexOf('guild_forum') === 0) && (k.tag === 'THUMBNAIL')) return true;
+        if((sprite.type.indexOf('external_image_wallitem') === 0) && (sprite.tag === 'THUMBNAIL')) return true;
+
+        if((sprite.type.indexOf('guild_forum') === 0) && (sprite.tag === 'THUMBNAIL')) return true;
 
         return false;
     }

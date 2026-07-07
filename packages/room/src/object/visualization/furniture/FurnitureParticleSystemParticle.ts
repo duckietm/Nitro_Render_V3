@@ -149,10 +149,10 @@ export class FurnitureParticleSystemParticle
         return this._lastY;
     }
 
-    public set lastY(k: number)
+    public set lastY(y: number)
     {
         this._hasMoved = true;
-        this._lastY = k;
+        this._lastY = y;
     }
 
     public get lastZ(): number

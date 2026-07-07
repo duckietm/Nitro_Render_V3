@@ -15,14 +15,14 @@ export class RoomSessionQueueEvent extends RoomSessionEvent
     private _isActive: boolean;
     private _activeQueue: string;
 
-    constructor(k: IRoomSession, _arg_2: string, _arg_3: number, _arg_4: boolean = false)
+    constructor(session: IRoomSession, name: string, target: number, isActive: boolean = false)
     {
-        super(RoomSessionQueueEvent.QUEUE_STATUS, k);
+        super(RoomSessionQueueEvent.QUEUE_STATUS, session);
 
-        this._name = _arg_2;
-        this._target = _arg_3;
+        this._name = name;
+        this._target = target;
         this._queues = new Map();
-        this._isActive = _arg_4;
+        this._isActive = isActive;
     }
 
     public get isActive(): boolean
@@ -45,13 +45,13 @@ export class RoomSessionQueueEvent extends RoomSessionEvent
         return Array.from(this._queues.keys());
     }
 
-    public getQueueSize(k: string): number
+    public getQueueSize(queueType: string): number
     {
-        return this._queues.get(k);
+        return this._queues.get(queueType);
     }
 
-    public addQueue(k: string, _arg_2: number): void
+    public addQueue(queueType: string, size: number): void
     {
-        this._queues.set(k, _arg_2);
+        this._queues.set(queueType, size);
     }
 }

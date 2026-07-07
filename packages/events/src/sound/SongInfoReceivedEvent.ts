@@ -6,10 +6,10 @@ export class SongInfoReceivedEvent extends NitroEvent
 
     private _id:number;
 
-    constructor(k:string, _arg_2:number)
+    constructor(type:string, id:number)
     {
-        super(k);
-        this._id = _arg_2;
+        super(type);
+        this._id = id;
     }
 
     public get id():number

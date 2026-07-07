@@ -27,12 +27,12 @@ export class AnimationFrameData
         return false;
     }
 
-    public getX(k: number): number
+    public getX(direction: number): number
     {
         return this._x;
     }
 
-    public getY(k: number): number
+    public getY(direction: number): number
     {
         return this._y;
     }

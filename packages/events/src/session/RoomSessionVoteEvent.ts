@@ -12,20 +12,20 @@ export class RoomSessionVoteEvent extends RoomSessionEvent
     private _SafeStr_7651: string[];
     private _SafeStr_7654: number = 0;
 
-    constructor(_arg_1: string, _arg_2: IRoomSession, _arg_3: string, _arg_4: string[], _arg_5: string[] = null, _arg_6: number = 0)
+    constructor(type: string, session: IRoomSession, question: string, choices: string[], results: string[] = null, totalVotes: number = 0)
     {
-        super(_arg_1, _arg_2);
+        super(type, session);
 
         this._choices = [];
         this._SafeStr_7651 = [];
-        this._question = _arg_3;
-        this._choices = _arg_4;
-        this._SafeStr_7651 = _arg_5;
+        this._question = question;
+        this._choices = choices;
+        this._SafeStr_7651 = results;
         if(this._SafeStr_7651 == null)
         {
             this._SafeStr_7651 = [];
         }
-        this._SafeStr_7654 = _arg_6;
+        this._SafeStr_7654 = totalVotes;
     }
 
     public get question(): string

@@ -32,9 +32,9 @@ export class RoomData
         return this._floorType;
     }
 
-    public set floorType(k: string)
+    public set floorType(type: string)
     {
-        this._floorType = k;
+        this._floorType = type;
     }
 
     public get wallType(): string
@@ -42,9 +42,9 @@ export class RoomData
         return this._wallType;
     }
 
-    public set wallType(k: string)
+    public set wallType(type: string)
     {
-        this._wallType = k;
+        this._wallType = type;
     }
 
     public get landscapeType(): string
@@ -52,8 +52,8 @@ export class RoomData
         return this._landscapeType;
     }
 
-    public set landscapeType(k: string)
+    public set landscapeType(type: string)
     {
-        this._landscapeType = k;
+        this._landscapeType = type;
     }
 }

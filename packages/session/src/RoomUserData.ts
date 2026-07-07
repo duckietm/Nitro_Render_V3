@@ -40,9 +40,9 @@ export class RoomUserData implements IRoomUserData
     private _roomEntryMethod: string = 'unknown';
     private _roomEntryTeleportId: number = 0;
 
-    constructor(k: number)
+    constructor(roomIndex: number)
     {
-        this._roomIndex = k;
+        this._roomIndex = roomIndex;
     }
 
     public get roomIndex(): number
@@ -55,9 +55,9 @@ export class RoomUserData implements IRoomUserData
         return this._activityPoints;
     }
 
-    public set activityPoints(k: number)
+    public set activityPoints(value: number)
     {
-        this._activityPoints = k;
+        this._activityPoints = value;
     }
 	
 	public get background(): number
@@ -65,9 +65,9 @@ export class RoomUserData implements IRoomUserData
         return this._background;
     }
 
-    public set background(k: number)
+    public set background(value: number)
     {
-        this._background = k;
+        this._background = value;
     }
 
     public get stand(): number
@@ -75,9 +75,9 @@ export class RoomUserData implements IRoomUserData
         return this._stand;
     }
 
-    public set stand(k: number)
+    public set stand(value: number)
     {
-        this._stand = k;
+        this._stand = value;
     }
 
     public get overlay(): number
@@ -85,9 +85,9 @@ export class RoomUserData implements IRoomUserData
         return this._overlay;
     }
 
-    public set overlay(k: number)
+    public set overlay(value: number)
     {
-        this._overlay = k;
+        this._overlay = value;
     }
 
     public get cardBackground(): number
@@ -95,9 +95,9 @@ export class RoomUserData implements IRoomUserData
         return this._cardBackground;
     }
 
-    public set cardBackground(k: number)
+    public set cardBackground(value: number)
     {
-        this._cardBackground = k;
+        this._cardBackground = value;
     }
 
     public get borderId(): number
@@ -105,9 +105,9 @@ export class RoomUserData implements IRoomUserData
         return this._borderId;
     }
 
-    public set borderId(k: number)
+    public set borderId(value: number)
     {
-        this._borderId = k;
+        this._borderId = value;
     }
 
     public get name(): string
@@ -115,9 +115,9 @@ export class RoomUserData implements IRoomUserData
         return this._name;
     }
 
-    public set name(k: string)
+    public set name(value: string)
     {
-        this._name = k;
+        this._name = value;
     }
 
     public get type(): number
@@ -125,9 +125,9 @@ export class RoomUserData implements IRoomUserData
         return this._type;
     }
 
-    public set type(k: number)
+    public set type(value: number)
     {
-        this._type = k;
+        this._type = value;
     }
 
     public get sex(): string
@@ -135,9 +135,9 @@ export class RoomUserData implements IRoomUserData
         return this._sex;
     }
 
-    public set sex(k: string)
+    public set sex(value: string)
     {
-        this._sex = k;
+        this._sex = value;
     }
 
     public get figure(): string
@@ -145,9 +145,9 @@ export class RoomUserData implements IRoomUserData
         return this._figure;
     }
 
-    public set figure(k: string)
+    public set figure(value: string)
     {
-        this._figure = k;
+        this._figure = value;
     }
 
     public get custom(): string
@@ -155,9 +155,9 @@ export class RoomUserData implements IRoomUserData
         return this._custom;
     }
 
-    public set custom(k: string)
+    public set custom(value: string)
     {
-        this._custom = k;
+        this._custom = value;
     }
 
     public get webID(): number
@@ -165,9 +165,9 @@ export class RoomUserData implements IRoomUserData
         return this._webID;
     }
 
-    public set webID(k: number)
+    public set webID(value: number)
     {
-        this._webID = k;
+        this._webID = value;
     }
 
     public get groupId(): number
@@ -185,9 +185,9 @@ export class RoomUserData implements IRoomUserData
         return this._groupName;
     }
 
-    public set groupName(k: string)
+    public set groupName(value: string)
     {
-        this._groupName = k;
+        this._groupName = value;
     }
 
     public get groupStatus(): number
@@ -195,9 +195,9 @@ export class RoomUserData implements IRoomUserData
         return this._groupStatus;
     }
 
-    public set groupStatus(k: number)
+    public set groupStatus(value: number)
     {
-        this._groupStatus = k;
+        this._groupStatus = value;
     }
 
     public get ownerId(): number
@@ -205,9 +205,9 @@ export class RoomUserData implements IRoomUserData
         return this._ownerId;
     }
 
-    public set ownerId(k: number)
+    public set ownerId(value: number)
     {
-        this._ownerId = k;
+        this._ownerId = value;
     }
 
     public get ownerName(): string
@@ -215,9 +215,9 @@ export class RoomUserData implements IRoomUserData
         return this._ownerName;
     }
 
-    public set ownerName(k: string)
+    public set ownerName(value: string)
     {
-        this._ownerName = k;
+        this._ownerName = value;
     }
 
     public get rarityLevel(): number
@@ -225,9 +225,9 @@ export class RoomUserData implements IRoomUserData
         return this._rarityLevel;
     }
 
-    public set rarityLevel(k: number)
+    public set rarityLevel(value: number)
     {
-        this._rarityLevel = k;
+        this._rarityLevel = value;
     }
 
     public get hasSaddle(): boolean
@@ -235,9 +235,9 @@ export class RoomUserData implements IRoomUserData
         return this._hasSaddle;
     }
 
-    public set hasSaddle(k: boolean)
+    public set hasSaddle(value: boolean)
     {
-        this._hasSaddle = k;
+        this._hasSaddle = value;
     }
 
     public get isRiding(): boolean
@@ -245,9 +245,9 @@ export class RoomUserData implements IRoomUserData
         return this._isRiding;
     }
 
-    public set isRiding(k: boolean)
+    public set isRiding(value: boolean)
     {
-        this._isRiding = k;
+        this._isRiding = value;
     }
 
     public get canBreed(): boolean
@@ -255,9 +255,9 @@ export class RoomUserData implements IRoomUserData
         return this._canBreed;
     }
 
-    public set canBreed(k: boolean)
+    public set canBreed(value: boolean)
     {
-        this._canBreed = k;
+        this._canBreed = value;
     }
 
     public get canHarvest(): boolean
@@ -265,9 +265,9 @@ export class RoomUserData implements IRoomUserData
         return this._canHarvest;
     }
 
-    public set canHarvest(k: boolean)
+    public set canHarvest(value: boolean)
     {
-        this._canHarvest = k;
+        this._canHarvest = value;
     }
 
     public get canRevive(): boolean
@@ -275,9 +275,9 @@ export class RoomUserData implements IRoomUserData
         return this._canRevive;
     }
 
-    public set canRevive(k: boolean)
+    public set canRevive(value: boolean)
     {
-        this._canRevive = k;
+        this._canRevive = value;
     }
 
     public get hasBreedingPermission(): boolean
@@ -285,9 +285,9 @@ export class RoomUserData implements IRoomUserData
         return this._hasBreedingPermission;
     }
 
-    public set hasBreedingPermission(k: boolean)
+    public set hasBreedingPermission(value: boolean)
     {
-        this._hasBreedingPermission = k;
+        this._hasBreedingPermission = value;
     }
 
     public get petLevel(): number
@@ -295,9 +295,9 @@ export class RoomUserData implements IRoomUserData
         return this._petLevel;
     }
 
-    public set petLevel(k: number)
+    public set petLevel(value: number)
     {
-        this._petLevel = k;
+        this._petLevel = value;
     }
 
     public get botSkills(): number[]
@@ -305,9 +305,9 @@ export class RoomUserData implements IRoomUserData
         return this._botSkills;
     }
 
-    public set botSkills(k: number[])
+    public set botSkills(value: number[])
     {
-        this._botSkills = k;
+        this._botSkills = value;
     }
 
     public get isModerator(): boolean
@@ -320,9 +320,9 @@ export class RoomUserData implements IRoomUserData
         return this._nickIcon;
     }
 
-    public set nickIcon(k: string)
+    public set nickIcon(value: string)
     {
-        this._nickIcon = k;
+        this._nickIcon = value;
     }
 
     public get prefixText(): string
@@ -330,9 +330,9 @@ export class RoomUserData implements IRoomUserData
         return this._prefixText;
     }
 
-    public set prefixText(k: string)
+    public set prefixText(value: string)
     {
-        this._prefixText = k;
+        this._prefixText = value;
     }
 
     public get prefixColor(): string
@@ -340,9 +340,9 @@ export class RoomUserData implements IRoomUserData
         return this._prefixColor;
     }
 
-    public set prefixColor(k: string)
+    public set prefixColor(value: string)
     {
-        this._prefixColor = k;
+        this._prefixColor = value;
     }
 
     public get prefixIcon(): string
@@ -350,9 +350,9 @@ export class RoomUserData implements IRoomUserData
         return this._prefixIcon;
     }
 
-    public set prefixIcon(k: string)
+    public set prefixIcon(value: string)
     {
-        this._prefixIcon = k;
+        this._prefixIcon = value;
     }
 
     public get prefixEffect(): string
@@ -360,9 +360,9 @@ export class RoomUserData implements IRoomUserData
         return this._prefixEffect;
     }
 
-    public set prefixEffect(k: string)
+    public set prefixEffect(value: string)
     {
-        this._prefixEffect = k;
+        this._prefixEffect = value;
     }
 
     public get prefixFont(): string
@@ -370,9 +370,9 @@ export class RoomUserData implements IRoomUserData
         return this._prefixFont;
     }
 
-    public set prefixFont(k: string)
+    public set prefixFont(value: string)
     {
-        this._prefixFont = k;
+        this._prefixFont = value;
     }
 
     public get displayOrder(): string
@@ -380,14 +380,14 @@ export class RoomUserData implements IRoomUserData
         return this._displayOrder;
     }
 
-    public set displayOrder(k: string)
+    public set displayOrder(value: string)
     {
-        this._displayOrder = k;
+        this._displayOrder = value;
     }
 
-    public set isModerator(k: boolean)
+    public set isModerator(value: boolean)
     {
-        this._isModerator = k;
+        this._isModerator = value;
     }
 
     public get roomEntryMethod(): string
@@ -395,9 +395,9 @@ export class RoomUserData implements IRoomUserData
         return this._roomEntryMethod;
     }
 
-    public set roomEntryMethod(k: string)
+    public set roomEntryMethod(value: string)
     {
-        this._roomEntryMethod = k;
+        this._roomEntryMethod = value;
     }
 
     public get roomEntryTeleportId(): number
@@ -405,8 +405,8 @@ export class RoomUserData implements IRoomUserData
         return this._roomEntryTeleportId;
     }
 
-    public set roomEntryTeleportId(k: number)
+    public set roomEntryTeleportId(value: number)
     {
-        this._roomEntryTeleportId = k;
+        this._roomEntryTeleportId = value;
     }
 }

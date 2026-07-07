@@ -63,9 +63,9 @@ export class RoomObjectMouseEvent extends RoomObjectEvent
         return this._localX;
     }
 
-    public set localX(k: number)
+    public set localX(value: number)
     {
-        this._localX = k;
+        this._localX = value;
     }
 
     public get localY(): number
@@ -73,9 +73,9 @@ export class RoomObjectMouseEvent extends RoomObjectEvent
         return this._localY;
     }
 
-    public set localY(k: number)
+    public set localY(value: number)
     {
-        this._localY = k;
+        this._localY = value;
     }
 
     public get spriteOffsetX(): number
@@ -83,9 +83,9 @@ export class RoomObjectMouseEvent extends RoomObjectEvent
         return this._spriteOffsetX;
     }
 
-    public set spriteOffsetX(k: number)
+    public set spriteOffsetX(value: number)
     {
-        this._spriteOffsetX = k;
+        this._spriteOffsetX = value;
     }
 
     public get spriteOffsetY(): number
@@ -93,8 +93,8 @@ export class RoomObjectMouseEvent extends RoomObjectEvent
         return this._spriteOffsetY;
     }
 
-    public set spriteOffsetY(k: number)
+    public set spriteOffsetY(value: number)
     {
-        this._spriteOffsetY = k;
+        this._spriteOffsetY = value;
     }
 }

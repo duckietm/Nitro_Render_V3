@@ -779,7 +779,7 @@ export class RoomSpriteCanvas implements IRoomRenderingCanvas
         this._activeSpriteCount++;
     }
 
-    private cleanSprites(spriteCount: number, _arg_2: boolean = false): void
+    private cleanSprites(spriteCount: number, destroy: boolean = false): void
     {
         if(!this._display) return;
 
@@ -791,7 +791,7 @@ export class RoomSpriteCanvas implements IRoomRenderingCanvas
 
             while(iterator >= spriteCount)
             {
-                this.cleanSprite(this.getExtendedSprite(iterator), _arg_2);
+                this.cleanSprite(this.getExtendedSprite(iterator), destroy);
 
                 iterator--;
             }
@@ -800,11 +800,11 @@ export class RoomSpriteCanvas implements IRoomRenderingCanvas
         this._activeSpriteCount = spriteCount;
     }
 
-    private updateEnterRoomEffect(sprite: ExtendedSprite, _arg_2: IRoomObjectSprite): void
+    private updateEnterRoomEffect(sprite: ExtendedSprite, objectSprite: IRoomObjectSprite): void
     {
-        if(!RoomEnterEffect.isVisualizationOn() || !_arg_2) return;
+        if(!RoomEnterEffect.isVisualizationOn() || !objectSprite) return;
 
-        switch(_arg_2.spriteType)
+        switch(objectSprite.spriteType)
         {
             case RoomObjectSpriteType.AVATAR_OWN:
                 return;
@@ -819,11 +819,11 @@ export class RoomSpriteCanvas implements IRoomRenderingCanvas
         }
     }
 
-    private cleanSprite(sprite: ExtendedSprite, _arg_2: boolean): void
+    private cleanSprite(sprite: ExtendedSprite, destroy: boolean): void
     {
         if(!sprite) return;
 
-        if(!_arg_2)
+        if(!destroy)
         {
             sprite.setTexture(null);
         }
@@ -1022,12 +1022,12 @@ export class RoomSpriteCanvas implements IRoomRenderingCanvas
         return new RoomSpriteMouseEvent(type, ((canvasName + '_') + this._eventId), canvasName, tag, screenX, screenY, localX, localY, ctrlKey, altKey, shiftKey, buttonDown);
     }
 
-    protected bufferMouseEvent(k: IRoomSpriteMouseEvent, _arg_2: string): void
+    protected bufferMouseEvent(event: IRoomSpriteMouseEvent, spriteId: string): void
     {
-        if(!k || !this._eventCache) return;
+        if(!event || !this._eventCache) return;
 
-        this._eventCache.delete(_arg_2);
-        this._eventCache.set(_arg_2, k);
+        this._eventCache.delete(spriteId);
+        this._eventCache.set(spriteId, event);
     }
 
     protected processMouseEvents(): void
@@ -1139,10 +1139,10 @@ export class RoomSpriteCanvas implements IRoomRenderingCanvas
         {
             this._SafeStr_795++;
 
-            const _local_4 = this._effectDirection;
-            const _local_1 = Vector3d.sum(_local_4, new Vector3d((Math.sin((((this._SafeStr_795 * 5) / 180) * Math.PI)) * 2), (Math.sin(((this._SafeStr_795 / 180) * Math.PI)) * 5), (Math.sin((((this._SafeStr_795 * 10) / 180) * Math.PI)) * 2)));
+            const baseDirection = this._effectDirection;
+            const direction = Vector3d.sum(baseDirection, new Vector3d((Math.sin((((this._SafeStr_795 * 5) / 180) * Math.PI)) * 2), (Math.sin(((this._SafeStr_795 / 180) * Math.PI)) * 5), (Math.sin((((this._SafeStr_795 * 10) / 180) * Math.PI)) * 2)));
 
-            geometry.direction = _local_1;
+            geometry.direction = direction;
         }
         else
         {

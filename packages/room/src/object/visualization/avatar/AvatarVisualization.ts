@@ -303,9 +303,9 @@ export class AvatarVisualization extends RoomObjectSpriteVisualization implement
                 return;
             }
 
-            let _local_20 = this._avatarImage.getCanvasOffsets();
+            let canvasOffsets = this._avatarImage.getCanvasOffsets();
 
-            if(!_local_20 || (_local_20.length < 3)) _local_20 = AvatarVisualization.DEFAULT_CANVAS_OFFSETS;
+            if(!canvasOffsets || (canvasOffsets.length < 3)) canvasOffsets = AvatarVisualization.DEFAULT_CANVAS_OFFSETS;
 
             const sprite = this.getSprite(AvatarVisualization.SPRITE_INDEX_AVATAR);
             if(sprite)
@@ -330,8 +330,8 @@ export class AvatarVisualization extends RoomObjectSpriteVisualization implement
 
                 if(sprite.texture)
                 {
-                    sprite.offsetX = ((((-1 * scale) / 2) + _local_20[0]) - ((sprite.texture.width - scale) / 2));
-                    sprite.offsetY = (((-(sprite.texture.height) + (scale / 4)) + _local_20[1]) + this._postureOffset);
+                    sprite.offsetX = ((((-1 * scale) / 2) + canvasOffsets[0]) - ((sprite.texture.width - scale) / 2));
+                    sprite.offsetY = (((-(sprite.texture.height) + (scale / 4)) + canvasOffsets[1]) + this._postureOffset);
 
                     if(this._isLaying)
                     {
@@ -348,11 +348,11 @@ export class AvatarVisualization extends RoomObjectSpriteVisualization implement
                     // layInside: avatar slightly behind bed (tucked in under blanket)
                     // !layInside: avatar slightly in front of bed (on top)
                     const laySign = this._layInside ? AvatarVisualization.AVATAR_SPRITE_LAYING_DEPTH : -AvatarVisualization.AVATAR_SPRITE_LAYING_DEPTH;
-                    sprite.relativeDepth = (laySign - this._layDepthOffset + _local_20[2]);
+                    sprite.relativeDepth = (laySign - this._layDepthOffset + canvasOffsets[2]);
                 }
                 else
                 {
-                    sprite.relativeDepth = (AvatarVisualization.AVATAR_SPRITE_DEFAULT_DEPTH + _local_20[2]);
+                    sprite.relativeDepth = (AvatarVisualization.AVATAR_SPRITE_DEFAULT_DEPTH + canvasOffsets[2]);
                 }
 
                 if(this._ownUser)
@@ -372,18 +372,18 @@ export class AvatarVisualization extends RoomObjectSpriteVisualization implement
             {
                 if(!this._isLaying)
                 {
-                    typingBubble.relativeDepth = ((AvatarVisualization.AVATAR_SPRITE_DEFAULT_DEPTH - 0.01) + _local_20[2]);
+                    typingBubble.relativeDepth = ((AvatarVisualization.AVATAR_SPRITE_DEFAULT_DEPTH - 0.01) + canvasOffsets[2]);
                 }
                 else
                 {
                     const laySign = this._layInside ? AvatarVisualization.AVATAR_SPRITE_LAYING_DEPTH : -AvatarVisualization.AVATAR_SPRITE_LAYING_DEPTH;
-                    typingBubble.relativeDepth = ((laySign - this._layDepthOffset - 0.01) + _local_20[2]);
+                    typingBubble.relativeDepth = ((laySign - this._layDepthOffset - 0.01) + canvasOffsets[2]);
                 }
             }
 
             this._isAnimating = this._avatarImage.isAnimating();
 
-            let _local_21 = AvatarVisualization.INITIAL_RESERVED_SPRITES;
+            let spriteIndex = AvatarVisualization.INITIAL_RESERVED_SPRITES;
             const direction = this._avatarImage.getDirection();
 
             for(const spriteData of this._avatarImage.getSprites())
@@ -420,7 +420,7 @@ export class AvatarVisualization extends RoomObjectSpriteVisualization implement
                 }
                 else
                 {
-                    const sprite = this.getSprite(_local_21);
+                    const sprite = this.getSprite(spriteIndex);
 
                     if(sprite)
                     {
@@ -491,7 +491,7 @@ export class AvatarVisualization extends RoomObjectSpriteVisualization implement
                         else sprite.blendMode = 'normal';
                     }
 
-                    _local_21++;
+                    spriteIndex++;
                 }
             }
 
@@ -552,9 +552,9 @@ export class AvatarVisualization extends RoomObjectSpriteVisualization implement
         return cachedImage;
     }
 
-    protected updateObject(object: IRoomObject, geometry: IRoomGeometry, update: boolean, _arg_4: boolean = false): boolean
+    protected updateObject(object: IRoomObject, geometry: IRoomGeometry, update: boolean, force: boolean = false): boolean
     {
-        if((!_arg_4 && (this.updateObjectCounter === object.updateCounter)) && (this._geometryUpdateCounter === geometry.updateId)) return false;
+        if((!force && (this.updateObjectCounter === object.updateCounter)) && (this._geometryUpdateCounter === geometry.updateId)) return false;
 
         let direction = (object.getDirection().x - geometry.direction.x);
         let headDirection = (this._headDirection - geometry.direction.x);
@@ -570,7 +570,7 @@ export class AvatarVisualization extends RoomObjectSpriteVisualization implement
             headDirection -= ((headDirection % 90) - 45);
         }
 
-        if((direction !== this._angle) || _arg_4)
+        if((direction !== this._angle) || force)
         {
             update = true;
 
@@ -582,7 +582,7 @@ export class AvatarVisualization extends RoomObjectSpriteVisualization implement
             this._avatarImage.setDirectionAngle(AvatarSetType.FULL, direction);
         }
 
-        if((headDirection !== this._headAngle) || _arg_4)
+        if((headDirection !== this._headAngle) || force)
         {
             update = true;
 

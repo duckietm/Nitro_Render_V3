@@ -133,9 +133,9 @@ export class FurnitureParticleSystem
         return 0;
     }
 
-    public controlsSprite(k: number): boolean
+    public controlsSprite(spriteId: number): boolean
     {
-        if(this._currentEmitter) return this._currentEmitter.roomObjectSpriteId == k;
+        if(this._currentEmitter) return this._currentEmitter.roomObjectSpriteId == spriteId;
 
         return false;
     }
@@ -159,7 +159,7 @@ export class FurnitureParticleSystem
     {
         if(!this._currentEmitter || !this._roomSprite || this._isDone) return;
 
-        const k = 10;
+        const projectionScale = 10;
 
         if(!this._hasIgnited && this._currentEmitter.hasIgnited) this._hasIgnited = true;
 
@@ -180,8 +180,8 @@ export class FurnitureParticleSystem
 
             for(const particle of this._currentEmitter.particles)
             {
-                const tx = (this._centerX + ((((particle.x - particle.z) * k) / 10) * this._scaleMultiplier));
-                const ty = ((this._centerY - offsetY) + ((((particle.y + ((particle.x + particle.z) / 2)) * k) / 10) * this._scaleMultiplier));
+                const tx = (this._centerX + ((((particle.x - particle.z) * projectionScale) / 10) * this._scaleMultiplier));
+                const ty = ((this._centerY - offsetY) + ((((particle.y + ((particle.x + particle.z) / 2)) * projectionScale) / 10) * this._scaleMultiplier));
                 const asset = particle.getAsset();
 
                 this._particleSprite.texture = null;

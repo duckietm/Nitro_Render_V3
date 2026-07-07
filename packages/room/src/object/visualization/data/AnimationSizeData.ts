@@ -120,13 +120,13 @@ export class AnimationSizeData extends SizeData
         return this._animationIds[(animationId % totalAnimations)];
     }
 
-    public isImmediateChange(animationId: number, _arg_2: number): boolean
+    public isImmediateChange(animationId: number, state: number): boolean
     {
         const animation = this._animations.get(animationId);
 
         if(!animation) return false;
 
-        return animation.isImmediateChange(_arg_2);
+        return animation.isImmediateChange(state);
     }
 
     public getStartFrame(animationId: number, direction: number): number

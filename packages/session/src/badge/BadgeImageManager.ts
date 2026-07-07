@@ -33,9 +33,9 @@ export class BadgeImageManager
         return this.getBadgeTexture(badgeName, type);
     }
 
-    public getBadgeInfo(k: string): BadgeInfo
+    public getBadgeInfo(badgeName: string): BadgeInfo
     {
-        const badge = this.getBadgeTexture(k);
+        const badge = this.getBadgeTexture(badgeName);
 
         return (badge) ? new BadgeInfo(badge, false) : new BadgeInfo(this.getBadgePlaceholder(), true);
     }

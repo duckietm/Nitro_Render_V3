@@ -3,13 +3,13 @@ import { Interval } from './Interval';
 
 export class EaseOut extends EaseRate
 {
-    constructor(k: Interval, _arg_2: number)
+    constructor(interval: Interval, rate: number)
     {
-        super(k, _arg_2);
+        super(interval, rate);
     }
 
-    public update(k: number): void
+    public update(progress: number): void
     {
-        this._interval.update(Math.pow(k, (1 / this._rate)));
+        this._interval.update(Math.pow(progress, (1 / this._rate)));
     }
 }

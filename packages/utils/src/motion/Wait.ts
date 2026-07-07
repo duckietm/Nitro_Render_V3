@@ -6,11 +6,11 @@ export class Wait extends Motion
     private _startTimeMs: number;
     private _waitTimeMs: number;
 
-    constructor(k: number)
+    constructor(waitTime: number)
     {
         super(null);
 
-        this._waitTimeMs = k;
+        this._waitTimeMs = waitTime;
     }
 
     public get running(): boolean
@@ -26,11 +26,11 @@ export class Wait extends Motion
         this._startTimeMs = GetTickerTime();
     }
 
-    public tick(k: number): void
+    public tick(time: number): void
     {
-        super.tick(k);
+        super.tick(time);
 
-        this._complete = ((k - this._startTimeMs) >= this._waitTimeMs);
+        this._complete = ((time - this._startTimeMs) >= this._waitTimeMs);
 
         if(this._complete) this.stop();
     }

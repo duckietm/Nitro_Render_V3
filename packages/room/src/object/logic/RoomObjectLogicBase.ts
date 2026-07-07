@@ -37,11 +37,11 @@ export class RoomObjectLogicBase implements IRoomObjectEventHandler
         return [];
     }
 
-    protected mergeTypes(k: string[], _arg_2: string[]): string[]
+    protected mergeTypes(baseTypes: string[], additionalTypes: string[]): string[]
     {
-        const types = k.concat();
+        const types = baseTypes.concat();
 
-        for(const type of _arg_2)
+        for(const type of additionalTypes)
         {
             if(!type || (types.indexOf(type) >= 0)) continue;
 

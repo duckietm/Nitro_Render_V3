@@ -40,23 +40,23 @@ export class PlaneMaskManager
         }
     }
 
-    public initialize(k: IAssetPlaneMaskData): void
+    public initialize(data: IAssetPlaneMaskData): void
     {
-        this._data = k;
+        this._data = data;
     }
 
-    public initializeAssetCollection(k: IGraphicAssetCollection): void
+    public initializeAssetCollection(assetCollection: IGraphicAssetCollection): void
     {
         if(!this.data) return;
 
-        this._assetCollection = k;
+        this._assetCollection = assetCollection;
 
-        this.parseMasks(this.data, k);
+        this.parseMasks(this.data, assetCollection);
     }
 
-    private parseMasks(maskData: IAssetPlaneMaskData, _arg_2: IGraphicAssetCollection): void
+    private parseMasks(maskData: IAssetPlaneMaskData, assetCollection: IGraphicAssetCollection): void
     {
-        if(!maskData || !_arg_2) return;
+        if(!maskData || !assetCollection) return;
 
         if(maskData.masks && maskData.masks.length)
         {
@@ -90,7 +90,7 @@ export class PlaneMaskManager
 
                                 if(maskVisualization)
                                 {
-                                    const assetName = this.parseMaskBitmaps(visualization.bitmaps, maskVisualization, _arg_2);
+                                    const assetName = this.parseMaskBitmaps(visualization.bitmaps, maskVisualization, assetCollection);
 
                                     newMask.setAssetName(size, assetName);
                                 }
@@ -248,10 +248,10 @@ export class PlaneMaskManager
         return true;
     }
 
-    public getMask(k: string): PlaneMask
+    public getMask(type: string): PlaneMask
     {
         if(!this._masks || !this._masks.size) return null;
 
-        return this._masks.get(k) || null;
+        return this._masks.get(type) || null;
     }
 }

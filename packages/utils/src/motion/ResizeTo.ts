@@ -9,12 +9,12 @@ export class ResizeTo extends Interval
     protected _deltaW: number;
     protected _deltaH: number;
 
-    constructor(k: HTMLElement, _arg_2: number, _arg_3: number, _arg_4: number)
+    constructor(target: HTMLElement, duration: number, endWidth: number, endHeight: number)
     {
-        super(k, _arg_2);
+        super(target, duration);
 
-        this._endW = _arg_3;
-        this._endH = _arg_4;
+        this._endW = endWidth;
+        this._endH = endHeight;
     }
 
     public start(): void
@@ -27,9 +27,9 @@ export class ResizeTo extends Interval
         this._deltaH = (this._endH - this._startH);
     }
 
-    public update(k: number): void
+    public update(progress: number): void
     {
-        this.target.style.width = ((this._startW + (this._deltaW * k)) + 'px');
-        this.target.style.height = ((this._startH + (this._deltaH * k)) + 'px');
+        this.target.style.width = ((this._startW + (this._deltaW * progress)) + 'px');
+        this.target.style.height = ((this._startH + (this._deltaH * progress)) + 'px');
     }
 }

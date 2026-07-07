@@ -137,76 +137,76 @@ export class ColorConverter
         return (r << 16) + (g << 8) + b;
     }
 
-    public static rgb2xyz(k: number): IVector3D
+    public static rgb2xyz(rgb: number): IVector3D
     {
-        let _local_2: number = (((k >> 16) & 0xFF) / 0xFF);
-        let _local_3: number = (((k >> 8) & 0xFF) / 0xFF);
-        let _local_4: number = (((k >> 0) & 0xFF) / 0xFF);
-        if(_local_2 > 0.04045)
+        let red: number = (((rgb >> 16) & 0xFF) / 0xFF);
+        let green: number = (((rgb >> 8) & 0xFF) / 0xFF);
+        let blue: number = (((rgb >> 0) & 0xFF) / 0xFF);
+        if(red > 0.04045)
         {
-            _local_2 = Math.pow(((_local_2 + 0.055) / 1.055), 2.4);
+            red = Math.pow(((red + 0.055) / 1.055), 2.4);
         }
         else
         {
-            _local_2 = (_local_2 / 12.92);
+            red = (red / 12.92);
         }
-        if(_local_3 > 0.04045)
+        if(green > 0.04045)
         {
-            _local_3 = Math.pow(((_local_3 + 0.055) / 1.055), 2.4);
+            green = Math.pow(((green + 0.055) / 1.055), 2.4);
         }
         else
         {
-            _local_3 = (_local_3 / 12.92);
+            green = (green / 12.92);
         }
-        if(_local_4 > 0.04045)
+        if(blue > 0.04045)
         {
-            _local_4 = Math.pow(((_local_4 + 0.055) / 1.055), 2.4);
+            blue = Math.pow(((blue + 0.055) / 1.055), 2.4);
         }
         else
         {
-            _local_4 = (_local_4 / 12.92);
+            blue = (blue / 12.92);
         }
-        _local_2 = (_local_2 * 100);
-        _local_3 = (_local_3 * 100);
-        _local_4 = (_local_4 * 100);
-        return new Vector3d((((_local_2 * 0.4124) + (_local_3 * 0.3576)) + (_local_4 * 0.1805)), (((_local_2 * 0.2126) + (_local_3 * 0.7152)) + (_local_4 * 0.0722)), (((_local_2 * 0.0193) + (_local_3 * 0.1192)) + (_local_4 * 0.9505)));
+        red = (red * 100);
+        green = (green * 100);
+        blue = (blue * 100);
+        return new Vector3d((((red * 0.4124) + (green * 0.3576)) + (blue * 0.1805)), (((red * 0.2126) + (green * 0.7152)) + (blue * 0.0722)), (((red * 0.0193) + (green * 0.1192)) + (blue * 0.9505)));
     }
 
-    public static xyz2CieLab(k: IVector3D): IVector3D
+    public static xyz2CieLab(xyz: IVector3D): IVector3D
     {
-        let _local_2: number = (k.x / 95.047);
-        let _local_3: number = (k.y / 100);
-        let _local_4: number = (k.z / 108.883);
-        if(_local_2 > 0.008856)
+        let x: number = (xyz.x / 95.047);
+        let y: number = (xyz.y / 100);
+        let z: number = (xyz.z / 108.883);
+        if(x > 0.008856)
         {
-            _local_2 = Math.pow(_local_2, (1 / 3));
+            x = Math.pow(x, (1 / 3));
         }
         else
         {
-            _local_2 = ((7.787 * _local_2) + (16 / 116));
+            x = ((7.787 * x) + (16 / 116));
         }
-        if(_local_3 > 0.008856)
+        if(y > 0.008856)
         {
-            _local_3 = Math.pow(_local_3, (1 / 3));
+            y = Math.pow(y, (1 / 3));
         }
         else
         {
-            _local_3 = ((7.787 * _local_3) + (16 / 116));
+            y = ((7.787 * y) + (16 / 116));
         }
-        if(_local_4 > 0.008856)
+        if(z > 0.008856)
         {
-            _local_4 = Math.pow(_local_4, (1 / 3));
+            z = Math.pow(z, (1 / 3));
         }
         else
         {
-            _local_4 = ((7.787 * _local_4) + (16 / 116));
+            z = ((7.787 * z) + (16 / 116));
         }
-        return new Vector3d(((116 * _local_3) - 16), (500 * (_local_2 - _local_3)), (200 * (_local_3 - _local_4)));
+        return new Vector3d(((116 * y) - 16), (500 * (x - y)), (200 * (y - z)));
     }
 
-    public static rgb2CieLab(k: number): IVector3D
+    public static rgb2CieLab(rgb: number): IVector3D
     {
-        return ColorConverter.xyz2CieLab(ColorConverter.rgb2xyz(k));
+        return ColorConverter.xyz2CieLab(ColorConverter.rgb2xyz(rgb));
     }
 
     public static colorize(colorA: number, colorB: number): number

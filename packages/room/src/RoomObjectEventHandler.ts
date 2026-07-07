@@ -74,9 +74,9 @@ export class RoomObjectEventHandler implements IRoomCanvasMouseListener, IRoomOb
 
         if((category !== RoomObjectCategory.ROOM) && (!this._roomEngine.isPlayingGame() || category !== RoomObjectCategory.UNIT)) category = RoomObjectCategory.MINIMUM;
 
-        const _local_7 = this.getMouseEventId(category, event.type);
+        const storedEventId = this.getMouseEventId(category, event.type);
 
-        if(_local_7 === event.eventId)
+        if(storedEventId === event.eventId)
         {
             if((event.type === MouseEventType.MOUSE_CLICK) || (event.type === MouseEventType.DOUBLE_CLICK) || (event.type === MouseEventType.MOUSE_DOWN) || (event.type === MouseEventType.MOUSE_UP) || (event.type === MouseEventType.MOUSE_MOVE)) return;
         }
@@ -121,35 +121,35 @@ export class RoomObjectEventHandler implements IRoomCanvasMouseListener, IRoomOb
         return true;
     }
 
-    public cancelRoomObjectInsert(k: number): boolean
+    public cancelRoomObjectInsert(roomId: number): boolean
     {
-        this.resetSelectedObjectData(k);
+        this.resetSelectedObjectData(roomId);
 
         return true;
     }
 
-    private getMouseEventId(k: number, _arg_2: string): string
+    private getMouseEventId(category: number, eventType: string): string
     {
-        const existing = this._eventIds.get(k);
+        const existing = this._eventIds.get(category);
 
         if(!existing) return null;
 
-        return (existing.get(_arg_2) || null);
+        return (existing.get(eventType) || null);
     }
 
-    private setMouseEventId(k: number, _arg_2: string, _arg_3: string): void
+    private setMouseEventId(category: number, eventType: string, eventId: string): void
     {
-        let existing = this._eventIds.get(k);
+        let existing = this._eventIds.get(category);
 
         if(!existing)
         {
             existing = new Map();
 
-            this._eventIds.set(k, existing);
+            this._eventIds.set(category, existing);
         }
 
-        existing.delete(_arg_2);
-        existing.set(_arg_2, _arg_3);
+        existing.delete(eventType);
+        existing.set(eventType, eventId);
     }
 
 
@@ -517,10 +517,10 @@ export class RoomObjectEventHandler implements IRoomCanvasMouseListener, IRoomOb
 
         if(category === RoomObjectCategory.ROOM)
         {
-            const _local_15 = this.getMouseEventId(RoomObjectCategory.MINIMUM, MouseEventType.MOUSE_CLICK);
-            const _local_16 = this.getMouseEventId(RoomObjectCategory.UNIT, MouseEventType.MOUSE_CLICK);
+            const minimumClickEventId = this.getMouseEventId(RoomObjectCategory.MINIMUM, MouseEventType.MOUSE_CLICK);
+            const unitClickEventId = this.getMouseEventId(RoomObjectCategory.UNIT, MouseEventType.MOUSE_CLICK);
 
-            if((_local_15 !== event.eventId) && (_local_16 !== event.eventId) && !didMove)
+            if((minimumClickEventId !== event.eventId) && (unitClickEventId !== event.eventId) && !didMove)
             {
                 this.deselectObject(roomId);
 
@@ -1110,7 +1110,7 @@ export class RoomObjectEventHandler implements IRoomCanvasMouseListener, IRoomOb
 
         if(!roomObject) return;
 
-        let _local_6 = true;
+        let moveValid = true;
 
         if((selectedData.category === RoomObjectCategory.FLOOR) || (selectedData.category === RoomObjectCategory.UNIT))
         {
@@ -1120,39 +1120,39 @@ export class RoomObjectEventHandler implements IRoomCanvasMouseListener, IRoomOb
             {
                 this.handleFurnitureMove(roomObject, selectedData, selectedData.loc.x, selectedData.loc.y, stackingHeightMap);
 
-                _local_6 = false;
+                moveValid = false;
             }
         }
 
         else if((selectedData.category === RoomObjectCategory.WALL))
         {
-            _local_6 = false;
+            moveValid = false;
 
             if(event instanceof RoomObjectWallMouseEvent)
             {
-                const _local_10 = event.wallLocation;
-                const _local_11 = event.wallWidth;
-                const _local_12 = event.wallHeight;
-                const _local_13 = event.x;
-                const _local_14 = event.y;
-                const _local_15 = event.direction;
+                const wallLocation = event.wallLocation;
+                const wallWidth = event.wallWidth;
+                const wallHeight = event.wallHeight;
+                const x = event.x;
+                const y = event.y;
+                const direction = event.direction;
 
-                if(this.handleWallItemMove(roomObject, selectedData, _local_10, _local_11, _local_12, _local_13, _local_14, _local_15))
+                if(this.handleWallItemMove(roomObject, selectedData, wallLocation, wallWidth, wallHeight, x, y, direction))
                 {
-                    _local_6 = true;
+                    moveValid = true;
                 }
             }
 
-            if(!_local_6)
+            if(!moveValid)
             {
                 roomObject.setLocation(selectedData.loc);
                 roomObject.setDirection(selectedData.dir);
             }
 
-            this._roomEngine.updateRoomObjectMask(roomId, selectedData.id, _local_6);
+            this._roomEngine.updateRoomObjectMask(roomId, selectedData.id, moveValid);
         }
 
-        if(_local_6)
+        if(moveValid)
         {
             this.setFurnitureAlphaMultiplier(roomObject, 0.5);
 
@@ -1236,7 +1236,7 @@ export class RoomObjectEventHandler implements IRoomCanvasMouseListener, IRoomOb
 
         if(roomObject)
         {
-            let _local_12 = true;
+            let placementValid = true;
 
             const stackingHeightMap = this._roomEngine.getFurnitureStackingHeightMap(roomId);
 
@@ -1246,35 +1246,35 @@ export class RoomObjectEventHandler implements IRoomCanvasMouseListener, IRoomOb
                 {
                     this._roomEngine.removeRoomObjectFloor(roomId, selectedData.id);
 
-                    _local_12 = false;
+                    placementValid = false;
                 }
             }
 
             else if(selectedData.category === RoomObjectCategory.WALL)
             {
-                _local_12 = false;
+                placementValid = false;
 
                 if(event instanceof RoomObjectWallMouseEvent)
                 {
-                    const _local_14 = event.wallLocation;
-                    const _local_15 = event.wallWidth;
-                    const _local_16 = event.wallHeight;
-                    const _local_17 = event.x;
-                    const _local_18 = event.y;
-                    const _local_19 = event.direction;
+                    const wallLocation = event.wallLocation;
+                    const wallWidth = event.wallWidth;
+                    const wallHeight = event.wallHeight;
+                    const x = event.x;
+                    const y = event.y;
+                    const direction = event.direction;
 
-                    if(this.handleWallItemMove(roomObject, selectedData, _local_14, _local_15, _local_16, _local_17, _local_18, _local_19))
+                    if(this.handleWallItemMove(roomObject, selectedData, wallLocation, wallWidth, wallHeight, x, y, direction))
                     {
-                        _local_12 = true;
+                        placementValid = true;
                     }
                 }
 
-                if(!_local_12)
+                if(!placementValid)
                 {
                     this._roomEngine.removeRoomObjectWall(roomId, selectedData.id);
                 }
 
-                this._roomEngine.updateRoomObjectMask(roomId, selectedData.id, _local_12);
+                this._roomEngine.updateRoomObjectMask(roomId, selectedData.id, placementValid);
             }
 
             else if(selectedData.category === RoomObjectCategory.UNIT)
@@ -1283,11 +1283,11 @@ export class RoomObjectEventHandler implements IRoomCanvasMouseListener, IRoomOb
                 {
                     this._roomEngine.removeRoomObjectUser(roomId, selectedData.id);
 
-                    _local_12 = false;
+                    placementValid = false;
                 }
             }
 
-            this._roomEngine.setObjectMoverIconSpriteVisible(!_local_12);
+            this._roomEngine.setObjectMoverIconSpriteVisible(!placementValid);
         }
     }
 
@@ -1295,118 +1295,118 @@ export class RoomObjectEventHandler implements IRoomCanvasMouseListener, IRoomOb
     {
         if(!roomObject || !selectedObjectData) return false;
 
-        const _local_6 = new Vector3d();
-        _local_6.assign(roomObject.getDirection());
+        const originalDirection = new Vector3d();
+        originalDirection.assign(roomObject.getDirection());
 
         roomObject.setDirection(selectedObjectData.dir);
 
-        const _local_7 = new Vector3d(x, y, 0);
-        const _local_8 = new Vector3d();
+        const targetLocation = new Vector3d(x, y, 0);
+        const newDirection = new Vector3d();
 
-        _local_8.assign(roomObject.getDirection());
+        newDirection.assign(roomObject.getDirection());
 
-        let _local_9 = this.validateFurnitureLocation(roomObject, _local_7, selectedObjectData.loc, selectedObjectData.dir, stackingHeightMap);
+        let validLocation = this.validateFurnitureLocation(roomObject, targetLocation, selectedObjectData.loc, selectedObjectData.dir, stackingHeightMap);
 
-        if(!_local_9)
+        if(!validLocation)
         {
-            _local_8.x = this.getValidRoomObjectDirection(roomObject, true);
+            newDirection.x = this.getValidRoomObjectDirection(roomObject, true);
 
-            roomObject.setDirection(_local_8);
+            roomObject.setDirection(newDirection);
 
-            _local_9 = this.validateFurnitureLocation(roomObject, _local_7, selectedObjectData.loc, selectedObjectData.dir, stackingHeightMap);
+            validLocation = this.validateFurnitureLocation(roomObject, targetLocation, selectedObjectData.loc, selectedObjectData.dir, stackingHeightMap);
         }
 
-        if(!_local_9)
+        if(!validLocation)
         {
-            roomObject.setDirection(_local_6);
+            roomObject.setDirection(originalDirection);
 
             return false;
         }
 
-        roomObject.setLocation(_local_9);
+        roomObject.setLocation(validLocation);
 
-        if(_local_8) roomObject.setDirection(_local_8);
-
-        return true;
-    }
-
-    private handleWallItemMove(k: IRoomObjectController, _arg_2: ISelectedRoomObjectData, _arg_3: IVector3D, _arg_4: IVector3D, _arg_5: IVector3D, _arg_6: number, _arg_7: number, _arg_8: number): boolean
-    {
-        if(!k || !_arg_2) return false;
-
-        const _local_9 = new Vector3d(_arg_8);
-        const _local_10 = this.validateWallItemLocation(k, _arg_3, _arg_4, _arg_5, _arg_6, _arg_7, _arg_2);
-
-        if(!_local_10) return false;
-
-        k.setLocation(_local_10);
-        k.setDirection(_local_9);
+        if(newDirection) roomObject.setDirection(newDirection);
 
         return true;
     }
 
-    private validateFurnitureLocation(k: IRoomObject, _arg_2: IVector3D, _arg_3: IVector3D, _arg_4: IVector3D, _arg_5: IFurnitureStackingHeightMap): Vector3d
+    private handleWallItemMove(roomObject: IRoomObjectController, selectedObjectData: ISelectedRoomObjectData, wallLocation: IVector3D, wallWidth: IVector3D, wallHeight: IVector3D, x: number, y: number, direction: number): boolean
     {
-        if(!k || !k.model || !_arg_2) return null;
+        if(!roomObject || !selectedObjectData) return false;
 
-        let _local_15: Vector3d = null;
+        const directionVector = new Vector3d(direction);
+        const validLocation = this.validateWallItemLocation(roomObject, wallLocation, wallWidth, wallHeight, x, y, selectedObjectData);
 
-        const _local_6 = k.getDirection();
+        if(!validLocation) return false;
 
-        if(!_local_6) return null;
+        roomObject.setLocation(validLocation);
+        roomObject.setDirection(directionVector);
 
-        if(!_arg_3 || !_arg_4) return null;
+        return true;
+    }
 
-        if((_arg_2.x === _arg_3.x) && (_arg_2.y === _arg_3.y))
+    private validateFurnitureLocation(roomObject: IRoomObject, targetLocation: IVector3D, currentLocation: IVector3D, currentDirection: IVector3D, stackingHeightMap: IFurnitureStackingHeightMap): Vector3d
+    {
+        if(!roomObject || !roomObject.model || !targetLocation) return null;
+
+        let resultLocation: Vector3d = null;
+
+        const direction = roomObject.getDirection();
+
+        if(!direction) return null;
+
+        if(!currentLocation || !currentDirection) return null;
+
+        if((targetLocation.x === currentLocation.x) && (targetLocation.y === currentLocation.y))
         {
-            if(_local_6.x === _arg_4.x)
+            if(direction.x === currentDirection.x)
             {
-                _local_15 = new Vector3d();
+                resultLocation = new Vector3d();
 
-                _local_15.assign(_arg_3);
+                resultLocation.assign(currentLocation);
 
-                return _local_15;
+                return resultLocation;
             }
         }
 
-        let sizeX = k.model.getValue<number>(RoomObjectVariable.FURNITURE_SIZE_X);
-        let sizeY = k.model.getValue<number>(RoomObjectVariable.FURNITURE_SIZE_Y);
+        let sizeX = roomObject.model.getValue<number>(RoomObjectVariable.FURNITURE_SIZE_X);
+        let sizeY = roomObject.model.getValue<number>(RoomObjectVariable.FURNITURE_SIZE_Y);
 
         if(sizeX < 1) sizeX = 1;
 
         if(sizeY < 1) sizeY = 1;
 
-        const _local_9 = _arg_3.x;
-        const _local_10 = _arg_3.y;
-        let _local_11 = sizeX;
-        let _local_12 = sizeY;
-        let _local_13 = 0;
-        let _local_14 = (Math.trunc((Math.trunc(_local_6.x + 45) % 360) / 90));
+        const baseX = currentLocation.x;
+        const baseY = currentLocation.y;
+        let currentSizeX = sizeX;
+        let currentSizeY = sizeY;
+        let temp = 0;
+        let directionQuadrant = (Math.trunc((Math.trunc(direction.x + 45) % 360) / 90));
 
-        if((_local_14 === 1) || (_local_14 === 3))
+        if((directionQuadrant === 1) || (directionQuadrant === 3))
         {
-            _local_13 = sizeX;
+            temp = sizeX;
 
             sizeX = sizeY;
-            sizeY = _local_13;
+            sizeY = temp;
         }
 
-        _local_14 = Math.trunc((Math.trunc(_arg_4.x + 45) % 360) / 90);
+        directionQuadrant = Math.trunc((Math.trunc(currentDirection.x + 45) % 360) / 90);
 
-        if((_local_14 === 1) || (_local_14 === 3))
+        if((directionQuadrant === 1) || (directionQuadrant === 3))
         {
-            _local_13 = _local_11;
-            _local_11 = _local_12;
-            _local_12 = _local_13;
+            temp = currentSizeX;
+            currentSizeX = currentSizeY;
+            currentSizeY = temp;
         }
 
-        if(_arg_5 && _arg_2)
+        if(stackingHeightMap && targetLocation)
         {
-            const stackable = (k.model.getValue<number>(RoomObjectVariable.FURNITURE_ALWAYS_STACKABLE) === 1);
+            const stackable = (roomObject.model.getValue<number>(RoomObjectVariable.FURNITURE_ALWAYS_STACKABLE) === 1);
 
-            if(_arg_5.validateLocation(_arg_2.x, _arg_2.y, sizeX, sizeY, _local_9, _local_10, _local_11, _local_12, stackable))
+            if(stackingHeightMap.validateLocation(targetLocation.x, targetLocation.y, sizeX, sizeY, baseX, baseY, currentSizeX, currentSizeY, stackable))
             {
-                return new Vector3d(_arg_2.x, _arg_2.y, _arg_5.getTileHeight(_arg_2.x, _arg_2.y));
+                return new Vector3d(targetLocation.x, targetLocation.y, stackingHeightMap.getTileHeight(targetLocation.x, targetLocation.y));
             }
 
             return null;
@@ -1415,51 +1415,51 @@ export class RoomObjectEventHandler implements IRoomCanvasMouseListener, IRoomOb
         return null;
     }
 
-    private validateWallItemLocation(k: IRoomObject, _arg_2: IVector3D, _arg_3: IVector3D, _arg_4: IVector3D, _arg_5: number, _arg_6: number, _arg_7: ISelectedRoomObjectData): Vector3d
+    private validateWallItemLocation(roomObject: IRoomObject, wallLocation: IVector3D, wallWidth: IVector3D, wallHeight: IVector3D, x: number, y: number, selectedObjectData: ISelectedRoomObjectData): Vector3d
     {
-        if((((((k == null) || (k.model == null)) || (_arg_2 == null)) || (_arg_3 == null)) || (_arg_4 == null)) || (_arg_7 == null)) return null;
+        if((((((roomObject == null) || (roomObject.model == null)) || (wallLocation == null)) || (wallWidth == null)) || (wallHeight == null)) || (selectedObjectData == null)) return null;
 
-        const _local_8 = k.model.getValue<number>(RoomObjectVariable.FURNITURE_SIZE_X);
-        const _local_9 = k.model.getValue<number>(RoomObjectVariable.FURNITURE_SIZE_Z);
-        const _local_10 = k.model.getValue<number>(RoomObjectVariable.FURNITURE_CENTER_Z);
+        const sizeX = roomObject.model.getValue<number>(RoomObjectVariable.FURNITURE_SIZE_X);
+        const sizeZ = roomObject.model.getValue<number>(RoomObjectVariable.FURNITURE_SIZE_Z);
+        const centerZ = roomObject.model.getValue<number>(RoomObjectVariable.FURNITURE_CENTER_Z);
 
-        if((((_arg_5 < (_local_8 / 2)) || (_arg_5 > (_arg_3.length - (_local_8 / 2)))) || (_arg_6 < _local_10)) || (_arg_6 > (_arg_4.length - (_local_9 - _local_10))))
+        if((((x < (sizeX / 2)) || (x > (wallWidth.length - (sizeX / 2)))) || (y < centerZ)) || (y > (wallHeight.length - (sizeZ - centerZ))))
         {
-            if((_arg_5 < (_local_8 / 2)) && (_arg_5 <= (_arg_3.length - (_local_8 / 2))))
+            if((x < (sizeX / 2)) && (x <= (wallWidth.length - (sizeX / 2))))
             {
-                _arg_5 = (_local_8 / 2);
+                x = (sizeX / 2);
             }
             else
             {
-                if((_arg_5 >= (_local_8 / 2)) && (_arg_5 > (_arg_3.length - (_local_8 / 2))))
+                if((x >= (sizeX / 2)) && (x > (wallWidth.length - (sizeX / 2))))
                 {
-                    _arg_5 = (_arg_3.length - (_local_8 / 2));
+                    x = (wallWidth.length - (sizeX / 2));
                 }
             }
 
-            if((_arg_6 < _local_10) && (_arg_6 <= (_arg_4.length - (_local_9 - _local_10))))
+            if((y < centerZ) && (y <= (wallHeight.length - (sizeZ - centerZ))))
             {
-                _arg_6 = _local_10;
+                y = centerZ;
             }
             else
             {
-                if((_arg_6 >= _local_10) && (_arg_6 > (_arg_4.length - (_local_9 - _local_10))))
+                if((y >= centerZ) && (y > (wallHeight.length - (sizeZ - centerZ))))
                 {
-                    _arg_6 = (_arg_4.length - (_local_9 - _local_10));
+                    y = (wallHeight.length - (sizeZ - centerZ));
                 }
             }
         }
 
-        if((((_arg_5 < (_local_8 / 2)) || (_arg_5 > (_arg_3.length - (_local_8 / 2)))) || (_arg_6 < _local_10)) || (_arg_6 > (_arg_4.length - (_local_9 - _local_10))))
+        if((((x < (sizeX / 2)) || (x > (wallWidth.length - (sizeX / 2)))) || (y < centerZ)) || (y > (wallHeight.length - (sizeZ - centerZ))))
         {
             return null;
         }
 
-        let _local_11 = Vector3d.sum(Vector3d.product(_arg_3, (_arg_5 / _arg_3.length)), Vector3d.product(_arg_4, (_arg_6 / _arg_4.length)));
+        let location = Vector3d.sum(Vector3d.product(wallWidth, (x / wallWidth.length)), Vector3d.product(wallHeight, (y / wallHeight.length)));
 
-        _local_11 = Vector3d.sum(_arg_2, _local_11);
+        location = Vector3d.sum(wallLocation, location);
 
-        return _local_11;
+        return location;
     }
 
     private changeObjectState(roomId: number, objectId: number, type: string, state: number, isRandom: boolean): void
@@ -1586,10 +1586,10 @@ export class RoomObjectEventHandler implements IRoomCanvasMouseListener, IRoomOb
         return new ObjectTileCursorUpdateMessage(new Vector3d(x, y, roomObject.getLocation().z), z, true, event.eventId);
     }
 
-    private handleMoveTargetFurni(k: number, _arg_2: RoomObjectMouseEvent): boolean
+    private handleMoveTargetFurni(roomId: number, event: RoomObjectMouseEvent): boolean
     {
-        const roomObject = this._roomEngine.getRoomObject(k, _arg_2.objectId, RoomObjectCategory.FLOOR);
-        const point = this.getActiveSurfaceLocation(roomObject, _arg_2);
+        const roomObject = this._roomEngine.getRoomObject(roomId, event.objectId, RoomObjectCategory.FLOOR);
+        const point = this.getActiveSurfaceLocation(roomObject, event);
 
         if(point && !this._roomEngine.moveBlocked)
         {
@@ -1601,22 +1601,22 @@ export class RoomObjectEventHandler implements IRoomCanvasMouseListener, IRoomOb
         return false;
     }
 
-    private getActiveSurfaceLocation(k: IRoomObject, _arg_2: RoomObjectMouseEvent): Vector3d
+    private getActiveSurfaceLocation(roomObject: IRoomObject, event: RoomObjectMouseEvent): Vector3d
     {
-        if(!k || !_arg_2) return null;
+        if(!roomObject || !event) return null;
 
-        const furniData = GetSessionDataManager().getFloorItemDataByName(k.type);
+        const furniData = GetSessionDataManager().getFloorItemDataByName(roomObject.type);
 
         if(!furniData) return null;
 
         if(!furniData.canStandOn && !furniData.canSitOn && !furniData.canLayOn) return null;
 
-        const model = k.model;
+        const model = roomObject.model;
 
         if(!model) return null;
 
-        const location = k.getLocation();
-        const direction = k.getDirection();
+        const location = roomObject.getLocation();
+        const direction = roomObject.getDirection();
 
         let sizeX = model.getValue<number>(RoomObjectVariable.FURNITURE_SIZE_X);
         let sizeY = model.getValue<number>(RoomObjectVariable.FURNITURE_SIZE_Y);
@@ -1632,62 +1632,62 @@ export class RoomObjectEventHandler implements IRoomCanvasMouseListener, IRoomOb
         if(!renderingCanvas) return null;
 
         const scale = renderingCanvas.geometry.scale;
-        const _local_13 = furniData.canSitOn ? 0.5 : 0;
-        const _local_14 = ((((scale / 2) + _arg_2.spriteOffsetX) + _arg_2.localX) / (scale / 4));
-        const _local_15 = (((_arg_2.spriteOffsetY + _arg_2.localY) + (((sizeZ - _local_13) * scale) / 2)) / (scale / 4));
-        const _local_16 = ((_local_14 + (2 * _local_15)) / 4);
-        const _local_17 = ((_local_14 - (2 * _local_15)) / 4);
-        const _local_18 = Math.floor((location.x + _local_16));
-        const _local_19 = Math.floor(((location.y - _local_17) + 1));
+        const sitOffset = furniData.canSitOn ? 0.5 : 0;
+        const offsetX = ((((scale / 2) + event.spriteOffsetX) + event.localX) / (scale / 4));
+        const offsetY = (((event.spriteOffsetY + event.localY) + (((sizeZ - sitOffset) * scale) / 2)) / (scale / 4));
+        const deltaX = ((offsetX + (2 * offsetY)) / 4);
+        const deltaY = ((offsetX - (2 * offsetY)) / 4);
+        const tileX = Math.floor((location.x + deltaX));
+        const tileY = Math.floor(((location.y - deltaY) + 1));
 
-        let _local_20 = false;
+        let outOfBounds = false;
 
-        if((_local_18 < location.x) || (_local_18 >= (location.x + sizeX))) _local_20 = true;
-        else if((_local_19 < location.y) || (_local_19 >= (location.y + sizeY))) _local_20 = true;
+        if((tileX < location.x) || (tileX >= (location.x + sizeX))) outOfBounds = true;
+        else if((tileY < location.y) || (tileY >= (location.y + sizeY))) outOfBounds = true;
 
-        const _local_21 = furniData.canSitOn ? (sizeZ - 0.5) : sizeZ;
+        const tileZ = furniData.canSitOn ? (sizeZ - 0.5) : sizeZ;
 
-        if(!_local_20) return new Vector3d(_local_18, _local_19, _local_21);
+        if(!outOfBounds) return new Vector3d(tileX, tileY, tileZ);
 
         return null;
     }
 
-    private handleMouseOverTile(k: RoomObjectTileMouseEvent, roomId: number): ObjectTileCursorUpdateMessage
+    private handleMouseOverTile(event: RoomObjectTileMouseEvent, roomId: number): ObjectTileCursorUpdateMessage
     {
         if(this.whereYouClickIsWhereYouGo())
         {
-            return new ObjectTileCursorUpdateMessage(new Vector3d(k.tileXAsInt, k.tileYAsInt, k.tileZAsInt), 0, true, k.eventId);
+            return new ObjectTileCursorUpdateMessage(new Vector3d(event.tileXAsInt, event.tileYAsInt, event.tileZAsInt), 0, true, event.eventId);
         }
 
         const roomObject = this._roomEngine.getRoomObjectCursor(roomId);
 
         if(roomObject && roomObject.visualization)
         {
-            const _local_4 = k.tileXAsInt;
-            const _local_5 = k.tileYAsInt;
-            const _local_6 = k.tileZAsInt;
-            const _local_7 = this._roomEngine.getRoomInstance(roomId);
+            const tileX = event.tileXAsInt;
+            const tileY = event.tileYAsInt;
+            const tileZ = event.tileZAsInt;
+            const roomInstance = this._roomEngine.getRoomInstance(roomId);
 
-            if(_local_7)
+            if(roomInstance)
             {
-                const _local_8 = this._roomEngine.getRoomTileObjectMap(roomId);
+                const tileObjectMap = this._roomEngine.getRoomTileObjectMap(roomId);
 
-                if(_local_8)
+                if(tileObjectMap)
                 {
-                    const _local_9 = _local_8.getObjectIntTile(_local_4, _local_5);
-                    const _local_10 = this._roomEngine.getFurnitureStackingHeightMap(roomId);
+                    const tileObject = tileObjectMap.getObjectIntTile(tileX, tileY);
+                    const stackingHeightMap = this._roomEngine.getFurnitureStackingHeightMap(roomId);
 
-                    if(_local_10)
+                    if(stackingHeightMap)
                     {
-                        if(_local_9 && _local_9.model && (_local_9.model.getValue<number>(RoomObjectVariable.FURNITURE_IS_VARIABLE_HEIGHT) > 0))
+                        if(tileObject && tileObject.model && (tileObject.model.getValue<number>(RoomObjectVariable.FURNITURE_IS_VARIABLE_HEIGHT) > 0))
                         {
-                            const _local_11 = _local_10.getTileHeight(_local_4, _local_5);
-                            const _local_12 = this._roomEngine.getLegacyWallGeometry(roomId).getHeight(_local_4, _local_5);
+                            const tileHeight = stackingHeightMap.getTileHeight(tileX, tileY);
+                            const wallHeight = this._roomEngine.getLegacyWallGeometry(roomId).getHeight(tileX, tileY);
 
-                            return new ObjectTileCursorUpdateMessage(new Vector3d(_local_4, _local_5, _local_6), (_local_11 - _local_12), true, k.eventId);
+                            return new ObjectTileCursorUpdateMessage(new Vector3d(tileX, tileY, tileZ), (tileHeight - wallHeight), true, event.eventId);
                         }
 
-                        return new ObjectTileCursorUpdateMessage(new Vector3d(_local_4, _local_5, _local_6), 0, true, k.eventId);
+                        return new ObjectTileCursorUpdateMessage(new Vector3d(tileX, tileY, tileZ), 0, true, event.eventId);
                     }
                 }
             }
@@ -1792,7 +1792,7 @@ export class RoomObjectEventHandler implements IRoomCanvasMouseListener, IRoomOb
 
         if(!roomObject) return false;
 
-        let _local_9 = true;
+        let shouldReset = true;
 
         switch(operation)
         {
@@ -1870,7 +1870,7 @@ export class RoomObjectEventHandler implements IRoomCanvasMouseListener, IRoomOb
                 }
                 break;
             case RoomObjectOperationType.OBJECT_MOVE:
-                _local_9 = false;
+                shouldReset = false;
                 this.setFurnitureAlphaMultiplier(roomObject, 0.5);
                 this.setSelectedRoomObjectData(roomId, roomObject.id, category, roomObject.getLocation(), roomObject.getDirection(), operation);
                 this._roomEngine.setObjectMoverIconSprite(roomObject.id, category, true);
@@ -1928,7 +1928,7 @@ export class RoomObjectEventHandler implements IRoomCanvasMouseListener, IRoomOb
             }
         }
 
-        if(_local_9) this.resetSelectedObjectData(roomId);
+        if(shouldReset) this.resetSelectedObjectData(roomId);
 
         return true;
     }
@@ -1972,49 +1972,49 @@ export class RoomObjectEventHandler implements IRoomCanvasMouseListener, IRoomOb
         return true;
     }
 
-    public getValidRoomObjectDirection(k: IRoomObjectController, _arg_2: boolean): number
+    public getValidRoomObjectDirection(roomObject: IRoomObjectController, clockwise: boolean): number
     {
-        if(!k || !k.model) return 0;
+        if(!roomObject || !roomObject.model) return 0;
 
-        let _local_6 = 0;
-        let _local_7 = 0;
+        let directionIndex = 0;
+        let i = 0;
         let allowedDirections: number[] = [];
 
-        if(k.type === RoomObjectUserType.MONSTER_PLANT)
+        if(roomObject.type === RoomObjectUserType.MONSTER_PLANT)
         {
-            allowedDirections = k.model.getValue<number[]>(RoomObjectVariable.PET_ALLOWED_DIRECTIONS);
+            allowedDirections = roomObject.model.getValue<number[]>(RoomObjectVariable.PET_ALLOWED_DIRECTIONS);
         }
         else
         {
-            allowedDirections = k.model.getValue<number[]>(RoomObjectVariable.FURNITURE_ALLOWED_DIRECTIONS);
+            allowedDirections = roomObject.model.getValue<number[]>(RoomObjectVariable.FURNITURE_ALLOWED_DIRECTIONS);
         }
 
-        let direction = k.getDirection().x;
+        let direction = roomObject.getDirection().x;
 
         if(allowedDirections && allowedDirections.length)
         {
-            _local_6 = allowedDirections.indexOf(direction);
+            directionIndex = allowedDirections.indexOf(direction);
 
-            if(_local_6 < 0)
+            if(directionIndex < 0)
             {
-                _local_6 = 0;
-                _local_7 = 0;
+                directionIndex = 0;
+                i = 0;
 
-                while(_local_7 < allowedDirections.length)
+                while(i < allowedDirections.length)
                 {
-                    if(direction <= allowedDirections[_local_7]) break;
+                    if(direction <= allowedDirections[i]) break;
 
-                    _local_6++;
-                    _local_7++;
+                    directionIndex++;
+                    i++;
                 }
 
-                _local_6 = (_local_6 % allowedDirections.length);
+                directionIndex = (directionIndex % allowedDirections.length);
             }
 
-            if(_arg_2) _local_6 = ((_local_6 + 1) % allowedDirections.length);
-            else _local_6 = (((_local_6 - 1) + allowedDirections.length) % allowedDirections.length);
+            if(clockwise) directionIndex = ((directionIndex + 1) % allowedDirections.length);
+            else directionIndex = (((directionIndex - 1) + allowedDirections.length) % allowedDirections.length);
 
-            direction = allowedDirections[_local_6];
+            direction = allowedDirections[directionIndex];
         }
 
         return direction;
@@ -2038,22 +2038,22 @@ export class RoomObjectEventHandler implements IRoomCanvasMouseListener, IRoomOb
 
         if(sizeY < 1) sizeY = 1;
 
-        let _local_8 = sizeX;
-        let _local_9 = sizeY;
+        let baseSizeX = sizeX;
+        let baseSizeY = sizeY;
 
-        let _local_11 = (Math.trunc((Math.trunc((goalDirection.x + 45)) % 360) / 90));
+        let directionQuadrant = (Math.trunc((Math.trunc((goalDirection.x + 45)) % 360) / 90));
 
-        if((_local_11 === 1) || (_local_11 === 3)) [sizeX, sizeY] = [sizeY, sizeX];
+        if((directionQuadrant === 1) || (directionQuadrant === 3)) [sizeX, sizeY] = [sizeY, sizeX];
 
-        _local_11 = (Math.trunc((Math.trunc((direction.x + 45)) % 360) / 90));
+        directionQuadrant = (Math.trunc((Math.trunc((direction.x + 45)) % 360) / 90));
 
-        if(((_local_11 === 1) || (_local_11 === 3))) [_local_8, _local_9] = [_local_9, _local_8];
+        if(((directionQuadrant === 1) || (directionQuadrant === 3))) [baseSizeX, baseSizeY] = [baseSizeY, baseSizeX];
 
         if(stackingHeightMap && location)
         {
             const alwaysStackable = (object.model.getValue<number>(RoomObjectVariable.FURNITURE_ALWAYS_STACKABLE) === 1);
 
-            if(stackingHeightMap.validateLocation(location.x, location.y, sizeX, sizeY, location.x, location.y, _local_8, _local_9, alwaysStackable, location.z)) return true;
+            if(stackingHeightMap.validateLocation(location.x, location.y, sizeX, sizeY, location.x, location.y, baseSizeX, baseSizeY, alwaysStackable, location.z)) return true;
         }
 
         return false;
@@ -2133,37 +2133,37 @@ export class RoomObjectEventHandler implements IRoomCanvasMouseListener, IRoomOb
         }
     }
 
-    public setSelectedAvatar(k: number, _arg_2: number, _arg_3: boolean): void
+    public setSelectedAvatar(roomId: number, objectId: number, select: boolean): void
     {
         if(!this._roomEngine) return;
 
         this.clearPendingAvatarLook();
 
-        const _local_4 = RoomObjectCategory.UNIT;
-        const _local_5 = this._roomEngine.getRoomObject(k, this._selectedAvatarId, _local_4);
+        const category = RoomObjectCategory.UNIT;
+        const previousAvatar = this._roomEngine.getRoomObject(roomId, this._selectedAvatarId, category);
 
-        if(_local_5 && _local_5.logic)
+        if(previousAvatar && previousAvatar.logic)
         {
-            _local_5.logic.processUpdateMessage(new ObjectAvatarSelectedMessage(false));
+            previousAvatar.logic.processUpdateMessage(new ObjectAvatarSelectedMessage(false));
 
             this._selectedAvatarId = -1;
         }
 
-        let _local_6 = false;
+        let avatarSelected = false;
 
-        if(_arg_3)
+        if(select)
         {
-            const _local_5 = this._roomEngine.getRoomObject(k, _arg_2, _local_4);
+            const targetAvatar = this._roomEngine.getRoomObject(roomId, objectId, category);
 
-            if(_local_5 && _local_5.logic)
+            if(targetAvatar && targetAvatar.logic)
             {
-                _local_5.logic.processUpdateMessage(new ObjectAvatarSelectedMessage(true));
+                targetAvatar.logic.processUpdateMessage(new ObjectAvatarSelectedMessage(true));
 
-                  _local_6 = true;
+                  avatarSelected = true;
 
-                  this._selectedAvatarId = _arg_2;
+                  this._selectedAvatarId = objectId;
 
-                  const location = _local_5.getLocation();
+                  const location = targetAvatar.getLocation();
 
                   if(location)
                   {
@@ -2172,7 +2172,7 @@ export class RoomObjectEventHandler implements IRoomCanvasMouseListener, IRoomOb
                           this._pendingAvatarLookTimeout = null;
 
                           if(this.shouldSuppressAvatarLook()) return;
-                          if(this._selectedAvatarId !== _arg_2) return;
+                          if(this._selectedAvatarId !== objectId) return;
 
                           GetCommunication().connection.send(new RoomUnitLookComposer(~~(location.x), ~~(location.y)));
                       }, RoomObjectEventHandler.CLICK_USER_LOOK_DELAY_MS);
@@ -2180,11 +2180,11 @@ export class RoomObjectEventHandler implements IRoomCanvasMouseListener, IRoomOb
               }
           }
 
-        const selectionArrow = this._roomEngine.getRoomObjectSelectionArrow(k);
+        const selectionArrow = this._roomEngine.getRoomObjectSelectionArrow(roomId);
 
         if(selectionArrow && selectionArrow.logic)
         {
-            if(_local_6 && !this._roomEngine.isPlayingGame()) selectionArrow.logic.processUpdateMessage(new ObjectVisibilityUpdateMessage(ObjectVisibilityUpdateMessage.ENABLED));
+            if(avatarSelected && !this._roomEngine.isPlayingGame()) selectionArrow.logic.processUpdateMessage(new ObjectVisibilityUpdateMessage(ObjectVisibilityUpdateMessage.ENABLED));
             else selectionArrow.logic.processUpdateMessage(new ObjectVisibilityUpdateMessage(ObjectVisibilityUpdateMessage.DISABLED));
         }
     }

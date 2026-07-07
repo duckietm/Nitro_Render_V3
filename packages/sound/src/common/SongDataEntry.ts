@@ -18,8 +18,8 @@ export class SongDataEntry implements ISongInfo
         return this._jukeboxDiskId;
     }
 
-    public set diskId(k: number)
+    public set diskId(value: number)
     {
-        this._jukeboxDiskId = k;
+        this._jukeboxDiskId = value;
     }
 }

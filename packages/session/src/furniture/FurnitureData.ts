@@ -82,9 +82,9 @@ export class FurnitureData implements IFurnitureData
         return this._className;
     }
 
-    public set className(k: string)
+    public set className(value: string)
     {
-        this._className = k;
+        this._className = value;
     }
 
     public get fullName(): string

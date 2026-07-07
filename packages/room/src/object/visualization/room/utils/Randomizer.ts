@@ -1,4 +1,4 @@
-﻿import { ToInt32 } from '@nitrots/utils';
+import { ToInt32 } from '@nitrots/utils';
 
 export class Randomizer
 {
@@ -12,117 +12,117 @@ export class Randomizer
     private _multiplier: number = 69069;
     private _increment: number = 5;
 
-    public static setSeed(k: number = 1): void
+    public static setSeed(seed: number = 1): void
     {
         if(!Randomizer._randomizer) Randomizer._randomizer = new Randomizer();
 
-        Randomizer._randomizer.seed = k;
+        Randomizer._randomizer.seed = seed;
     }
 
-    public static setModulus(k: number = 16777216): void
+    public static setModulus(modulus: number = 16777216): void
     {
         if(!Randomizer._randomizer) Randomizer._randomizer = new Randomizer();
 
-        Randomizer._randomizer.modulus = k;
+        Randomizer._randomizer.modulus = modulus;
     }
 
-    public static getValues(k: number, _arg_2: number, _arg_3: number): number[]
+    public static getValues(count: number, min: number, max: number): number[]
     {
         if(!Randomizer._randomizer) Randomizer._randomizer = new Randomizer();
 
-        return Randomizer._randomizer.getRandomValues(k, _arg_2, _arg_3);
+        return Randomizer._randomizer.getRandomValues(count, min, max);
     }
 
-    public static getArray(k: number, _arg_2: number): number[]
+    public static getArray(count: number, maxValue: number): number[]
     {
         if(!Randomizer._randomizer) Randomizer._randomizer = new Randomizer();
 
-        return Randomizer._randomizer.getRandomArray(k, _arg_2);
+        return Randomizer._randomizer.getRandomArray(count, maxValue);
     }
 
-    public set seed(k: number)
+    public set seed(value: number)
     {
-        this._seed = k;
+        this._seed = value;
     }
 
-    public set modulus(k: number)
+    public set modulus(value: number)
     {
-        if(k < 1) k = 1;
+        if(value < 1) value = 1;
 
-        this._modulus = k;
+        this._modulus = value;
     }
 
     public dispose(): void
     {
     }
 
-    public getRandomValues(k: number, _arg_2: number, _arg_3: number): number[]
+    public getRandomValues(count: number, min: number, max: number): number[]
     {
-        const _local_4: number[] = [];
+        const values: number[] = [];
 
-        let _local_5 = 0;
+        let index = 0;
 
-        while(_local_5 < k)
+        while(index < count)
         {
-            _local_4.push(this.iterateScaled(_arg_2, (_arg_3 - _arg_2)));
-            _local_5++;
+            values.push(this.iterateScaled(min, (max - min)));
+            index++;
         }
 
-        return _local_4;
+        return values;
     }
 
-    public getRandomArray(k: number, _arg_2: number): number[]
+    public getRandomArray(count: number, maxValue: number): number[]
     {
-        if(((k > _arg_2) || (_arg_2 > 1000))) return null;
+        if(((count > maxValue) || (maxValue > 1000))) return null;
 
-        const _local_3: number[] = [];
+        const pool: number[] = [];
 
-        let _local_4 = 0;
+        let poolIndex = 0;
 
-        while(_local_4 <= _arg_2)
+        while(poolIndex <= maxValue)
         {
-            _local_3.push(_local_4);
-            _local_4++;
+            pool.push(poolIndex);
+            poolIndex++;
         }
 
-        const _local_5: number[] = [];
+        const result: number[] = [];
 
-        let _local_6 = 0;
+        let pickIndex = 0;
 
-        while(_local_6 < k)
+        while(pickIndex < count)
         {
-            const _local_7 = this.iterateScaled(0, (_local_3.length - 1));
+            const randomIndex = this.iterateScaled(0, (pool.length - 1));
 
-            _local_5.push(_local_3[_local_7]);
-            _local_3.splice(_local_7, 1);
+            result.push(pool[randomIndex]);
+            pool.splice(randomIndex, 1);
 
-            _local_6++;
+            pickIndex++;
         }
 
-        return _local_5;
+        return result;
     }
 
     private iterate(): number
     {
-        let k: number = ToInt32(Math.trunc(this._multiplier * this._seed) + this._increment);
+        let value: number = ToInt32(Math.trunc(this._multiplier * this._seed) + this._increment);
 
-        if(k < 0) k = -(k);
+        if(value < 0) value = -(value);
 
-        k = (k % this._modulus);
+        value = (value % this._modulus);
 
-        this._seed = k;
+        this._seed = value;
 
-        return k;
+        return value;
     }
 
-    private iterateScaled(k: number, _arg_2: number): number
+    private iterateScaled(base: number, range: number): number
     {
-        let _local_3: number = this.iterate();
+        let value: number = this.iterate();
 
-        if(_arg_2 < 1) return k;
+        if(range < 1) return base;
 
-        _local_3 = Math.trunc(k + ((_local_3 / this._modulus) * _arg_2));
+        value = Math.trunc(base + ((value / this._modulus) * range));
 
-        return _local_3;
+        return value;
     }
 }

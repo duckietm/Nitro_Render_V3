@@ -5,8 +5,8 @@ export class RoomSessionPropertyUpdateEvent extends RoomSessionEvent
 {
     public static RSDUE_ALLOW_PETS: string = 'RSDUE_ALLOW_PETS';
 
-    constructor(k: string, _arg_2: IRoomSession)
+    constructor(type: string, session: IRoomSession)
     {
-        super(k, _arg_2);
+        super(type, session);
     }
 }

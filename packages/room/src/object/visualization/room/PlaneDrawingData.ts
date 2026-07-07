@@ -13,7 +13,7 @@ export class PlaneDrawingData implements IPlaneDrawingData
     private _alignBottom: boolean;
     private _assetNames: string[][];
 
-    constructor(k: PlaneDrawingData = null, _arg_2: number = 0, _arg_3: boolean = false)
+    constructor(source: PlaneDrawingData = null, color: number = 0, alignBottom: boolean = false)
     {
         this._assetNames = [];
         this._maskAssetNames = [];
@@ -21,34 +21,34 @@ export class PlaneDrawingData implements IPlaneDrawingData
         this._maskAssetFlipHs = [];
         this._maskAssetFlipVs = [];
 
-        if(k != null)
+        if(source != null)
         {
-            this._maskAssetNames = k._maskAssetNames;
-            this._maskAssetLocations = k._maskAssetLocations;
-            this._maskAssetFlipHs = k._maskAssetFlipHs;
-            this._maskAssetFlipVs = k._maskAssetFlipVs;
+            this._maskAssetNames = source._maskAssetNames;
+            this._maskAssetLocations = source._maskAssetLocations;
+            this._maskAssetFlipHs = source._maskAssetFlipHs;
+            this._maskAssetFlipVs = source._maskAssetFlipVs;
         }
 
-        this._color = _arg_2;
-        this._alignBottom = _arg_3;
+        this._color = color;
+        this._alignBottom = alignBottom;
     }
 
-    public addMask(k: string, _arg_2: Point, _arg_3: boolean, _arg_4: boolean): void
+    public addMask(assetName: string, location: Point, flipH: boolean, flipV: boolean): void
     {
-        this._maskAssetNames.push(k);
-        this._maskAssetLocations.push(_arg_2);
-        this._maskAssetFlipHs.push(_arg_3);
-        this._maskAssetFlipVs.push(_arg_4);
+        this._maskAssetNames.push(assetName);
+        this._maskAssetLocations.push(location);
+        this._maskAssetFlipHs.push(flipH);
+        this._maskAssetFlipVs.push(flipV);
     }
 
-    public addAssetColumn(k: string[]): void
+    public addAssetColumn(column: string[]): void
     {
-        this._assetNames.push(k);
+        this._assetNames.push(column);
     }
 
-    public set z(k: number)
+    public set z(value: number)
     {
-        this._z = k;
+        this._z = value;
     }
 
     public get z(): number
@@ -56,9 +56,9 @@ export class PlaneDrawingData implements IPlaneDrawingData
         return this._z;
     }
 
-    public set cornerPoints(k: Point[])
+    public set cornerPoints(value: Point[])
     {
-        this._points = k;
+        this._points = value;
     }
 
     public get cornerPoints(): Point[]

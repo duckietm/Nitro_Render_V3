@@ -8,13 +8,13 @@ export class RoomSessionUserBadgesEvent extends RoomSessionEvent
     private _userId: number = 0;
     private _badges: string[];
 
-    constructor(k: IRoomSession, _arg_2: number, _arg_3: string[])
+    constructor(session: IRoomSession, userId: number, badges: string[])
     {
-        super(RoomSessionUserBadgesEvent.RSUBE_BADGES, k);
+        super(RoomSessionUserBadgesEvent.RSUBE_BADGES, session);
 
         this._badges = [];
-        this._userId = _arg_2;
-        this._badges = _arg_3;
+        this._userId = userId;
+        this._badges = badges;
     }
 
     public get userId(): number

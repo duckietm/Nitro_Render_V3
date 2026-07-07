@@ -29,11 +29,11 @@ export class Queue extends Motion
         this._motion.start();
     }
 
-    public update(k: number): void
+    public update(progress: number): void
     {
-        super.update(k);
+        super.update(progress);
 
-        if(this._motion.running) this._motion.update(k);
+        if(this._motion.running) this._motion.update(progress);
     }
 
     public stop(): void
@@ -43,11 +43,11 @@ export class Queue extends Motion
         this._motion.stop();
     }
 
-    public tick(k: number): void
+    public tick(time: number): void
     {
-        super.tick(k);
+        super.tick(time);
 
-        this._motion.tick(k);
+        this._motion.tick(time);
 
         if(this._motion.complete)
         {

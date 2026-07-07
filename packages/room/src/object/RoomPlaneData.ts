@@ -19,77 +19,77 @@ export class RoomPlaneData
     private _secondaryNormals: Vector3d[];
     private _masks: RoomPlaneMaskData[];
 
-    constructor(k: number, _arg_2: IVector3D, _arg_3: IVector3D, _arg_4: IVector3D, _arg_5: IVector3D[])
+    constructor(type: number, location: IVector3D, leftSide: IVector3D, rightSide: IVector3D, secondaryNormals: IVector3D[])
     {
-        let _local_6: number;
-        let _local_7: number;
-        let _local_8: number;
-        let _local_9: number;
-        let _local_10: number;
-        let _local_11: number;
-        let _local_12: IVector3D;
-        let _local_13: Vector3d;
+        let angleXY: number;
+        let angleZ: number;
+        let angleRoll: number;
+        let deltaX: number;
+        let deltaY: number;
+        let index: number;
+        let normalVector: IVector3D;
+        let secondaryNormal: Vector3d;
         this._secondaryNormals = [];
         this._masks = [];
         this._loc = new Vector3d();
-        this._loc.assign(_arg_2);
+        this._loc.assign(location);
         this._leftSide = new Vector3d();
-        this._leftSide.assign(_arg_3);
+        this._leftSide.assign(leftSide);
         this._rightSide = new Vector3d();
-        this._rightSide.assign(_arg_4);
-        this._type = k;
-        if(((!(_arg_3 == null)) && (!(_arg_4 == null))))
+        this._rightSide.assign(rightSide);
+        this._type = type;
+        if(((!(leftSide == null)) && (!(rightSide == null))))
         {
-            this._normal = Vector3d.crossProduct(_arg_3, _arg_4);
-            _local_6 = 0;
-            _local_7 = 0;
-            _local_8 = 0;
-            _local_9 = 0;
-            _local_10 = 0;
+            this._normal = Vector3d.crossProduct(leftSide, rightSide);
+            angleXY = 0;
+            angleZ = 0;
+            angleRoll = 0;
+            deltaX = 0;
+            deltaY = 0;
             if(((!(this.normal.x == 0)) || (!(this.normal.y == 0))))
             {
-                _local_9 = this.normal.x;
-                _local_10 = this.normal.y;
-                _local_6 = (360 + ((Math.atan2(_local_10, _local_9) / Math.PI) * 180));
-                if(_local_6 >= 360)
+                deltaX = this.normal.x;
+                deltaY = this.normal.y;
+                angleXY = (360 + ((Math.atan2(deltaY, deltaX) / Math.PI) * 180));
+                if(angleXY >= 360)
                 {
-                    _local_6 = (_local_6 - 360);
+                    angleXY = (angleXY - 360);
                 }
-                _local_9 = Math.sqrt(((this.normal.x * this.normal.x) + (this.normal.y * this.normal.y)));
-                _local_10 = this.normal.z;
-                _local_7 = (360 + ((Math.atan2(_local_10, _local_9) / Math.PI) * 180));
-                if(_local_7 >= 360)
+                deltaX = Math.sqrt(((this.normal.x * this.normal.x) + (this.normal.y * this.normal.y)));
+                deltaY = this.normal.z;
+                angleZ = (360 + ((Math.atan2(deltaY, deltaX) / Math.PI) * 180));
+                if(angleZ >= 360)
                 {
-                    _local_7 = (_local_7 - 360);
+                    angleZ = (angleZ - 360);
                 }
             }
             else
             {
                 if(this.normal.z < 0)
                 {
-                    _local_7 = 90;
+                    angleZ = 90;
                 }
                 else
                 {
-                    _local_7 = 270;
+                    angleZ = 270;
                 }
             }
-            this._normalDirection = new Vector3d(_local_6, _local_7, _local_8);
+            this._normalDirection = new Vector3d(angleXY, angleZ, angleRoll);
         }
-        if(((!(_arg_5 == null)) && (_arg_5.length > 0)))
+        if(((!(secondaryNormals == null)) && (secondaryNormals.length > 0)))
         {
-            _local_11 = 0;
-            while(_local_11 < _arg_5.length)
+            index = 0;
+            while(index < secondaryNormals.length)
             {
-                _local_12 = _arg_5[_local_11];
-                if(((!(_local_12 == null)) && (_local_12.length > 0)))
+                normalVector = secondaryNormals[index];
+                if(((!(normalVector == null)) && (normalVector.length > 0)))
                 {
-                    _local_13 = new Vector3d();
-                    _local_13.assign(_local_12);
-                    _local_13.multiply((1 / _local_13.length));
-                    this._secondaryNormals.push(_local_13);
+                    secondaryNormal = new Vector3d();
+                    secondaryNormal.assign(normalVector);
+                    secondaryNormal.multiply((1 / secondaryNormal.length));
+                    this._secondaryNormals.push(secondaryNormal);
                 }
-                _local_11++;
+                index++;
             }
         }
     }
@@ -134,68 +134,68 @@ export class RoomPlaneData
         return this._masks.length;
     }
 
-    public getSecondaryNormal(k: number): IVector3D
+    public getSecondaryNormal(index: number): IVector3D
     {
-        if(((k < 0) || (k >= this.secondaryNormalCount)))
+        if(((index < 0) || (index >= this.secondaryNormalCount)))
         {
             return null;
         }
-        const _local_2: Vector3d = new Vector3d();
-        _local_2.assign((this._secondaryNormals[k] as IVector3D));
-        return _local_2;
+        const secondaryNormal: Vector3d = new Vector3d();
+        secondaryNormal.assign((this._secondaryNormals[index] as IVector3D));
+        return secondaryNormal;
     }
 
-    public addMask(k: number, _arg_2: number, _arg_3: number, _arg_4: number): void
+    public addMask(leftSideLoc: number, rightSideLoc: number, leftSideLength: number, rightSideLength: number): void
     {
-        const _local_5: RoomPlaneMaskData = new RoomPlaneMaskData(k, _arg_2, _arg_3, _arg_4);
-        this._masks.push(_local_5);
+        const mask: RoomPlaneMaskData = new RoomPlaneMaskData(leftSideLoc, rightSideLoc, leftSideLength, rightSideLength);
+        this._masks.push(mask);
     }
 
-    private getMask(k: number): RoomPlaneMaskData
+    private getMask(index: number): RoomPlaneMaskData
     {
-        if(((k < 0) || (k >= this.maskCount)))
+        if(((index < 0) || (index >= this.maskCount)))
         {
             return null;
         }
-        return this._masks[k];
+        return this._masks[index];
     }
 
-    public getMaskLeftSideLoc(k: number): number
+    public getMaskLeftSideLoc(index: number): number
     {
-        const _local_2: RoomPlaneMaskData = this.getMask(k);
-        if(_local_2 != null)
+        const mask: RoomPlaneMaskData = this.getMask(index);
+        if(mask != null)
         {
-            return _local_2.leftSideLoc;
+            return mask.leftSideLoc;
         }
         return -1;
     }
 
-    public getMaskRightSideLoc(k: number): number
+    public getMaskRightSideLoc(index: number): number
     {
-        const _local_2: RoomPlaneMaskData = this.getMask(k);
-        if(_local_2 != null)
+        const mask: RoomPlaneMaskData = this.getMask(index);
+        if(mask != null)
         {
-            return _local_2.rightSideLoc;
+            return mask.rightSideLoc;
         }
         return -1;
     }
 
-    public getMaskLeftSideLength(k: number): number
+    public getMaskLeftSideLength(index: number): number
     {
-        const _local_2: RoomPlaneMaskData = this.getMask(k);
-        if(_local_2 != null)
+        const mask: RoomPlaneMaskData = this.getMask(index);
+        if(mask != null)
         {
-            return _local_2.leftSideLength;
+            return mask.leftSideLength;
         }
         return -1;
     }
 
-    public getMaskRightSideLength(k: number): number
+    public getMaskRightSideLength(index: number): number
     {
-        const _local_2: RoomPlaneMaskData = this.getMask(k);
-        if(_local_2 != null)
+        const mask: RoomPlaneMaskData = this.getMask(index);
+        if(mask != null)
         {
-            return _local_2.rightSideLength;
+            return mask.rightSideLength;
         }
         return -1;
     }
