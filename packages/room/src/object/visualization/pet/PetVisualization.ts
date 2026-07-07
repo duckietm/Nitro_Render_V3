@@ -12,6 +12,7 @@ export class PetVisualization extends FurnitureAnimatedVisualization
     private static HEAD: string = 'head';
     private static SADDLE: string = 'saddle';
     private static HAIR: string = 'hair';
+    private static POSTURE_LAY: string = 'lay';
     private static ADDITIONAL_SPRITE_COUNT: number = 1;
     private static EXPERIENCE_BUBBLE_VISIBLE_IN_MS: number = 1000;
     private static PET_EXPERIENCE_BUBBLE: string = 'avatar_addition_pet_experience_bubble';
@@ -349,7 +350,7 @@ export class PetVisualization extends FurnitureAnimatedVisualization
     {
         if(this._headOnly && this.isNonHeadSprite(layerId)) return null;
 
-        if(this._isRiding && this._parser3(layerId)) return null;
+        if((this._isRiding || (this._posture === PetVisualization.POSTURE_LAY)) && this._parser3(layerId)) return null;
 
         const totalSprites = this.totalSprites;
 
