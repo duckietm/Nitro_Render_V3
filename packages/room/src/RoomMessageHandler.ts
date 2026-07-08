@@ -37,6 +37,7 @@ export class RoomMessageHandler
     private _messageEvents: IMessageEvent[] = [];
     private _activeWiredUserMovements = new Map<number, { expiresAt: number, sourceX: number, sourceY: number, sourceZ: number, targetX: number, targetY: number, targetZ: number }>();
     private _activeRoomUserWalks = new Map<number, { startedAt: number, targetX: number, targetY: number, targetZ: number, duration: number }>();
+    private _jumpingUnitIds = new Set<number>();
     private _activeConfInvisHiddenItemIds = new Set<number>();
     private _confInvisReapplyTimeouts: ReturnType<typeof setTimeout>[] = [];
     private _activeAreaHideControllers = new Map<number, AreaHideControllerState>();
@@ -126,6 +127,7 @@ export class RoomMessageHandler
         this._latestEntryTileEvent = null;
         this._activeWiredUserMovements.clear();
         this._activeRoomUserWalks.clear();
+        this._jumpingUnitIds.clear();
         if(this._planeParser)
         {
             this._planeParser.dispose();
@@ -149,6 +151,7 @@ export class RoomMessageHandler
         this._latestEntryTileEvent = null;
         this._activeWiredUserMovements.clear();
         this._activeRoomUserWalks.clear();
+        this._jumpingUnitIds.clear();
         this._activeConfInvisHiddenItemIds.clear();
         this.clearConfInvisReapplyTimeouts();
         this._activeAreaHideControllers.clear();
@@ -162,6 +165,7 @@ export class RoomMessageHandler
         this._latestEntryTileEvent = null;
         this._activeWiredUserMovements.clear();
         this._activeRoomUserWalks.clear();
+        this._jumpingUnitIds.clear();
         this._activeConfInvisHiddenItemIds.clear();
         this.clearConfInvisReapplyTimeouts();
         this._activeAreaHideControllers.clear();
@@ -1422,6 +1426,7 @@ export class RoomMessageHandler
         if(!(event instanceof RoomUnitRemoveEvent) || !event.connection || !this._roomEngine) return;
 
         this._activeRoomUserWalks.delete(event.getParser().unitId);
+        this._jumpingUnitIds.delete(event.getParser().unitId);
         this._roomEngine.removeRoomObjectUser(this._currentRoomId, event.getParser().unitId);
 
         this.updateGuideMarker();
@@ -1524,10 +1529,6 @@ export class RoomMessageHandler
                         case 'jmp':
                         case 'jmp-in':
                         case 'jmp-out':
-                            // A jumping horse is also moving, and the status order is not guaranteed
-                            // (it comes from a ConcurrentHashMap server-side). Remember the jump and
-                            // force it after the loop so the jump pose wins over 'mv' - otherwise the
-                            // horse just slides across and only shows the jump once it stops.
                             jumpPosture = action.action;
                             jumpParameter = action.value;
                             postureUpdate = true;
@@ -1554,6 +1555,14 @@ export class RoomMessageHandler
                 postureUpdate = true;
                 postureType = jumpPosture;
                 parameter = jumpParameter;
+
+                this._jumpingUnitIds.add(status.id);
+            }
+            else if(this._jumpingUnitIds.delete(status.id) && !postureUpdate)
+            {
+                postureUpdate = true;
+                postureType = RoomObjectVariable.STD;
+                parameter = '';
             }
 
             if(postureUpdate) this._roomEngine.updateRoomObjectUserPosture(this._currentRoomId, status.id, postureType, parameter);
