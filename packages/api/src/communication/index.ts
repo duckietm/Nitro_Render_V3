@@ -2,6 +2,7 @@ export * from './ICodec';
 export * from './ICommunicationManager';
 export * from './IConnection';
 export * from './IConnectionStateListener';
+export * from './IConnectionStateSnapshot';
 export * from './IMessageComposer';
 export * from './IMessageConfiguration';
 export * from './IMessageDataWrapper';

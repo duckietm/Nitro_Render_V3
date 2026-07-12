@@ -1,6 +1,7 @@
 import { IMessageComposer } from './IMessageComposer';
 import { IMessageConfiguration } from './IMessageConfiguration';
 import { IMessageEvent } from './IMessageEvent';
+import { IConnectionStateSnapshot } from './IConnectionStateSnapshot';
 
 export interface IConnection
 {
@@ -13,6 +14,7 @@ export interface IConnection
     registerMessages(configuration: IMessageConfiguration): void;
     addMessageEvent(event: IMessageEvent): void;
     removeMessageEvent(event: IMessageEvent): void;
+    readonly connectionState: Readonly<IConnectionStateSnapshot>;
     isAuthenticated: boolean;
     dataBuffer: ArrayBuffer;
 }

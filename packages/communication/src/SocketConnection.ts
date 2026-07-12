@@ -1,10 +1,11 @@
-import { ICodec, IConnection, IMessageComposer, IMessageConfiguration, IMessageDataWrapper, IMessageEvent, IMessageParser, WebSocketEventEnum } from '@nitrots/api';
+import { ICodec, IConnection, IConnectionStateSnapshot, IMessageComposer, IMessageConfiguration, IMessageDataWrapper, IMessageEvent, IMessageParser, WebSocketEventEnum } from '@nitrots/api';
 import { GetConfiguration } from '@nitrots/configuration';
 import { GetEventDispatcher, NitroEvent, NitroEventType, ReconnectEvent } from '@nitrots/events';
 import { NitroLogger } from '@nitrots/utils';
 import { EvaWireFormat } from './codec';
 import { aesGcmDecrypt, aesGcmEncrypt, buildClientHello, deriveAesKey, deriveSharedSecret, exportPublicKeySpki, generateEphemeralKeyPair, importPublicKeySpki, importSigningPublicKeyFromBase64, NONCE_LEN, parseServerHello, randomNonce, verifyEphemeralSignature } from './crypto';
 import { MessageClassManager } from './messages';
+import { ConnectionStateStore } from './ConnectionStateStore';
 
 type CryptoState = 'disabled' | 'awaiting_server_hello' | 'ready' | 'error';
 
@@ -30,10 +31,12 @@ export class SocketConnection implements IConnection
     private _isReconnecting: boolean = false;
     private _intentionalClose: boolean = false;
     private _wasAuthenticated: boolean = false;
-	
+
     public static readonly MAX_RECONNECT_ATTEMPTS: number = 7;
     public static readonly BASE_RECONNECT_DELAY_MS: number = 1000;
     public static readonly MAX_RECONNECT_DELAY_MS: number = 30000;
+
+    private readonly _connectionState = new ConnectionStateStore(SocketConnection.MAX_RECONNECT_ATTEMPTS);
 
     private _cryptoState: CryptoState = 'disabled';
     private _sessionKey: CryptoKey = null;
@@ -46,6 +49,14 @@ export class SocketConnection implements IConnection
 
         this._socketUrl = socketUrl;
         this._intentionalClose = false;
+
+        this.setConnectionState({
+            phase: 'connecting',
+            reconnectAttempt: 0,
+            authenticated: false,
+            closeCode: null,
+            closeReason: ''
+        });
 
         this.createSocket(socketUrl);
     }
@@ -294,10 +305,13 @@ export class SocketConnection implements IConnection
             this._reconnectAttempt = 0;
             this._isReconnecting = false;
 
+            this.setConnectionState({ phase: 'reauthenticating', reconnectAttempt: 0, authenticated: false });
+
             GetEventDispatcher().dispatchEvent(new NitroEvent(NitroEventType.SOCKET_RECONNECTED));
         }
         else
         {
+            this.setConnectionState({ phase: 'authenticating', authenticated: false });
             GetEventDispatcher().dispatchEvent(new NitroEvent(NitroEventType.SOCKET_OPENED));
         }
     }
@@ -313,11 +327,20 @@ export class SocketConnection implements IConnection
         }
 
         const code = event?.code ?? 0;
+        const closeReason = event?.reason || '';
+        const hadAuthenticatedSession = this._isAuthenticated || this._wasAuthenticated;
 
         if(code === 1000 || code === 1001)
         {
             this._isAuthenticated = false;
             this._isReady = false;
+
+            this.setConnectionState({
+                phase: (!this._intentionalClose && hadAuthenticatedSession) ? 'failed' : 'disconnected',
+                authenticated: false,
+                closeCode: code,
+                closeReason
+            });
 
             GetEventDispatcher().dispatchEvent(new NitroEvent(NitroEventType.SOCKET_CLOSED));
             return;
@@ -329,6 +352,13 @@ export class SocketConnection implements IConnection
         this._isReady = false;
         this._pendingClientMessages = [];
         this._pendingServerMessages = [];
+
+        this.setConnectionState({
+            phase: 'reconnecting',
+            authenticated: false,
+            closeCode: code,
+            closeReason
+        });
 
         this.attemptReconnect();
     }
@@ -353,6 +383,12 @@ export class SocketConnection implements IConnection
             this._isReconnecting = false;
             this._wasAuthenticated = false;
 
+            this.setConnectionState({
+                phase: 'failed',
+                reconnectAttempt: this._reconnectAttempt,
+                authenticated: false
+            });
+
             GetEventDispatcher().dispatchEvent(new ReconnectEvent(
                 NitroEventType.SOCKET_RECONNECT_FAILED,
                 this._reconnectAttempt,
@@ -366,6 +402,12 @@ export class SocketConnection implements IConnection
 
         this._isReconnecting = true;
         this._reconnectAttempt++;
+
+        this.setConnectionState({
+            phase: 'reconnecting',
+            reconnectAttempt: this._reconnectAttempt,
+            authenticated: false
+        });
 
         const delay = Math.min(
             SocketConnection.BASE_RECONNECT_DELAY_MS * Math.pow(2, this._reconnectAttempt - 1) + Math.random() * 1000,
@@ -431,6 +473,14 @@ export class SocketConnection implements IConnection
         this._pendingBytes = 0;
         this._dataBuffer = null;
         this._decryptChain = Promise.resolve();
+
+        this.setConnectionState({
+            phase: 'disconnected',
+            reconnectAttempt: 0,
+            authenticated: false,
+            closeCode: null,
+            closeReason: ''
+        });
     }
 
     public ready(): void
@@ -450,6 +500,20 @@ export class SocketConnection implements IConnection
     public authenticated(): void
     {
         this._isAuthenticated = true;
+        this.setConnectionState({
+            phase: 'connected',
+            reconnectAttempt: 0,
+            authenticated: true,
+            closeCode: null,
+            closeReason: ''
+        });
+    }
+
+    private setConnectionState(patch: Partial<IConnectionStateSnapshot>): void
+    {
+        if(!this._connectionState.update(patch)) return;
+
+        GetEventDispatcher().dispatchEvent(new NitroEvent(NitroEventType.CONNECTION_STATE_CHANGED));
     }
 
     public send(...composers: IMessageComposer<unknown[]>[]): boolean
@@ -645,6 +709,11 @@ export class SocketConnection implements IConnection
     public get isAuthenticated(): boolean
     {
         return this._isAuthenticated;
+    }
+
+    public get connectionState(): Readonly<IConnectionStateSnapshot>
+    {
+        return this._connectionState.snapshot;
     }
 
     public get isReconnecting(): boolean
