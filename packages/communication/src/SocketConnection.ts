@@ -5,6 +5,7 @@ import { NitroLogger } from '@nitrots/utils';
 import { EvaWireFormat } from './codec';
 import { aesGcmDecrypt, aesGcmEncrypt, buildClientHello, deriveAesKey, deriveSharedSecret, exportPublicKeySpki, generateEphemeralKeyPair, importPublicKeySpki, importSigningPublicKeyFromBase64, NONCE_LEN, parseServerHello, randomNonce, verifyEphemeralSignature } from './crypto';
 import { MessageClassManager } from './messages';
+import { shouldReconnectAfterClose } from './socketClosePolicy';
 
 type CryptoState = 'disabled' | 'awaiting_server_hello' | 'ready' | 'error';
 
@@ -306,15 +307,9 @@ export class SocketConnection implements IConnection
     {
         NitroLogger.log('[SocketConnection] Socket closed, code: ' + (event?.code ?? 'unknown') + ', reason: ' + (event?.reason || 'none'));
 
-        if(this._intentionalClose)
-        {
-            GetEventDispatcher().dispatchEvent(new NitroEvent(NitroEventType.SOCKET_CLOSED));
-            return;
-        }
-
         const code = event?.code ?? 0;
 
-        if(code === 1000 || code === 1001)
+        if(!shouldReconnectAfterClose(code, this._intentionalClose))
         {
             this._isAuthenticated = false;
             this._isReady = false;
