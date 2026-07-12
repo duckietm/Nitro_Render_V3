@@ -538,4 +538,10 @@ export class IncomingHeader
     public static SOUNDBOARD_PLAY = 9406;
     public static EARNINGS_CENTER = 9407;
     public static EARNINGS_CLAIM_RESULT = 9408;
+    public static MESSENGER_CONVERSATIONS = 4900;
+    public static MESSENGER_HISTORY = 4901;
+    public static MESSENGER_MESSAGE_ACK = 4902;
+    public static MESSENGER_MESSAGE_FAILED = 4903;
+    public static MESSENGER_MESSAGE = 4904;
+    public static MESSENGER_READ_CURSOR = 4905;
 }

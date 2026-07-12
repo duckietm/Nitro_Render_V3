@@ -17,3 +17,4 @@ export * from './NewConsoleMessageEvent';
 export * from './NewFriendRequestEvent';
 export * from './RoomInviteErrorEvent';
 export * from './RoomInviteEvent';
+export * from './MessengerEvents';

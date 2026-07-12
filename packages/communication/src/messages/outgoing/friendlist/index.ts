@@ -18,3 +18,7 @@ export * from './SendMessageComposer';
 export * from './SendRoomInviteComposer';
 export * from './SetRelationshipStatusComposer';
 export * from './VisitUserComposer';
+export * from './RequestMessengerConversationsComposer';
+export * from './RequestMessengerHistoryComposer';
+export * from './SendMessengerMessageComposer';
+export * from './MarkMessengerReadComposer';
