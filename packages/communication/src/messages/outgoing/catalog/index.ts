@@ -9,6 +9,8 @@ export * from './CatalogAdminMoveOfferComposer';
 export * from './CatalogAdminMovePageComposer';
 export * from './CatalogAdminPublishComposer';
 export * from './CatalogAdminSaveOfferComposer';
+export * from './CatalogAdminSavePageIconComposer';
+export * from './CatalogAdminSavePageImagesComposer';
 export * from './CatalogAdminSavePageComposer';
 export * from './BuildersClubPlaceWallItemMessageComposer';
 export * from './BuildersClubQueryFurniCountMessageComposer';

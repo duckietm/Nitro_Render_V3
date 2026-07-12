@@ -8,6 +8,7 @@ import { HanditemBlockStateMessageEvent } from './messages';
 import { TranslationLanguagesEvent, TranslationLanguagesRequestComposer, TranslationResultEvent, TranslationTextRequestComposer } from './messages';
 import { YouTubeRoomBroadcastEvent, YouTubeRoomPlayComposer, YouTubeRoomSettingsComposer, YouTubeRoomSettingsEvent, YouTubeRoomWatchersEvent, YouTubeRoomWatchingComposer } from './messages';
 import { HousekeepingActionLogEvent, HousekeepingActionResultEvent, HousekeepingBanUserComposer, HousekeepingDashboardEvent, HousekeepingDeleteRoomComposer, HousekeepingFindRoomByIdComposer, HousekeepingFindUserByIdComposer, HousekeepingFindUserByNameComposer, HousekeepingForceDisconnectUserComposer, HousekeepingGetDashboardComposer, HousekeepingGiveCreditsComposer, HousekeepingGiveCurrencyComposer, HousekeepingGrantItemComposer, HousekeepingKickAllFromRoomComposer, HousekeepingKickUserComposer, HousekeepingListActionLogComposer, HousekeepingMuteRoomComposer, HousekeepingMuteUserComposer, HousekeepingResetUserPasswordComposer, HousekeepingRoomDetailEvent, HousekeepingRoomListEvent, HousekeepingRoomStateComposer, HousekeepingSearchRoomsComposer, HousekeepingSendHotelAlertComposer, HousekeepingSetHcSubscriptionComposer, HousekeepingSetUserRankComposer, HousekeepingTradeLockUserComposer, HousekeepingTransferRoomOwnershipComposer, HousekeepingUnbanUserComposer, HousekeepingUserDetailEvent } from './messages';
+import { CatalogAdminSavePageIconComposer, CatalogAdminSavePageImagesComposer } from './messages/outgoing/catalog';
 import { RareValuesEvent, RequestRareValuesComposer } from './messages';
 import { WheelBuySpinComposer, WheelDataEvent, WheelOpenComposer, WheelRecentWinsEvent, WheelResultEvent, WheelSpinComposer } from './messages';
 import { WheelAdminGetPrizesComposer, WheelAdminPrizesEvent, WheelAdminSavePrizesComposer } from './messages';
@@ -696,6 +697,8 @@ export class NitroMessages implements IMessageConfiguration
         this._composers.set(OutgoingHeader.BUILDERS_CLUB_PLACE_WALL_ITEM, BuildersClubPlaceWallItemMessageComposer);
         this._composers.set(OutgoingHeader.BUILDERS_CLUB_QUERY_FURNI_COUNT, BuildersClubQueryFurniCountMessageComposer);
 		this._composers.set(OutgoingHeader.CATALOG_ADMIN_SAVE_PAGE, CatalogAdminSavePageComposer);
+        this._composers.set(OutgoingHeader.CATALOG_ADMIN_SAVE_PAGE_IMAGES, CatalogAdminSavePageImagesComposer);
+        this._composers.set(OutgoingHeader.CATALOG_ADMIN_SAVE_PAGE_ICON, CatalogAdminSavePageIconComposer);
         this._composers.set(OutgoingHeader.CATALOG_ADMIN_CREATE_PAGE, CatalogAdminCreatePageComposer);
         this._composers.set(OutgoingHeader.CATALOG_ADMIN_DELETE_PAGE, CatalogAdminDeletePageComposer);
         this._composers.set(OutgoingHeader.CATALOG_ADMIN_SAVE_OFFER, CatalogAdminSaveOfferComposer);
