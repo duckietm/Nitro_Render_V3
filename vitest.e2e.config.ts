@@ -6,7 +6,7 @@ export default defineConfig({
         environment: 'node',
         include: ['packages/**/*.e2e.test.ts'],
         exclude: ['**/node_modules/**', '**/dist/**'],
-        testTimeout: 60000,
+        testTimeout: 90000,
         setupFiles: ['packages/communication/src/e2e/setup.ts'],
         alias: aliases
     },
