@@ -26,6 +26,7 @@
     "eslint": "eslint ./src ./packages/*/src",
     "eslint-fix": "eslint ./src --fix",
     "test": "vitest run",
+    "test:e2e:login-reconnect": "vitest run --config vitest.e2e.config.ts packages/communication/src/e2e/loginReconnect.e2e.test.ts",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage"
   },
