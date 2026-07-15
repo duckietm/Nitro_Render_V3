@@ -1,4 +1,5 @@
 import { mkdirSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { TypeScriptPacketRegistry } from '../TypeScriptPacketRegistry';
@@ -23,7 +24,7 @@ describe('TypeScript packet registry', () =>
 
     it('discovers registered events, their parsers, and outgoing composers', () =>
     {
-        const root = join(process.env.TEMP!, `packet-registry-${ Date.now() }`);
+        const root = join(tmpdir(), `packet-registry-${ Date.now() }`);
         write(root, 'messages/incoming/IncomingHeader.ts', `export class IncomingHeader {
             static OPEN = 100; static DECLARED_ONLY = 101;
         }`);
@@ -47,7 +48,7 @@ describe('TypeScript packet registry', () =>
 
     it('rejects duplicate active headers', () =>
     {
-        const root = join(process.env.TEMP!, `packet-registry-duplicate-${ Date.now() }`);
+        const root = join(tmpdir(), `packet-registry-duplicate-${ Date.now() }`);
         write(root, 'messages/incoming/IncomingHeader.ts', `export class IncomingHeader {
             static FIRST = 100; static SECOND = 100;
         }`);
@@ -69,7 +70,7 @@ describe('TypeScript packet registry', () =>
 
     it('rejects registrations whose parser source is missing', () =>
     {
-        const root = join(process.env.TEMP!, `packet-registry-missing-${ Date.now() }`);
+        const root = join(tmpdir(), `packet-registry-missing-${ Date.now() }`);
         write(root, 'messages/incoming/IncomingHeader.ts',
             'export class IncomingHeader { static MISSING = 100; }');
         write(root, 'messages/outgoing/OutgoingHeader.ts', 'export class OutgoingHeader {}');
