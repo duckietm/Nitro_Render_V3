@@ -91,34 +91,36 @@ const endpoint = (input: unknown, context: string): PacketEndpoint =>
 const schema = (input: unknown, context: string): WireSchema =>
 {
     const value = object(input, context);
-    const type = nonEmptyString(value.type, `${ context }.type`);
-    if(SCALAR_TYPES.has(type as ScalarType))
+    const kind = nonEmptyString(value.kind, `${ context }.kind`);
+    if(kind === 'scalar')
     {
+        const type = nonEmptyString(value.type, `${ context }.type`);
+        if(!SCALAR_TYPES.has(type as ScalarType)) throw new TypeError(`${ context } has unknown scalar type ${ type }`);
         return { type: type as ScalarType, name: string(value.name, `${ context }.name`) };
     }
-    if(type === 'list')
+    if(kind === 'list')
     {
         const countType = nonEmptyString(value.countType, `${ context }.countType`);
         if(!SCALAR_TYPES.has(countType as ScalarType)) throw new TypeError(`${ context } has unknown scalar type ${ countType }`);
         return {
-            type,
+            type: 'list',
             countType: countType as ScalarType,
             item: array(value.item, `${ context }.item`).map((field, index) => schema(field, `${ context }.item[${ index }]`))
         };
     }
-    if(type === 'optional')
+    if(kind === 'optional')
     {
         return {
-            type,
+            type: 'optional',
             controller: nonEmptyString(value.controller, `${ context }.controller`),
             fields: array(value.fields, `${ context }.fields`).map((field, index) => schema(field, `${ context }.fields[${ index }]`))
         };
     }
-    if(type === 'variant')
+    if(kind === 'variant')
     {
         const branches = object(value.branches, `${ context }.branches`);
         return {
-            type,
+            type: 'variant',
             discriminator: nonEmptyString(value.discriminator, `${ context }.discriminator`),
             branches: Object.fromEntries(Object.entries(branches).map(([key, fields]) => [
                 key,
@@ -126,7 +128,7 @@ const schema = (input: unknown, context: string): WireSchema =>
             ]))
         };
     }
-    throw new TypeError(`${ context } has unknown scalar type ${ type }`);
+    throw new TypeError(`${ context } has unknown schema kind ${ kind }`);
 };
 
 const direction = (input: unknown, context: string): PacketDirection =>

@@ -71,4 +71,11 @@ describe('TypeScript packet signature extractor', () =>
 
         expect(result.unsupportedReason).toContain('Data-dependent packet operations in IfStatement inside parse');
     });
+
+    it('rejects parser fields delegated to an external constructor', () =>
+    {
+        const result = extractTypeScriptPacketSignature(fixture('DelegatedParserFixture.ts'), 'incoming');
+
+        expect(result.unsupportedReason).toContain('external constructor Payload');
+    });
 });

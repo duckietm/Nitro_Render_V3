@@ -81,6 +81,17 @@ const extractIncomingMethod = (
         if(helper.unsupportedReason) return helper;
         fields.push(...helper.fields);
     }
+    const wrapperNames = new Set(method.parameters.map(parameter => parameter.name.getText()));
+    let delegatedConstructor: string | undefined;
+    visit(method.body, node =>
+    {
+        if(delegatedConstructor || !ts.isNewExpression(node)) return;
+        if(node.arguments?.some(argument => ts.isIdentifier(unwrap(argument))
+            && wrapperNames.has((unwrap(argument) as ts.Identifier).text)))
+            delegatedConstructor = node.expression.getText();
+    });
+    if(delegatedConstructor)
+        return unsupported(`Packet fields delegated to external constructor ${ delegatedConstructor } inside ${ name }`);
     return { fields };
 };
 

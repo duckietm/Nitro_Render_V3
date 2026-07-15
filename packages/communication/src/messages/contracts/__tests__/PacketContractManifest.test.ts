@@ -10,10 +10,10 @@ const validManifest = () => ({
         java: { symbol: 'SendFixtureEvent', className: 'SendFixtureEvent', path: 'src/SendFixtureEvent.java' },
         typescript: { symbol: 'SEND_FIXTURE', className: 'SendFixtureComposer', path: 'src/SendFixtureComposer.ts' },
         fields: [
-            { type: 'int', name: 'id' },
-            { type: 'list', countType: 'short', item: [{ type: 'string', name: 'label' }] },
-            { type: 'optional', controller: 'enabled', fields: [{ type: 'boolean', name: 'enabled' }] },
-            { type: 'variant', discriminator: 'kind', branches: { '1': [{ type: 'long', name: 'value' }] } }
+            { kind: 'scalar', type: 'int', name: 'id' },
+            { kind: 'list', countType: 'short', item: [{ kind: 'scalar', type: 'string', name: 'label' }] },
+            { kind: 'optional', controller: 'enabled', fields: [{ kind: 'scalar', type: 'boolean', name: 'enabled' }] },
+            { kind: 'variant', discriminator: 'kind', branches: { '1': [{ kind: 'scalar', type: 'long', name: 'value' }] } }
         ]
     }],
     unpaired: [],
@@ -64,7 +64,7 @@ describe('packet contract manifest', () =>
     it('rejects unknown scalar types and invalid directions', () =>
     {
         const scalar = validManifest();
-        scalar.contracts[0].fields = [{ type: 'float', name: 'value' }] as never;
+        scalar.contracts[0].fields = [{ kind: 'scalar', type: 'float', name: 'value' }] as never;
         expect(() => parsePacketContractManifest(scalar)).toThrow('unknown scalar type');
 
         const direction = validManifest();
