@@ -1,0 +1,56 @@
+name: Packet contracts
+
+on:
+  pull_request:
+    branches: [Dev]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out renderer
+        uses: actions/checkout@v4
+
+      - name: Resolve linked emulator branch
+        id: emulator
+        shell: bash
+        env:
+          RENDERER_BRANCH: ${{ github.head_ref || github.ref_name }}
+        run: |
+          linked_branch="${RENDERER_BRANCH%-renderer}-emulator"
+          if git ls-remote --exit-code --heads https://github.com/simoleo89/Arcturus-Morningstar-Extended.git "$linked_branch" >/dev/null 2>&1; then
+            echo "repository=simoleo89/Arcturus-Morningstar-Extended" >> "$GITHUB_OUTPUT"
+            echo "ref=$linked_branch" >> "$GITHUB_OUTPUT"
+          else
+            echo "repository=duckietm/Polaris-Emulator" >> "$GITHUB_OUTPUT"
+            echo "ref=dev" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Check out linked emulator
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ steps.emulator.outputs.repository }}
+          ref: ${{ steps.emulator.outputs.ref }}
+          path: emulator
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: yarn
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Verify renderer contracts
+        run: yarn test packages/communication/src/messages/contracts/__tests__
+
+      - name: Type-check renderer
+        run: yarn compile:fast
+
+      - name: Verify manifest identity
+        run: node scripts/verify-packet-contract-manifest.mjs --emulator emulator

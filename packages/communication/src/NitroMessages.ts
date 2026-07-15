@@ -49,7 +49,6 @@ export class NitroMessages implements IMessageConfiguration
         this._events.set(IncomingHeader.USER_CHANGE_NAME, ChangeUserNameResultMessageEvent);
         this._events.set(IncomingHeader.CHECK_USER_NAME, CheckUserNameResultMessageEvent);
         this._events.set(IncomingHeader.USER_FIGURE, FigureUpdateEvent);
-        this._events.set(IncomingHeader.USER_OUTFITS, WardrobeMessageEvent);
 
         // BOTS
         this._events.set(IncomingHeader.ADD_BOT_TO_INVENTORY, BotAddedToInventoryEvent);
@@ -130,7 +129,6 @@ export class NitroMessages implements IMessageConfiguration
         this._events.set(IncomingHeader.COMPETITION_VOTING_INFO, CompetitionVotingInfoMessageEvent);
         this._events.set(IncomingHeader.COMPETITION_TIMING_CODE, CurrentTimingCodeMessageEvent);
         this._events.set(IncomingHeader.COMPETITION_USER_PART_OF, IsUserPartOfCompetitionMessageEvent);
-        this._events.set(IncomingHeader.COMPETITION_NO_OWNED_ROOMS, NoOwnedRoomsAlertMessageEvent);
         this._events.set(IncomingHeader.COMPETITION_SECONDS_UNTIL, SecondsUntilMessageEvent);
 
         // CRAFTING
