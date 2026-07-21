@@ -600,4 +600,15 @@ export class OutgoingHeader
     public static REQUEST_MESSENGER_HISTORY = 4901;
     public static SEND_MESSENGER_MESSAGE = 4902;
     public static MARK_MESSENGER_READ = 4903;
+    public static SNOWWAR_LOAD_STAGE_READY = 6000;
+    public static SNOWWAR_EXIT_GAME = 6001;
+    public static SNOWWAR_WALK = 6003;
+    public static SNOWWAR_THROW_AT_LOCATION = 6004;
+    public static SNOWWAR_THROW_AT_PLAYER = 6005;
+    public static SNOWWAR_CREATE_SNOWBALL = 6006;
+    public static SNOWWAR_REQUEST_FULL_GAME_STATUS = 6007;
+    public static SNOWWAR_PLAY_AGAIN = 6008;
+    public static SNOWWAR_GAME_CHAT = 6009;
+    public static SNOWWAR_JOIN_QUEUE = 6012;
+    public static SNOWWAR_LEAVE_QUEUE = 6013;
 }

@@ -117,6 +117,11 @@ export class MusicPlayer
         return Promise.resolve(sample);
     }
 
+    /**
+     * Plays a single sample once (trax-editor audition). Reuses the same
+     * howler cache as full playback, so auditioned samples are already
+     * warm when the preview starts.
+     */
     public async playSampleOnce(sampleId: number): Promise<void>
     {
         this.stopSampleOnce();
@@ -137,8 +142,16 @@ export class MusicPlayer
         this._auditionPlayId = -1;
     }
 
+    /**
+     * Howler only unlocks its AudioContext from a document-level capture
+     * listener that is registered when the first Howl is created — one click
+     * too late for a fresh session, which made the first play/audition after
+     * login silent. Chrome grants Web Audio sticky user activation, so the
+     * gesture that triggered this call is enough to resume the context here.
+     */
     private async unlockAudio(): Promise<void>
     {
+        //@ts-ignore
         if(Howler._audioUnlocked) return;
 
         const ctx = Howler.ctx;
@@ -148,10 +161,14 @@ export class MusicPlayer
         try
         {
             if(ctx.state !== 'running') await ctx.resume();
+
+            //@ts-ignore
             if(ctx.state === 'running') Howler._audioUnlocked = true;
         }
         catch
-        { }
+        {
+            // Stays locked; howler's own listener unlocks on the next gesture.
+        }
     }
 
     private async preload(): Promise<void>
