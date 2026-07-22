@@ -1,4 +1,5 @@
 export * from './SnowWarLoadStageReadyComposer';
+export * from './SnowWarEditRoomComposer';
 export * from './SnowWarExitGameComposer';
 export * from './SnowWarWalkComposer';
 export * from './SnowWarThrowAtLocationComposer';

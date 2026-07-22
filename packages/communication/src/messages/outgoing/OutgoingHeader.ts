@@ -609,6 +609,7 @@ export class OutgoingHeader
     public static SNOWWAR_REQUEST_FULL_GAME_STATUS = 6007;
     public static SNOWWAR_PLAY_AGAIN = 6008;
     public static SNOWWAR_GAME_CHAT = 6009;
+    public static SNOWWAR_EDIT_ROOM = 6010;
     public static SNOWWAR_JOIN_QUEUE = 6012;
     public static SNOWWAR_LEAVE_QUEUE = 6013;
 }
