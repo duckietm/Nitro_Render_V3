@@ -6,6 +6,7 @@ export class SnowWarLevelItemData
     private _x: number;
     private _y: number;
     private _rotation: number;
+    private _imageUrl: string;
 
     constructor(wrapper: IMessageDataWrapper)
     {
@@ -13,6 +14,10 @@ export class SnowWarLevelItemData
         this._x = wrapper.readInt();
         this._y = wrapper.readInt();
         this._rotation = wrapper.readInt();
+        // Optional room-ad image (empty for normal props). Trailing per-item
+        // string so old servers that don't emit it still parse - guarded by
+        // the item count, not bytesAvailable.
+        this._imageUrl = wrapper.readString();
     }
 
     public get name(): string
@@ -33,5 +38,10 @@ export class SnowWarLevelItemData
     public get rotation(): number
     {
         return this._rotation;
+    }
+
+    public get imageUrl(): string
+    {
+        return this._imageUrl;
     }
 }
