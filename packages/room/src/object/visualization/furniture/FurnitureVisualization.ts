@@ -4,6 +4,7 @@ import { BLEND_MODES, Filter, Texture } from 'pixi.js';
 import { RoomObjectSpriteVisualization } from '../RoomObjectSpriteVisualization';
 import { ColorData, LayerData } from '../data';
 import { FurnitureVisualizationData } from './FurnitureVisualizationData';
+import { composeFurnitureAlphaMultiplier, furnitureAlphaTolerance } from './WiredOpacityVisualizationPolicy';
 
 export class FurnitureVisualization extends RoomObjectSpriteVisualization
 {
@@ -44,6 +45,7 @@ export class FurnitureVisualization extends RoomObjectSpriteVisualization
     private _animationNumber: number;
     private _lookThrough: boolean;
     private _needsLookThroughUpdate: boolean;
+    private _wiredClickThrough: boolean;
 
     constructor()
     {
@@ -80,6 +82,7 @@ export class FurnitureVisualization extends RoomObjectSpriteVisualization
 
         this._animationNumber = 0;
         this._lookThrough = false;
+        this._wiredClickThrough = false;
     }
 
     public initialize(data: IObjectVisualizationData): boolean
@@ -236,15 +239,18 @@ export class FurnitureVisualization extends RoomObjectSpriteVisualization
         this._furnitureLift = (model.getValue<number>(RoomObjectVariable.FURNITURE_LIFT_AMOUNT) || 0);
 
         let alphaMultiplier = model.getValue<number>(RoomObjectVariable.FURNITURE_ALPHA_MULTIPLIER);
+        const wiredOpacity = model.getValue<number>(RoomObjectVariable.FURNITURE_WIRED_OPACITY);
+        const wiredClickThrough = (model.getValue<number>(RoomObjectVariable.FURNITURE_WIRED_CLICK_THROUGH) === 1);
         const hiddenByConfInvisControl = (model.getValue<number>(RoomObjectVariable.FURNITURE_CONF_INVIS_HIDDEN) === 1);
         const hiddenByAreaHideControl = (model.getValue<number>(RoomObjectVariable.FURNITURE_AREA_HIDE_HIDDEN) === 1);
 
         if(isNaN(alphaMultiplier)) alphaMultiplier = 1;
-        if(hiddenByConfInvisControl || hiddenByAreaHideControl) alphaMultiplier = 0;
+        alphaMultiplier = composeFurnitureAlphaMultiplier(alphaMultiplier, wiredOpacity, hiddenByConfInvisControl || hiddenByAreaHideControl);
 
-        if(this._alphaMultiplier !== alphaMultiplier)
+        if((this._alphaMultiplier !== alphaMultiplier) || (this._wiredClickThrough !== wiredClickThrough))
         {
             this._alphaMultiplier = alphaMultiplier;
+            this._wiredClickThrough = wiredClickThrough;
 
             this._alphaChanged = true;
         }
@@ -313,7 +319,7 @@ export class FurnitureVisualization extends RoomObjectSpriteVisualization
                     sprite.offsetX = (assetData.offsetX + this.getLayerXOffset(scale, this._direction, layerId));
                     sprite.offsetY = (assetData.offsetY + this.getLayerYOffset(scale, this._direction, layerId));
                     sprite.blendMode = this.getLayerBlendMode(scale, this._direction, layerId);
-                    sprite.alphaTolerance = (this.getLayerIgnoreMouse(scale, this._direction, layerId) ? AlphaTolerance.MATCH_NOTHING : AlphaTolerance.MATCH_OPAQUE_PIXELS);
+                    sprite.alphaTolerance = furnitureAlphaTolerance(this.getLayerIgnoreMouse(scale, this._direction, layerId), this._wiredClickThrough);
 
                     relativeDepth = this.getLayerZOffset(scale, this._direction, layerId);
                     relativeDepth = (relativeDepth - (layerId * 0.001));

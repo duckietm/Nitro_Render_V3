@@ -12,4 +12,6 @@ export interface IMessageDataWrapper
     readString(): string;
     header: number;
     bytesAvailable: boolean;
+    /** Exact unread byte count when the transport can expose it. */
+    readonly remainingBytes?: number;
 }

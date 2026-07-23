@@ -301,6 +301,8 @@ export class OutgoingHeader
     public static WIRED_USER_VARIABLE_UPDATE = 10025;
     public static WIRED_USER_VARIABLE_MANAGE = 10026;
     public static WIRED_USER_INSPECT_MOVE = 10027;
+    public static WIRED_FURNI_RUNTIME_STATE_REQUEST = 10028;
+    public static WIRED_FEATURE_CAPABILITIES = 10029;
     public static TRANSLATION_LANGUAGES_REQUEST = 10032;
     public static TRANSLATION_TEXT_REQUEST = 10033;
     public static WIRED_OPEN = 768;

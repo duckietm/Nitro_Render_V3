@@ -75,4 +75,9 @@ export class EvaWireDataWrapper implements IMessageDataWrapper
     {
         return (this._buffer && (this._buffer.remaining() > 0));
     }
+
+    public get remainingBytes(): number
+    {
+        return this._buffer?.remaining() ?? 0;
+    }
 }
