@@ -25,6 +25,7 @@ export * from './ChestLogEvent';
 export * from './RoomDimmerPresetsMessageEvent';
 export * from './RoomMessageNotificationMessageEvent';
 export * from './WelcomeGiftStatusEvent';
+export * from './WiredFurniGravityMessageEvent';
 export * from './WiredFurniOpacityMessageEvent';
 export * from './floor';
 export * from './wall';
