@@ -2,6 +2,7 @@ export class IncomingHeader
 {
     // These packets do not belong to this revision, so these are custom packet ids
     public static AREA_HIDE = 6001;
+    public static WIRED_FURNI_OPACITY = 6002;
 
     // MENTIONS
     public static MENTION_RECEIVED = 4801;

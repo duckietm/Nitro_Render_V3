@@ -84,6 +84,7 @@ export class RoomObjectVariable
     public static FURNITURE_BADGE_ASSET_NAME: string = 'furniture_badge_asset_name';
     public static FURNITURE_BADGE_VISIBLE_IN_STATE: string = 'furniture_badge_visible_in_state';
     public static FURNITURE_ALPHA_MULTIPLIER: string = 'furniture_alpha_multiplier';
+    public static FURNITURE_OPACITY_CLICK_THROUGH: string = 'furniture_opacity_click_through';
     public static FURNITURE_CONF_INVIS_HIDDEN: string = 'furniture_conf_invis_hidden';
     public static FURNITURE_AREA_HIDE_HIDDEN: string = 'furniture_area_hide_hidden';
     public static FURNITURE_USAGE_POLICY: string = 'furniture_usage_policy';
