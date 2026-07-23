@@ -4,6 +4,8 @@ export * from './TriggerDefinition';
 export * from './WiredActionDefinition';
 export * from './WiredFurniActionParser';
 export * from './WiredFurniConditionParser';
+export * from './WiredFurniOpacityParser';
+export * from './WiredFurniRuntimeStateParser';
 export * from './WiredFurniTriggerParser';
 export * from './WiredMonitorDataParser';
 export * from './WiredRoomSettingsDataParser';

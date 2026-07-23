@@ -1,5 +1,7 @@
 export * from './WiredFurniActionEvent';
 export * from './WiredFurniConditionEvent';
+export * from './WiredFurniOpacityEvent';
+export * from './WiredFurniRuntimeStateEvent';
 export * from './WiredFurniTriggerEvent';
 export * from './WiredMonitorDataEvent';
 export * from './WiredOpenEvent';
