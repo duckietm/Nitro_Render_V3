@@ -1,4 +1,4 @@
-import { IRoomObjectController, IRoomObjectUpdateMessage, IVector3D, RoomObjectVariable } from '@nitrots/api';
+import { IRoomObjectController, IRoomObjectModel, IRoomObjectUpdateMessage, IVector3D, RoomObjectVariable } from '@nitrots/api';
 import { Vector3d } from '@nitrots/utils';
 import { ObjectMoveUpdateMessage } from '../../messages';
 import { RoomObjectLogicBase } from './RoomObjectLogicBase';
@@ -92,7 +92,7 @@ export class MovingObjectLogic extends RoomObjectLogicBase
             else if(this._locationDelta.length > 0)
             {
                 vector.assign(this._locationDelta);
-                vector.multiply((difference / this._updateInterval));
+                vector.multiply(this.easeProgress(difference / this._updateInterval, model));
                 vector.add(this._location);
             }
             else
@@ -117,6 +117,12 @@ export class MovingObjectLogic extends RoomObjectLogicBase
                 this._locationDelta.y = 0;
                 this._locationDelta.z = 0;
                 completedInterpolation = true;
+
+                if(model && (model.getValue<number>(RoomObjectVariable.FURNITURE_MOVE_STYLE) > 0))
+                {
+                    model.setValue(RoomObjectVariable.FURNITURE_MOVE_STYLE, 0);
+                    model.setValue(RoomObjectVariable.FURNITURE_MOVE_STYLE_INTENSITY, 0);
+                }
             }
         }
 
@@ -315,6 +321,56 @@ export class MovingObjectLogic extends RoomObjectLogicBase
         return (Math.abs(first.x - second.x) <= MovingObjectLogic.LOCATION_EPSILON)
             && (Math.abs(first.y - second.y) <= MovingObjectLogic.LOCATION_EPSILON)
             && (Math.abs(first.z - second.z) <= MovingObjectLogic.LOCATION_EPSILON);
+    }
+
+    private easeProgress(progress: number, model: IRoomObjectModel): number
+    {
+        if(!model) return progress;
+
+        const style = model.getValue<number>(RoomObjectVariable.FURNITURE_MOVE_STYLE);
+
+        if(!style || (style <= 0)) return progress;
+
+        const intensity = Math.max(0, Math.min(100, (model.getValue<number>(RoomObjectVariable.FURNITURE_MOVE_STYLE_INTENSITY) ?? 100))) / 100;
+        const t = Math.max(0, Math.min(1, progress));
+        const styled = MovingObjectLogic.applyMoveStyle(t, style);
+
+        return t + ((styled - t) * intensity);
+    }
+
+    private static applyMoveStyle(t: number, style: number): number
+    {
+        switch(style)
+        {
+            case 1: // ease in
+                return t * t;
+            case 2: // ease out
+                return 1 - ((1 - t) * (1 - t));
+            case 3: // ease in/out
+                return (t < 0.5) ? (2 * t * t) : (1 - (Math.pow((-2 * t) + 2, 2) / 2));
+            case 4: // bounce (ease-out bounce)
+                return MovingObjectLogic.easeOutBounce(t);
+            case 5: { // elastic (ease-out elastic)
+                if((t === 0) || (t === 1)) return t;
+                const c4 = (2 * Math.PI) / 3;
+                return (Math.pow(2, -10 * t) * Math.sin(((t * 10) - 0.75) * c4)) + 1;
+            }
+            case 6: // drop: accelerate down, land with a small bounce
+                return (t < 0.7) ? ((t / 0.7) * (t / 0.7) * 0.98) : (0.98 + (0.02 * MovingObjectLogic.easeOutBounce((t - 0.7) / 0.3)));
+            default:
+                return t;
+        }
+    }
+
+    private static easeOutBounce(t: number): number
+    {
+        const n1 = 7.5625;
+        const d1 = 2.75;
+
+        if(t < (1 / d1)) return n1 * t * t;
+        if(t < (2 / d1)) return (n1 * (t -= (1.5 / d1)) * t) + 0.75;
+        if(t < (2.5 / d1)) return (n1 * (t -= (2.25 / d1)) * t) + 0.9375;
+        return (n1 * (t -= (2.625 / d1)) * t) + 0.984375;
     }
 
     protected getLocationOffset(): IVector3D

@@ -1,5 +1,6 @@
 export * from './WiredFurniActionEvent';
 export * from './WiredFurniConditionEvent';
+export * from './WiredFurniMoveStyleEvent';
 export * from './WiredFurniOpacityEvent';
 export * from './WiredFurniRuntimeStateEvent';
 export * from './WiredFurniTriggerEvent';
