@@ -19,6 +19,8 @@ export class MovingObjectLogic extends RoomObjectLogicBase
     private _changeTime: number;
     private _updateInterval: number;
     private _queuedMoveMessages: ObjectMoveUpdateMessage[];
+    private _animationEffect: number;
+    private _gravityIntensity: number;
 
     constructor()
     {
@@ -34,6 +36,8 @@ export class MovingObjectLogic extends RoomObjectLogicBase
         this._changeTime = 0;
         this._updateInterval = MovingObjectLogic.DEFAULT_UPDATE_INTERVAL;
         this._queuedMoveMessages = [];
+        this._animationEffect = 0;
+        this._gravityIntensity = 0;
     }
 
     public dispose(): void
@@ -91,9 +95,12 @@ export class MovingObjectLogic extends RoomObjectLogicBase
             }
             else if(this._locationDelta.length > 0)
             {
+                const progress = this.getAnimationProgress(difference / this._updateInterval);
+
                 vector.assign(this._locationDelta);
-                vector.multiply((difference / this._updateInterval));
+                vector.multiply(progress);
                 vector.add(this._location);
+                vector.z += this.getGravityOffset(progress);
             }
             else
             {
@@ -194,6 +201,8 @@ export class MovingObjectLogic extends RoomObjectLogicBase
         this._location.assign(startLocation);
         this.object.setLocation(this._location);
         this._followObject = message.anchorObject;
+        this._animationEffect = message.animationEffect;
+        this._gravityIntensity = message.gravityIntensity;
 
         if(message.anchorOffset) this._followOffset.assign(message.anchorOffset);
         else this._followOffset.assign(new Vector3d());
@@ -222,8 +231,11 @@ export class MovingObjectLogic extends RoomObjectLogicBase
             const vector = MovingObjectLogic.TEMP_VECTOR;
 
             vector.assign(this._locationDelta);
-            vector.multiply((elapsed / this._updateInterval));
+            const progress = this.getAnimationProgress(elapsed / this._updateInterval);
+
+            vector.multiply(progress);
             vector.add(this._location);
+            vector.z += this.getGravityOffset(progress);
 
             const locationOffset = this.getLocationOffset();
 
@@ -245,6 +257,8 @@ export class MovingObjectLogic extends RoomObjectLogicBase
         this._followObject = null;
         this._followOffset.assign(new Vector3d());
         this._queuedMoveMessages = [];
+        this._animationEffect = 0;
+        this._gravityIntensity = 0;
         this._changeTime = this._lastUpdateTime;
     }
 
@@ -275,7 +289,65 @@ export class MovingObjectLogic extends RoomObjectLogicBase
             message.duration,
             message.elapsed,
             message.anchorObject,
-            message.anchorOffset));
+            message.anchorOffset,
+            message.animationEffect,
+            message.gravityIntensity));
+    }
+
+    private getAnimationProgress(progress: number): number
+    {
+        const amount = Math.max(0, Math.min(1, progress));
+
+        switch(this._animationEffect)
+        {
+            case 1:
+                return amount * amount;
+            case 2:
+                return 1 - Math.pow(1 - amount, 2);
+            case 3:
+                return amount < 0.5 ? 2 * amount * amount : 1 - (Math.pow(-2 * amount + 2, 2) / 2);
+            case 4:
+                return this.easeOutBounce(amount);
+            case 5:
+                return amount === 0 || amount === 1
+                    ? amount
+                    : Math.pow(2, -10 * amount) * Math.sin(((amount * 10) - 0.75) * ((2 * Math.PI) / 3)) + 1;
+            case 6:
+                return amount < 0.75 ? Math.pow(amount / 0.75, 2) * 0.92 : 0.92 + ((amount - 0.75) / 0.25) * 0.08;
+            default:
+                return amount;
+        }
+    }
+
+    private easeOutBounce(progress: number): number
+    {
+        const first = 7.5625;
+        const second = 2.75;
+
+        if(progress < (1 / second)) return first * progress * progress;
+        if(progress < (2 / second))
+        {
+            const amount = progress - (1.5 / second);
+
+            return first * amount * amount + 0.75;
+        }
+        if(progress < (2.5 / second))
+        {
+            const amount = progress - (2.25 / second);
+
+            return first * amount * amount + 0.9375;
+        }
+
+        const amount = progress - (2.625 / second);
+
+        return first * amount * amount + 0.984375;
+    }
+
+    private getGravityOffset(progress: number): number
+    {
+        if(this._gravityIntensity <= 0) return 0;
+
+        return Math.sin(Math.PI * progress) * (this._gravityIntensity / 100) * 1.5;
     }
 
     private processQueuedMoveMessage(): void
