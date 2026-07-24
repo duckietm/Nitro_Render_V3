@@ -20,6 +20,7 @@ export class FurnitureVisualization extends RoomObjectSpriteVisualization
     protected _furnitureLift: number;
     protected _alphaMultiplier: number;
     protected _alphaChanged: boolean;
+    protected _clickThrough: boolean;
     protected _clickUrl: string;
     protected _clickHandling: boolean;
 
@@ -58,6 +59,7 @@ export class FurnitureVisualization extends RoomObjectSpriteVisualization
         this._furnitureLift = 0;
         this._alphaMultiplier = 1;
         this._alphaChanged = false;
+        this._clickThrough = false;
         this._clickUrl = null;
         this._clickHandling = false;
 
@@ -236,6 +238,7 @@ export class FurnitureVisualization extends RoomObjectSpriteVisualization
         this._furnitureLift = (model.getValue<number>(RoomObjectVariable.FURNITURE_LIFT_AMOUNT) || 0);
 
         let alphaMultiplier = model.getValue<number>(RoomObjectVariable.FURNITURE_ALPHA_MULTIPLIER);
+        const clickThrough = (model.getValue<number>(RoomObjectVariable.FURNITURE_OPACITY_CLICK_THROUGH) === 1);
         const hiddenByConfInvisControl = (model.getValue<number>(RoomObjectVariable.FURNITURE_CONF_INVIS_HIDDEN) === 1);
         const hiddenByAreaHideControl = (model.getValue<number>(RoomObjectVariable.FURNITURE_AREA_HIDE_HIDDEN) === 1);
 
@@ -248,6 +251,8 @@ export class FurnitureVisualization extends RoomObjectSpriteVisualization
 
             this._alphaChanged = true;
         }
+
+        this._clickThrough = clickThrough;
 
         this.updateModelCounter = model.updateCounter;
 
@@ -313,7 +318,7 @@ export class FurnitureVisualization extends RoomObjectSpriteVisualization
                     sprite.offsetX = (assetData.offsetX + this.getLayerXOffset(scale, this._direction, layerId));
                     sprite.offsetY = (assetData.offsetY + this.getLayerYOffset(scale, this._direction, layerId));
                     sprite.blendMode = this.getLayerBlendMode(scale, this._direction, layerId);
-                    sprite.alphaTolerance = (this.getLayerIgnoreMouse(scale, this._direction, layerId) ? AlphaTolerance.MATCH_NOTHING : AlphaTolerance.MATCH_OPAQUE_PIXELS);
+                    sprite.alphaTolerance = ((this._clickThrough || this.getLayerIgnoreMouse(scale, this._direction, layerId)) ? AlphaTolerance.MATCH_NOTHING : AlphaTolerance.MATCH_OPAQUE_PIXELS);
 
                     relativeDepth = this.getLayerZOffset(scale, this._direction, layerId);
                     relativeDepth = (relativeDepth - (layerId * 0.001));
