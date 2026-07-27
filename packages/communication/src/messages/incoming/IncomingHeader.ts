@@ -290,6 +290,7 @@ export class IncomingHeader
     public static WIRED_FURNI_RUNTIME_STATE = 5108;
     public static WIRED_FURNI_OPACITY = 5109;
     public static WIRED_FURNI_MOVE_STYLE = 5110;
+    public static WIRED_ARRAY_INSPECTION_DATA = 5111;
     public static WIRED_OPEN = 1830;
     public static WIRED_REWARD = 178;
     public static WIRED_SAVE = 1155;
