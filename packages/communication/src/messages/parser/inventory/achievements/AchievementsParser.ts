@@ -31,6 +31,21 @@ export class AchievementsParser implements IMessageParser
 
         this._defaultCategory = wrapper.readString();
 
+        if(!wrapper.bytesAvailable) return true;
+
+        // Polaris carries states after the complete legacy list to preserve record boundaries.
+        const stateCount = wrapper.readInt();
+        const achievementsById = new Map(this._achievements.map(achievement => [ achievement.achievementId, achievement ]));
+
+        for(let i = 0; i < stateCount; i++)
+        {
+            const achievementId = wrapper.readInt();
+            const state = wrapper.readShort();
+            const achievement = achievementsById.get(achievementId);
+
+            if(achievement) achievement.state = state;
+        }
+
         return true;
     }
 

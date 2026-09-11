@@ -6,6 +6,11 @@ export class AchievementData
     public static DISPLAY_METHOD_SHOW_LEVEL_PROGRESS: number = 0;
     public static DISPLAY_METHOD_NEVER_SHOW_PROGRESS: number = 1;
     public static DISPLAY_METHOD_SHOW_TOTAL_PROGRESS: number = 2;
+    public static STATE_DISABLED: number = 0;
+    public static STATE_ENABLED: number = 1;
+    public static STATE_ARCHIVED: number = 2;
+    public static STATE_OFF_SEASON: number = 3;
+    public static STATE_CONTROLLED_BY_WIRED: number = 4;
 
     private _achievementId: number;
     private _level: number;
@@ -20,6 +25,7 @@ export class AchievementData
     private _subCategory: string;
     private _levelCount: number;
     private _displayMethod: number;
+    private _state: number = AchievementData.STATE_ENABLED;
 
     private _unseen: number = 0;
 
@@ -50,6 +56,11 @@ export class AchievementData
     public get badgeId(): string
     {
         return this._badgeId;
+    }
+
+    public get code(): string
+    {
+        return this._badgeId.replace(/^ACH_/, '').replace(/\d+$/, '');
     }
 
     public get level(): number
@@ -117,6 +128,16 @@ export class AchievementData
         return this._displayMethod;
     }
 
+    public get state(): number
+    {
+        return this._state;
+    }
+
+    public set state(state: number)
+    {
+        this._state = state;
+    }
+
     public get progress(): number
     {
         return this._currentPoints;
@@ -152,5 +173,6 @@ export class AchievementData
         this._subCategory = badge._subCategory;
         this._levelCount = badge._levelCount;
         this._displayMethod = badge._displayMethod;
+        this._state = badge._state;
     }
 }

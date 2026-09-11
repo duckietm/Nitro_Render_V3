@@ -7,6 +7,9 @@ export class AchievementResolutionCompletedMessageParser implements IMessagePars
 
     public flush(): boolean
     {
+        this._stuffCode = '';
+        this._badgeCode = '';
+
         return true;
     }
 

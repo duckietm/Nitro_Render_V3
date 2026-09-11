@@ -23,31 +23,26 @@ export class TalentLevelUpMessageParser implements IMessageParser
     {
         if(!wrapper) return false;
 
-        let totalRewards = 0;
-
         this._talentTrackName = wrapper.readString();
         this._level = wrapper.readInt();
+        this._rewardPerks = [];
+        this._rewardProducts = [];
 
         const totalRewardsPerks = wrapper.readInt();
 
-        while(totalRewards < totalRewardsPerks)
+        for(let i = 0; i < totalRewardsPerks; i++)
         {
             this._rewardPerks.push(new TalentTrackRewardPerk(wrapper));
-            totalRewards++;
         }
 
         const totalRewardsProducts = wrapper.readInt();
 
-        if(totalRewards < totalRewardsProducts)
+        for(let i = 0; i < totalRewardsProducts; i++)
         {
-            for(let i = 0; i < totalRewardsProducts; i++)
-            {
-                const name = wrapper.readString();
-                const vipDays = wrapper.readInt();
+            const productCode = wrapper.readString();
+            const vipDays = wrapper.readInt();
 
-                this._rewardProducts.push(new TalentTrackRewardProduct(name, vipDays));
-                totalRewards++;
-            }
+            this._rewardProducts.push(new TalentTrackRewardProduct(productCode, vipDays));
         }
 
         return true;

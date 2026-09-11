@@ -18,6 +18,10 @@ export class AchievementParser implements IMessageParser
 
         this._achievement = new AchievementData(wrapper);
 
+        if(!wrapper.bytesAvailable) return true;
+
+        this._achievement.state = wrapper.readShort();
+
         return true;
     }
 

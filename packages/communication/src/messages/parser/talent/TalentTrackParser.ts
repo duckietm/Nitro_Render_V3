@@ -56,9 +56,9 @@ export class TalentTrackParser implements IMessageParser
             for(let j = 0; j < itemsCount; j++)
             {
                 const name = wrapper.readString();
-                const unknownInt = wrapper.readInt();
+                const vipDays = wrapper.readInt();
 
-                levelItems.push(new TalentTrackRewardProduct(name, unknownInt));
+                levelItems.push(new TalentTrackRewardProduct(name, vipDays));
             }
 
             this._levels.push(new TalentTrackLevel(levelId, levelState, levelAchievements, levelPerks, levelItems));
