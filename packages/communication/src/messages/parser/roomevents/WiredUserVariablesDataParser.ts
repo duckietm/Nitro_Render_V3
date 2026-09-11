@@ -5,6 +5,7 @@ export interface IWiredArrayFieldDefinitionData
     id: number;
     name: string;
     order: number;
+    textConnected?: boolean;
 }
 
 export interface IWiredArrayVariableMetadata

@@ -43,7 +43,7 @@ describe('WiredUserVariablesDataParser', () =>
             arrayFormat: 'record',
             arrayMode: 'slots',
             maxEntries: 64,
-            fields: [ { id: 7, name: 'ItemID', order: 0 } ],
+            fields: [ { id: 7, name: 'ItemID', order: 0, textConnected: true } ],
             permanent: true
         } ]));
         const parser = new WiredUserVariablesDataParser();
@@ -55,7 +55,7 @@ describe('WiredUserVariablesDataParser', () =>
             arrayFormat: 'record',
             arrayMode: 'slots',
             maxEntries: 64,
-            fields: [ { id: 7, name: 'ItemID', order: 0 } ],
+            fields: [ { id: 7, name: 'ItemID', order: 0, textConnected: true } ],
             permanent: true
         });
     });

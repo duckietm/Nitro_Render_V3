@@ -9233,6 +9233,17 @@
           "kind": "scalar",
           "type": "int",
           "name": "value"
+        },
+        {
+          "kind": "optional",
+          "controller": "variableToken",
+          "fields": [
+            {
+              "kind": "scalar",
+              "type": "string",
+              "name": "variableToken"
+            }
+          ]
         }
       ]
     },
