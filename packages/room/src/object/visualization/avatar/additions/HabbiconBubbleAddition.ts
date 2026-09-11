@@ -14,9 +14,9 @@ export class HabbiconBubbleAddition implements IAvatarAddition
     private static BACKGROUND_VISIBLE_DURATION_MS: number = 3350;
     private static BACKGROUND_FADE_OUT_DURATION_MS: number = 530;
     private static ROOM_LARGE_OFFSET_X: number = -20;
-    private static ROOM_LARGE_OFFSET_Y: number = -126;
+    private static ROOM_LARGE_STACK_BOTTOM_Y: number = -86;
     private static ROOM_SMALL_OFFSET_X: number = -10;
-    private static ROOM_SMALL_OFFSET_Y: number = -65;
+    private static ROOM_SMALL_STACK_BOTTOM_Y: number = -45;
     private static DEFAULT_RELATIVE_DEPTH: number = -0.2;
 
     private _runtime: HabbiconRuntimeAsset = null;
@@ -70,7 +70,7 @@ export class HabbiconBubbleAddition implements IAvatarAddition
 
         this.syncRuntime();
         this.applyFrame(sprite, this.resolveTexture(this.resolveAlpha(Date.now()), this.resolveBackgroundAlpha(Date.now())));
-        this.applyOffsets(sprite, Date.now() - this._startedAt, true);
+        this.applyOffsets(sprite, Date.now() - this._startedAt);
 
         if(firstUpdate && sprite.texture)
         {
@@ -98,7 +98,7 @@ export class HabbiconBubbleAddition implements IAvatarAddition
         const frameIndex = this.resolveFrameIndex(elapsed);
         const sourceAlpha = this.resolveAlpha(now);
         const backgroundAlpha = this.resolveBackgroundAlpha(now);
-        let changed = false;
+        let changed = !sprite.texture || sprite.texture.destroyed;
 
         if(this._runtime && frameIndex !== this._frameIndex)
         {
@@ -114,14 +114,9 @@ export class HabbiconBubbleAddition implements IAvatarAddition
         if(changed) this.applyFrame(sprite, this.resolveTexture(sourceAlpha, backgroundAlpha));
 
         sprite.relativeDepth = HabbiconBubbleAddition.DEFAULT_RELATIVE_DEPTH;
-        this.applyOffsets(sprite, elapsed, false);
+        this.applyOffsets(sprite, elapsed);
 
-        if(sprite.alpha !== 255)
-        {
-            sprite.alpha = 255;
-            changed = true;
-        }
-
+        sprite.alpha = 255;
         sprite.visible = Math.max(sourceAlpha, backgroundAlpha) > 0;
 
         return true;
@@ -142,27 +137,18 @@ export class HabbiconBubbleAddition implements IAvatarAddition
         return this._triggerSequence;
     }
 
-    private applyOffsets(sprite: IRoomObjectSprite, elapsed: number, fromUpdate: boolean): void
+    private applyOffsets(sprite: IRoomObjectSprite, elapsed: number): void
     {
         const small = this._scale < 48;
+        const additionScale = small ? 32 : 64;
         const offsetX = small ? HabbiconBubbleAddition.ROOM_SMALL_OFFSET_X : HabbiconBubbleAddition.ROOM_LARGE_OFFSET_X;
-        let offsetY = small ? HabbiconBubbleAddition.ROOM_SMALL_OFFSET_Y : HabbiconBubbleAddition.ROOM_LARGE_OFFSET_Y;
+        let offsetY = small ? HabbiconBubbleAddition.ROOM_SMALL_STACK_BOTTOM_Y : HabbiconBubbleAddition.ROOM_LARGE_STACK_BOTTOM_Y;
 
-        if(fromUpdate)
-        {
-            const additionScale = small ? 32 : 64;
-
-            if(this._visualization.posture === AvatarAction.POSTURE_SIT) offsetY += (additionScale / 2);
-            else if(this._visualization.posture === AvatarAction.POSTURE_LAY) offsetY += additionScale;
-        }
-        else
-        {
-            if(this._visualization.posture === AvatarAction.POSTURE_SIT) offsetY += 32;
-            else if(this._visualization.posture === AvatarAction.POSTURE_LAY) offsetY += 64;
-        }
+        if(this._visualization.posture === AvatarAction.POSTURE_SIT) offsetY += (additionScale / 2);
+        else if(this._visualization.posture === AvatarAction.POSTURE_LAY) offsetY += additionScale;
 
         sprite.offsetX = offsetX + this.resolveFrameAnchorCompensationX();
-        sprite.offsetY = offsetY + this.getIntroOffsetY(elapsed) + this.resolveFrameAnchorCompensationY();
+        sprite.offsetY = offsetY - this._bitmapHeight + this.getIntroOffsetY(elapsed);
         sprite.relativeDepth = HabbiconBubbleAddition.DEFAULT_RELATIVE_DEPTH;
     }
 
@@ -298,11 +284,6 @@ export class HabbiconBubbleAddition implements IAvatarAddition
         return Math.round((1 - progress) * HabbiconBubbleAddition.INTRO_START_OFFSET_Y);
     }
 
-    private quantizeAlpha(alpha: number): number
-    {
-        return Math.min(255, Math.round(alpha / 8) * 8);
-    }
-
     private resolveAlpha(now: number): number
     {
         if(!this._startedAt || this._sourceFadeOutAt <= this._startedAt) return 255;
@@ -312,7 +293,7 @@ export class HabbiconBubbleAddition implements IAvatarAddition
 
         if(this._sourceHideAt > this._startedAt && now >= this._sourceHideAt) return 0;
 
-        return this.quantizeAlpha(Math.round(255 * Math.min(fadeIn, fadeOut)));
+        return Math.round(255 * Math.min(fadeIn, fadeOut));
     }
 
     private resolveBackgroundAlpha(now: number): number
@@ -322,7 +303,7 @@ export class HabbiconBubbleAddition implements IAvatarAddition
         const fadeIn = Math.min(1, Math.max(0, (now - this._startedAt) / HabbiconBubbleAddition.FADE_IN_DURATION_MS));
         const fadeOut = now < this._backgroundFadeOutAt ? 1 : 1 - Math.min(1, Math.max(0, (now - this._backgroundFadeOutAt) / HabbiconBubbleAddition.BACKGROUND_FADE_OUT_DURATION_MS));
 
-        return this.quantizeAlpha(Math.round(255 * Math.min(fadeIn, fadeOut)));
+        return Math.round(255 * Math.min(fadeIn, fadeOut));
     }
 
     private resolveFrameAnchorCompensationX(): number
@@ -334,17 +315,6 @@ export class HabbiconBubbleAddition implements IAvatarAddition
         const baseWidth = this.resolveBaseDimension(this._runtime.baseWidth);
 
         return Math.round((baseWidth - this._bitmapWidth) * 0.5);
-    }
-
-    private resolveFrameAnchorCompensationY(): number
-    {
-        if(!this._bitmapHeight) return 0;
-
-        if(!this._runtime) return this._composed ? -7 : 0;
-
-        const baseHeight = this.resolveBaseDimension(this._runtime.baseHeight);
-
-        return baseHeight - this._bitmapHeight + (this._composed ? 7 : 0);
     }
 
     private resolveBaseDimension(value: number): number

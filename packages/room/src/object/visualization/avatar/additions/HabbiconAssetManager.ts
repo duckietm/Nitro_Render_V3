@@ -47,11 +47,14 @@ export class HabbiconAssetManager
 
     private _loading: Promise<void> | null = null;
     private _definitions = new Map<number, HabbiconDefinition>();
+    private _collectionDefinitions = new Map<number, HabbiconFrameData>();
     private _runtimeAssets = new Map<number, HabbiconRuntimeAsset>();
     private _sourceCanvases = new Map<string, HTMLCanvasElement>();
+    private _imageUrls = new Map<string, string>();
     private _composedTextures = new Map<string, Texture>();
     private _animationLoading = new Map<number, Promise<void>>();
     private _spritesheet: HTMLImageElement = null;
+    private _collectionSpritesheet: HTMLImageElement = null;
 
     public static getInstance(): HabbiconAssetManager
     {
@@ -148,6 +151,55 @@ export class HabbiconAssetManager
         return canvas;
     }
 
+    public getCollectionIconCanvas(collectionId: number, outlined: boolean = false): HTMLCanvasElement
+    {
+        void this.preload();
+
+        const key = `collection:${ collectionId }:${ outlined }`;
+        const existing = this._sourceCanvases.get(key);
+
+        if(existing) return existing;
+
+        const definition = this._collectionDefinitions.get(collectionId);
+
+        if(!definition || !this._collectionSpritesheet) return null;
+
+        let canvas = this.createFrameCanvas(this._collectionSpritesheet, definition.x, definition.y, definition.width, definition.height, 1);
+
+        if(!canvas) return null;
+
+        if(outlined)
+        {
+            const outline = this.createOutlineCanvas(canvas);
+
+            outline.getContext('2d')?.drawImage(canvas, HabbiconAssetManager.OUTLINE_SIZE, HabbiconAssetManager.OUTLINE_SIZE);
+            canvas = outline;
+        }
+
+        this._sourceCanvases.set(key, canvas);
+
+        return canvas;
+    }
+
+    public getCollectionIconUrl(collectionId: number, outlined: boolean = false): string
+    {
+        return this.getImageUrl(`collection:${ collectionId }:${ outlined }`, this.getCollectionIconCanvas(collectionId, outlined));
+    }
+
+    public getPreviewUrl(habbiconId: number): string
+    {
+        return this.getImageUrl(`preview:${ habbiconId }`, this.getPreviewSourceCanvas(habbiconId, false));
+    }
+
+    private getImageUrl(key: string, canvas: HTMLCanvasElement): string
+    {
+        if(!canvas) return '';
+
+        if(!this._imageUrls.has(key)) this._imageUrls.set(key, canvas.toDataURL());
+
+        return this._imageUrls.get(key);
+    }
+
     public composeTexture(source: HTMLCanvasElement, sourceAlpha: number, backgroundAlpha: number, mirrored: boolean, cacheKey: string): Texture
     {
         if(!source) return null;
@@ -239,12 +291,28 @@ export class HabbiconAssetManager
                 });
             }
 
-            this._spritesheet = await this.loadImage(`${ baseUrl }habbicons_spritesheet.png`);
+            for(const icon of (Array.isArray(data?.collectionIcons) ? data.collectionIcons : []))
+            {
+                this._collectionDefinitions.set(Number(icon.id), {
+                    id: Number(icon.id),
+                    x: Number(icon.x) || 0,
+                    y: Number(icon.y) || 0,
+                    width: this.normalizeDimension(icon.width, 18),
+                    height: this.normalizeDimension(icon.height, 18)
+                });
+            }
+
+            [this._spritesheet, this._collectionSpritesheet] = await Promise.all([
+                this.loadImage(`${ baseUrl }habbicons_spritesheet.png`),
+                this.loadImage(`${ baseUrl }collection_icons_spritesheet.png`).catch(() => null)
+            ]);
         }
         catch
         {
             this._definitions.clear();
+            this._collectionDefinitions.clear();
             this._spritesheet = null;
+            this._collectionSpritesheet = null;
         }
     }
 
@@ -289,9 +357,9 @@ export class HabbiconAssetManager
                 playbackDurationMs: definition.steps.reduce((total, step) => total + Math.max(1, step.durationMs), 0)
             });
         }
-        finally
+        catch
         {
-            this._animationLoading.delete(habbiconId);
+            // Keep the preview after a failed animation load instead of retrying every frame.
         }
     }
 
@@ -334,7 +402,7 @@ export class HabbiconAssetManager
             .filter(step => step?.enabled !== false)
             .map(step => ({
                 sourceFrame: Math.max(0, Number(step.sourceFrame) || 0),
-                durationMs: Math.max(1, Math.max(1, Number(step.durationMs) || 100) / playbackSpeed)
+                durationMs: Math.max(1, Math.trunc(Math.max(1, Number(step.durationMs) || 0) / playbackSpeed))
             }));
     }
 

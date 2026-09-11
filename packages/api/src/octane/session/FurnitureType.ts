@@ -6,5 +6,6 @@ export enum FurnitureType
     BADGE = 'B',
     ROBOT = 'R',
     HABBO_CLUB = 'H',
-    PET = 'P'
+    PET = 'P',
+    HABBICON = 'HABBICON'
 }
