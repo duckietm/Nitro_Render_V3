@@ -8,6 +8,7 @@ export class WiredRoomSettingsDataParser implements IMessageParser
     private _canInspect: boolean;
     private _canModify: boolean;
     private _canManageSettings: boolean;
+    private _timezone: string;
 
     public flush(): boolean
     {
@@ -17,6 +18,7 @@ export class WiredRoomSettingsDataParser implements IMessageParser
         this._canInspect = false;
         this._canModify = false;
         this._canManageSettings = false;
+        this._timezone = '';
 
         return true;
     }
@@ -31,6 +33,7 @@ export class WiredRoomSettingsDataParser implements IMessageParser
         this._canInspect = wrapper.readBoolean();
         this._canModify = wrapper.readBoolean();
         this._canManageSettings = wrapper.readBoolean();
+        this._timezone = wrapper.readString();
 
         return true;
     }
@@ -63,5 +66,11 @@ export class WiredRoomSettingsDataParser implements IMessageParser
     public get canManageSettings(): boolean
     {
         return this._canManageSettings;
+    }
+
+    /** Timezone picked in the AIR 13 wired settings tab; empty means the hotel default. */
+    public get timezone(): string
+    {
+        return this._timezone;
     }
 }

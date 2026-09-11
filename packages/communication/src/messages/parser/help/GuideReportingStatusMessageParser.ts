@@ -9,7 +9,7 @@ export class GuideReportingStatusMessageParser implements IMessageParser
     public static readonly GUIDE_REPORTING_STATUS_REPORTING_TOO_QUICKLY: number = 3;
 
     private _statusCode: number;
-    private _pendingTicket: PendingGuideTicketData;
+    private _pendingTicket: PendingGuideTicketData = null;
 
     public flush(): boolean
     {
@@ -24,15 +24,15 @@ export class GuideReportingStatusMessageParser implements IMessageParser
         if(!wrapper) return false;
 
         this._statusCode = wrapper.readInt();
-        this._pendingTicket = new PendingGuideTicketData(
-            wrapper.readInt(),
-            wrapper.readInt(),
-            wrapper.readBoolean(),
-            wrapper.readString(),
-            wrapper.readString(),
-            wrapper.readString(),
-            wrapper.readString()
-        );
+        // Cleared every time: an answer without a ticket must not leave the previous one standing.
+        this._pendingTicket = null;
+
+        // Only a pending ticket carries anything after the status: every other answer is the int
+        // alone, and reading further walks off the end of the packet.
+        if(this._statusCode === GuideReportingStatusMessageParser.GUIDE_REPORTING_STATUS_PENDING_TICKET)
+        {
+            this._pendingTicket = new PendingGuideTicketData(wrapper);
+        }
 
         return true;
     }

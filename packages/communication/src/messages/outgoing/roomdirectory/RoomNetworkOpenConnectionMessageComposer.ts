@@ -4,9 +4,14 @@ export class RoomNetworkOpenConnectionMessageComposer implements IMessageCompose
 {
     private _data: ConstructorParameters<typeof RoomNetworkOpenConnectionMessageComposer>;
 
-    constructor(roomId: number, instanceType: number)
+    /**
+     * Official `class_2150` via `RoomSessionManager.gotoRoomNetwork`: the room
+     * network to hop into and the home room the server may prefer (0 when it
+     * must not).
+     */
+    constructor(networkId: number, homeRoomId: number)
     {
-        this._data = [roomId, instanceType];
+        this._data = [networkId, homeRoomId];
     }
 
     public getMessageArray()

@@ -16,6 +16,10 @@ export class UserInfoDataParser
     private _lastAccessDate: string;
     private _canChangeName: boolean;
     private _safetyLocked: boolean;
+    private _accountTradeLocked: boolean;
+    private _nameColor: string;
+    private _respectReplenishesLeft: number;
+    private _maxRespectPerDay: number;
 
     constructor(wrapper: IMessageDataWrapper)
     {
@@ -41,6 +45,10 @@ export class UserInfoDataParser
         this._lastAccessDate = null;
         this._canChangeName = false;
         this._safetyLocked = false;
+        this._accountTradeLocked = false;
+        this._nameColor = '';
+        this._respectReplenishesLeft = 0;
+        this._maxRespectPerDay = 3;
 
         return true;
     }
@@ -63,6 +71,19 @@ export class UserInfoDataParser
         this._lastAccessDate = wrapper.readString();
         this._canChangeName = wrapper.readBoolean();
         this._safetyLocked = wrapper.readBoolean();
+
+        // Official `class_1757.parse`: two optional trailing blocks, read only while bytes remain.
+        if(wrapper.bytesAvailable)
+        {
+            this._accountTradeLocked = wrapper.readBoolean();
+            this._nameColor = wrapper.readString();
+        }
+
+        if(wrapper.bytesAvailable)
+        {
+            this._respectReplenishesLeft = wrapper.readInt();
+            this._maxRespectPerDay = wrapper.readInt();
+        }
 
         return true;
     }
@@ -135,5 +156,27 @@ export class UserInfoDataParser
     public get safetyLocked(): boolean
     {
         return this._safetyLocked;
+    }
+
+    public get accountTradeLocked(): boolean
+    {
+        return this._accountTradeLocked;
+    }
+
+    public get nameColor(): string
+    {
+        return this._nameColor;
+    }
+
+    /** Official `respectReplenishesLeft`: how many times the daily respects can still be bought back. */
+    public get respectReplenishesLeft(): number
+    {
+        return this._respectReplenishesLeft;
+    }
+
+    /** Official `maxRespectPerDay`: what a replenish restores `respectsRemaining` to. */
+    public get maxRespectPerDay(): number
+    {
+        return this._maxRespectPerDay;
     }
 }

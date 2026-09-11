@@ -4,4 +4,5 @@ export * from './DisconnectReasonEvent';
 export * from './IdentityAccountsEvent';
 export * from './InitDiffieHandshakeEvent';
 export * from './IsFirstLoginOfDayEvent';
+export * from './LatencyPingResponseEvent';
 export * from './NoobnessLevelMessageEvent';

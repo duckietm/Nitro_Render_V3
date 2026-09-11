@@ -1,5 +1,5 @@
 import { IFurnitureData, IGroupInformationManager, IMessageComposer, IMessageEvent, IProductData, ISessionDataManager, IUserDataSnapshot, NoobnessLevelEnum, SecurityLevel } from '@octane/api';
-import { AccountSafetyLockStatusChangeMessageEvent, AccountSafetyLockStatusChangeParser, AvailabilityStatusMessageEvent, ChangeUserNameResultMessageEvent, EmailStatusResultEvent, FigureUpdateEvent, FurnitureDataReloadEvent, GetCommunication, GetUserTagsComposer, InClientLinkEvent, MysteryBoxKeysEvent, NoobnessLevelMessageEvent, PetRespectComposer, PetScratchFailedMessageEvent, RoomReadyMessageEvent, RoomUnitChatComposer, UserInfoEvent, UserNameChangeMessageEvent, UserPermissionsEvent, UserRespectComposer, UserTagsMessageEvent } from '@octane/communication';
+import { AccountSafetyLockStatusChangeMessageEvent, AccountSafetyLockStatusChangeParser, AvailabilityStatusMessageEvent, PetRespectFailedEvent, ReplenishRespectComposer, UpdateUIFlagsComposer, ChangeUserNameResultMessageEvent, EmailStatusResultEvent, FigureUpdateEvent, FurnitureDataReloadEvent, GetCommunication, GetUserTagsComposer, InClientLinkEvent, MysteryBoxKeysEvent, NoobnessLevelMessageEvent, PetRespectComposer, PetScratchFailedMessageEvent, RoomReadyMessageEvent, RoomUnitChatComposer, UserInfoEvent, UserNameChangeMessageEvent, UserPermissionsEvent, UserRespectComposer, UserTagsMessageEvent } from '@octane/communication';
 import type { FurnidataDeltaEntry } from '@octane/communication';
 import { applyFurnidataDeltaTo } from './furniture/applyFurnidataDelta';
 import { GetConfiguration } from '@octane/configuration';
@@ -8,6 +8,7 @@ import { GetEventDispatcher, MysteryBoxKeysUpdateEvent, OctaneEvent, OctaneEvent
 import { CreateLinkEvent, HabboWebTools, parseConfigJsonFromResponse } from '@octane/utils';
 import { Texture } from 'pixi.js';
 import { GroupInformationManager } from './GroupInformationManager';
+import { BlockedUsersManager } from './BlockedUsersManager';
 import { IgnoredUsersManager } from './IgnoredUsersManager';
 import { BadgeImageManager } from './badge/BadgeImageManager';
 import { FurnitureDataLoader } from './furniture/FurnitureDataLoader';
@@ -25,10 +26,14 @@ export class SessionDataManager implements ISessionDataManager
     private _respectsReceived: number;
     private _respectsLeft: number;
     private _respectsPetLeft: number;
+    /** Official `respectReplenishesLeft` / `maxRespectPerDay` of the user object (2661). */
+    private _respectReplenishesLeft: number = 0;
+    private _maxRespectPerDay: number = 3;
     private _canChangeName: boolean;
     private _safetyLocked: boolean;
 
     private _ignoredUsersManager: IgnoredUsersManager = new IgnoredUsersManager();
+    private _blockedUsersManager: BlockedUsersManager = new BlockedUsersManager();
     private _groupInformationManager: IGroupInformationManager = new GroupInformationManager();
 
     private _clubLevel: number = 0;
@@ -119,6 +124,8 @@ export class SessionDataManager implements ISessionDataManager
             respectsReceived: this._respectsReceived,
             respectsLeft: this._respectsLeft,
             respectsPetLeft: this._respectsPetLeft,
+            respectReplenishesLeft: this._respectReplenishesLeft,
+            maxRespectPerDay: this._maxRespectPerDay,
             canChangeName: this._canChangeName,
             clubLevel: this._clubLevel,
             securityLevel: this._securityLevel,
@@ -147,6 +154,7 @@ export class SessionDataManager implements ISessionDataManager
             this._productData.init(),
             this._badgeImageManager.init(),
             Promise.resolve(this._ignoredUsersManager.init()),
+            Promise.resolve(this._blockedUsersManager.init()),
             Promise.resolve(this._groupInformationManager.init())
         ]);
 
@@ -165,6 +173,7 @@ export class SessionDataManager implements ISessionDataManager
             GetCommunication().registerMessageEvent(new UserPermissionsEvent(this.onUserPermissionsEvent.bind(this))),
             GetCommunication().registerMessageEvent(new AvailabilityStatusMessageEvent(this.onAvailabilityStatusMessageEvent.bind(this))),
             GetCommunication().registerMessageEvent(new PetScratchFailedMessageEvent(this.onPetRespectFailed.bind(this))),
+            GetCommunication().registerMessageEvent(new PetRespectFailedEvent(this.onPetRespectFailedByAge.bind(this))),
             GetCommunication().registerMessageEvent(new ChangeUserNameResultMessageEvent(this.onChangeNameUpdateEvent.bind(this))),
             GetCommunication().registerMessageEvent(new UserNameChangeMessageEvent(this.onUserNameChangeMessageEvent.bind(this))),
             GetCommunication().registerMessageEvent(new UserTagsMessageEvent(this.onUserTags.bind(this))),
@@ -312,10 +321,14 @@ export class SessionDataManager implements ISessionDataManager
         this._respectsReceived = userInfo.respectsReceived;
         this._respectsLeft = userInfo.respectsRemaining;
         this._respectsPetLeft = userInfo.respectsPetRemaining;
+        this._respectReplenishesLeft = userInfo.respectReplenishesLeft;
+        this._maxRespectPerDay = userInfo.maxRespectPerDay;
         this._canChangeName = userInfo.canChangeName;
         this._safetyLocked = userInfo.safetyLocked;
 
         this._ignoredUsersManager.requestIgnoredUsers(userInfo.username);
+        // Official `BlockedUsersManager.initBlockList()`, sent once the session data is known.
+        this._blockedUsersManager.requestBlockedUsers();
 
         this.invalidateUserDataSnapshot();
     }
@@ -366,6 +379,20 @@ export class SessionDataManager implements ISessionDataManager
     }
 
     private onPetRespectFailed(event: PetScratchFailedMessageEvent): void
+    {
+        if(!event || !event.connection) return;
+
+        this._respectsPetLeft++;
+
+        this.invalidateUserDataSnapshot();
+    }
+
+    /**
+     * Official `SessionDataManager.onPetRespectFailed(class_1691)`: the scratch was refused
+     * because the account is too young, so the spent pet respect comes back. The alert itself
+     * is the client's job (`room.error.pets.respectfailed`).
+     */
+    private onPetRespectFailedByAge(event: PetRespectFailedEvent): void
     {
         if(!event || !event.connection) return;
 
@@ -713,6 +740,58 @@ export class SessionDataManager implements ISessionDataManager
         this.invalidateUserDataSnapshot();
     }
 
+    /**
+     * Official `SessionDataManager.replenishRespect()`: buys the daily respects back and
+     * assumes success, so the counters move straight away.
+     */
+    public replenishRespect(): void
+    {
+        if(this._respectReplenishesLeft <= 0) return;
+
+        this.send(new ReplenishRespectComposer());
+
+        this._respectReplenishesLeft--;
+        this._respectsLeft = this._maxRespectPerDay;
+
+        this.invalidateUserDataSnapshot();
+    }
+
+    /** Official `SessionDataManager.setFriendBarState` -> `setUIFlag(1, state)`. */
+    public setFriendBarState(expanded: boolean): void
+    {
+        this.setUIFlag(1, expanded);
+    }
+
+    /** Official `SessionDataManager.setRoomToolsState` -> `setUIFlag(2, state)`. */
+    public setRoomToolsState(expanded: boolean): void
+    {
+        this.setUIFlag(2, expanded);
+    }
+
+    /**
+     * Official `SessionDataManager.setUIFlag`: nothing is sent when the bit already has the
+     * requested value, otherwise the whole flag word goes back to the server.
+     */
+    private setUIFlag(flag: number, enabled: boolean): void
+    {
+        if(enabled)
+        {
+            if(this._uiFlags & flag) return;
+
+            this._uiFlags |= flag;
+        }
+        else
+        {
+            if(!(this._uiFlags & flag)) return;
+
+            this._uiFlags &= ~flag;
+        }
+
+        this.send(new UpdateUIFlagsComposer(this._uiFlags));
+
+        this.invalidateUserDataSnapshot();
+    }
+
     public sendSpecialCommandMessage(text: string, styleId: number = 0): void
     {
         this.send(new RoomUnitChatComposer(text));
@@ -731,6 +810,22 @@ export class SessionDataManager implements ISessionDataManager
     public isUserIgnored(name: string): boolean
     {
         return this._ignoredUsersManager.isIgnored(name);
+    }
+
+    /** Official `SessionDataManager.blockUser` - the block list, keyed by user id. */
+    public blockUser(userId: number): void
+    {
+        this._blockedUsersManager.blockUser(userId);
+    }
+
+    public unblockUser(userId: number): void
+    {
+        this._blockedUsersManager.unblockUser(userId);
+    }
+
+    public isBlocked(userId: number): boolean
+    {
+        return this._blockedUsersManager.isBlocked(userId);
     }
 
     public getGroupBadge(groupId: number): string
@@ -773,6 +868,11 @@ export class SessionDataManager implements ISessionDataManager
         return this._ignoredUsersManager;
     }
 
+    public get blockedUsersManager(): BlockedUsersManager
+    {
+        return this._blockedUsersManager;
+    }
+
     public get groupInformationManager(): IGroupInformationManager
     {
         return this._groupInformationManager;
@@ -786,6 +886,16 @@ export class SessionDataManager implements ISessionDataManager
     public get respectsLeft(): number
     {
         return this._respectsLeft;
+    }
+
+    public get respectReplenishesLeft(): number
+    {
+        return this._respectReplenishesLeft;
+    }
+
+    public get maxRespectPerDay(): number
+    {
+        return this._maxRespectPerDay;
     }
 
     public get respectsPetLeft(): number

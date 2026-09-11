@@ -16,3 +16,7 @@ export * from './PetPlacingErrorEventParser';
 export * from './RestoreClientMessageParser';
 export * from './SimpleAlertMessageParser';
 export * from './UnseenItemsParser';
+export * from './TreasureHuntWinnerInfo';
+export * from './TreasureHuntFirstWinnerMessageParser';
+export * from './TreasureHuntFailMessageParser';
+export * from './TreasureHuntUpdateMessageParser';

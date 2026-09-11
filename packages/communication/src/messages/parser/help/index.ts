@@ -26,3 +26,5 @@ export * from './IssueCloseNotificationMessageParser';
 export * from './PendingGuideTicketData';
 export * from './QuizDataMessageParser';
 export * from './QuizResultsMessageParser';
+export * from './MyReportStatusData';
+export * from './MyReportsStatusMessageParser';

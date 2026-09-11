@@ -21,6 +21,7 @@ export class OctaneEventType
     public static readonly SESSION_DATA_UPDATED = 'SESSION_DATA_UPDATED';
     public static readonly ROOM_SESSION_UPDATED = 'ROOM_SESSION_UPDATED';
     public static readonly IGNORED_USERS_UPDATED = 'IGNORED_USERS_UPDATED';
+    public static readonly BLOCKED_USERS_UPDATED = 'BLOCKED_USERS_UPDATED';
     public static readonly GROUP_BADGES_UPDATED = 'GROUP_BADGES_UPDATED';
     public static readonly ROOM_USER_LIST_UPDATED = 'ROOM_USER_LIST_UPDATED';
     public static readonly SOUND_VOLUMES_UPDATED = 'SOUND_VOLUMES_UPDATED';

@@ -7,3 +7,4 @@ export * from './RoomKickUserComposer';
 export * from './RoomMuteUserComposer';
 export * from './RoomTakeRightsComposer';
 export * from './RoomUnbanUserComposer';
+export * from './RoomUnmuteUserComposer';

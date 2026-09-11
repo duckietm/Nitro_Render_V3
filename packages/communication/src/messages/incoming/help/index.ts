@@ -25,3 +25,4 @@ export * from './HotelMergeNameChangeEvent';
 export * from './IssueCloseNotificationMessageEvent';
 export * from './QuizDataMessageEvent';
 export * from './QuizResultsMessageEvent';
+export * from './MyReportsStatusMessageEvent';

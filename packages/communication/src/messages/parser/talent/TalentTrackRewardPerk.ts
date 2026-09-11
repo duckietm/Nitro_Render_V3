@@ -2,14 +2,14 @@ import { IMessageDataWrapper } from '@octane/api';
 
 export class TalentTrackRewardPerk
 {
-    private _perkId: number;
+    private _perkId: string;
 
     constructor(wrapper: IMessageDataWrapper)
     {
-        this._perkId = wrapper.readInt();
+        this._perkId = wrapper.readString();
     }
 
-    public get perkId(): number
+    public get perkId(): string
     {
         return this._perkId;
     }

@@ -63,6 +63,10 @@ export class OutgoingHeader
     public static GAME2REQUESTFULLSTATUSUPDATEMESSAGE = 1598;
     public static GAME2GETWEEKLYFRIENDSLEADERBOARD = 1232;
     public static GAME2GETWEEKLYLEADERBOARD = 2565;
+    public static GAME2GETTOTALGROUPLEADERBOARD = 1776;
+    public static GAME2GETWEEKLYGROUPLEADERBOARD = 2691;
+    public static GET_SNOWWAR_GAME_TOKENS_OFFER = 980;
+    public static PURCHASE_SNOWWAR_GAME_TOKENS_OFFER = 391;
     public static GET_GIFT_WRAPPING_CONFIG = 418;
     public static GROUP_ADMIN_ADD = 2894;
     public static GROUP_ADMIN_REMOVE = 722;
@@ -136,6 +140,7 @@ export class OutgoingHeader
     public static ITEM_PAINT = 711;
     public static SET_OBJECT_DATA = 3608;
     public static ITEM_STACK_HELPER = 3839;
+    public static ITEM_STACK_HELPER_ADJACENT = 2687;
     public static ITEM_WALL_CLICK = OutgoingHeader.FURNITURE_WALL_MULTISTATE;
     public static ITEM_WALL_UPDATE = OutgoingHeader.FURNITURE_WALL_UPDATE;
     public static MARKETPLACE_CONFIG = 2597;
@@ -324,6 +329,15 @@ export class OutgoingHeader
     public static WIRED_FEATURE_CAPABILITIES = 10029;
     public static WIRED_ARRAY_INSPECTION_REQUEST = 10034;
     public static WIRED_ARRAY_INSPECTION_UPDATE = 10035;
+    // AIR 13 wired leftovers, all on their official ids.
+    public static WIRED_USER_SELECTED = 3122;
+    public static WIRED_MENU_PERMISSIONS_SAVE = 1936;
+    public static WIRED_ROOM_STATE_ACTION = 3761;
+    public static WIRED_ROOM_LOGS_PAGE = 3882;
+    public static WIRED_VARIABLE_HOLDERS_PAGE = 975;
+    public static WIRED_VARIABLE_HOLDERS_REQUEST = 2973;
+    public static WIRED_VARIABLE_HASHES = 1497;
+    public static WIRED_ALL_VARIABLES_REQUEST = 1735;
     public static TRANSLATION_LANGUAGES_REQUEST = 10032;
     public static TRANSLATION_TEXT_REQUEST = 10033;
     public static WIRED_OPEN = 768;
@@ -372,11 +386,22 @@ export class OutgoingHeader
     public static MARKETPLACE_REQUEST_OFFERS = 2407;
     public static MARKETPLACE_BUY_OFFER = 1603;
     public static MARKETPLACE_BUY_TOKENS = 1866;
+    // AIR 13 marketplace: 1228 cancel every own offer, 2058 clear the own sold/expired history,
+    // 1551 make one offer out of several identical items.
+    public static MARKETPLACE_CANCEL_ALL_OFFERS = 1228;
+    public static MARKETPLACE_CLEAR_OWN_HISTORY = 2058;
+    public static MARKETPLACE_SELL_MULTIPLE_ITEMS = 1551;
+    // AIR 13 club extend confirmation (ClubDiscountPromoExtension).
+    public static HABBO_CLUB_EXTEND_CONFIRM = 352;
+    // AIR 13 help: 2935 ask for my reports, 3063 appeal one of them.
+    public static GET_MY_REPORTS_STATUS = 2935;
+    public static APPEAL_REPORT = 3063;
     public static CATALOG_REQUESET_PET_BREEDS = 1756;
     public static APPROVE_NAME = 2109;
     public static UNIT_GIVE_HANDITEM_PET = 2768;
     public static PET_MOUNT = OutgoingHeader.PET_RIDE;
     public static PET_SUPPLEMENT = 749;
+    public static GET_BADGE_INFO = 2895;
     public static FURNITURE_GROUP_INFO = 2651;
     public static ACHIEVEMENT_RESOLUTION_OPEN = 359;
     public static USE_PET_PRODUCT = 1328;
@@ -688,4 +713,20 @@ export class OutgoingHeader
     public static USE_HABBICON = 9417;
     // AIR 13 avatar editor hot looks tab (client -> server). 9360 to match emulator GetHotLooksEvent.
     public static GET_HOT_LOOKS = 9360;
+    // AIR 13 session block list (client -> server), official ids.
+    public static USER_BLOCK_LIST = 485;
+    public static USER_BLOCK = 697;
+    public static USER_UNBLOCK = 1886;
+    // AIR 13 replenish respect / notification feed activation / ambassador unmute, official ids.
+    public static REPLENISH_RESPECT = 3728;
+    public static ACTIVATE_NOTIFICATIONS = 3235;
+    public static UNMUTE_USER = 3302;
+    // AIR 13 UpdateUIFlags. The official id is 733; the emulator has always listened on 2313,
+    // where the unused CLIENT_TOOLBAR_TOGGLE name was already declared, so this is its alias.
+    public static UPDATE_UI_FLAGS = OutgoingHeader.CLIENT_TOOLBAR_TOGGLE;
+    // AIR 13 Discord preferences (client -> server), official ids.
+    public static DISCORD_PREFERENCES = 1055;
+    public static DISCORD_UPDATE_PREFERENCES = 2774;
+    // AIR 13 self donation tool (client -> server), official id.
+    public static SELF_DONATION = 2499;
 }

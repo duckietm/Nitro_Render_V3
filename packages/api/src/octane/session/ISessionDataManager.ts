@@ -1,6 +1,7 @@
 import { Texture } from 'pixi.js';
 import { IFurnitureData } from './IFurnitureData';
 import { IGroupInformationManager } from './IGroupInformationManager';
+import { IBlockedUsersManager } from './IBlockedUsersManager';
 import { IIgnoredUsersManager } from './IIgnoredUsersManager';
 import { IProductData } from './IProductData';
 import { IUserDataSnapshot } from './IUserDataSnapshot';
@@ -31,6 +32,12 @@ export interface ISessionDataManager
     ignoreUser(name: string): void;
     unignoreUser(name: string): void;
     isUserIgnored(name: string): boolean;
+    blockUser(userId: number): void;
+    unblockUser(userId: number): void;
+    isBlocked(userId: number): boolean;
+    replenishRespect(): void;
+    setFriendBarState(expanded: boolean): void;
+    setRoomToolsState(expanded: boolean): void;
     getGroupBadge(groupId: number): string;
     userId: number;
     userName: string;
@@ -38,10 +45,13 @@ export interface ISessionDataManager
     gender: string;
     realName: string;
     ignoredUsersManager: IIgnoredUsersManager;
+    blockedUsersManager: IBlockedUsersManager;
     groupInformationManager: IGroupInformationManager;
     respectsReceived: number;
     respectsLeft: number;
     respectsPetLeft: number;
+    respectReplenishesLeft: number;
+    maxRespectPerDay: number;
     canChangeName: boolean;
     clubLevel: number;
     securityLevel: number;

@@ -4,6 +4,7 @@ export * from './CompleteDiffieHandshakeMessageComposer';
 export * from './DisconnectMessageComposer';
 export * from './InfoRetrieveMessageComposer';
 export * from './InitDiffieHandshakeMessageComposer';
+export * from './LatencyPingRequestMessageComposer';
 export * from './PongMessageComposer';
 export * from './SSOTicketMessageComposer';
 export * from './UniqueIDMessageComposer';

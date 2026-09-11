@@ -1,3 +1,4 @@
+export * from './BlockedUsersManager';
 export * from './GetRoomSessionManager';
 export * from './GetSessionDataManager';
 export * from './GroupInformationManager';

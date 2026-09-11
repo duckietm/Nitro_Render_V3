@@ -15,3 +15,6 @@ export * from './PetPlacingErrorEvent';
 export * from './RestoreClientMessageEvent';
 export * from './SimpleAlertMessageEvent';
 export * from './UnseenItemsEvent';
+export * from './TreasureHuntFirstWinnerMessageEvent';
+export * from './TreasureHuntFailMessageEvent';
+export * from './TreasureHuntUpdateMessageEvent';

@@ -3,6 +3,7 @@ import { AreaHideMessageEvent, ConfInvisStateMessageEvent, DiceValueMessageEvent
 import { GetRoomSessionManager, GetSessionDataManager } from '@octane/session';
 import { Vector3d } from '@octane/utils';
 import { FloorHeightMapMessageParser } from '@octane/communication';
+import { ItemRemoveMultipleEvent, ItemsStateUpdateEvent, ObjectRemoveMultipleEvent } from '@octane/communication';
 import { GetRoomEngine } from './GetRoomEngine';
 import { RoomVariableEnum } from './RoomVariableEnum';
 import { ObjectRoomMapUpdateMessage } from './messages';
@@ -73,13 +74,16 @@ export class RoomMessageHandler
             new FurnitureFloorAddEvent(this.onFurnitureFloorAddEvent.bind(this)),
             new FurnitureFloorEvent(this.onFurnitureFloorEvent.bind(this)),
             new FurnitureFloorRemoveEvent(this.onFurnitureFloorRemoveEvent.bind(this)),
+            new ObjectRemoveMultipleEvent(this.onObjectRemoveMultipleEvent.bind(this)),
             new FurnitureFloorUpdateEvent(this.onFurnitureFloorUpdateEvent.bind(this)),
             new FurnitureWallAddEvent(this.onFurnitureWallAddEvent.bind(this)),
             new FurnitureWallEvent(this.onFurnitureWallEvent.bind(this)),
             new FurnitureWallRemoveEvent(this.onFurnitureWallRemoveEvent.bind(this)),
+            new ItemRemoveMultipleEvent(this.onItemRemoveMultipleEvent.bind(this)),
             new FurnitureWallUpdateEvent(this.onFurnitureWallUpdateEvent.bind(this)),
             new FurnitureDataEvent(this.onFurnitureDataEvent.bind(this)),
             new ItemDataUpdateMessageEvent(this.onItemDataUpdateMessageEvent.bind(this)),
+            new ItemsStateUpdateEvent(this.onItemsStateUpdateEvent.bind(this)),
             new OneWayDoorStatusMessageEvent(this.onOneWayDoorStatusMessageEvent.bind(this)),
             new AreaHideMessageEvent(this.onAreaHideMessageEvent.bind(this)),
             new ConfInvisStateMessageEvent(this.onConfInvisStateMessageEvent.bind(this)),
@@ -927,6 +931,71 @@ export class RoomMessageHandler
             this._roomEngine.removeRoomObjectFloor(this._currentRoomId, parser.itemId, (parser.isExpired) ? -1 : parser.userId, true);
             this.applyAreaHideStateToRoomObjects();
         }
+    }
+
+    /**
+     * `ObjectRemoveMultiple` (1451). The official
+     * `class_1902.onObjectRemoveMultiple` disposes every floor object of the
+     * batch and refreshes the tile object map once at the end, instead of once
+     * per item as the single remove does.
+     */
+    private onObjectRemoveMultipleEvent(event: ObjectRemoveMultipleEvent): void
+    {
+        if(!(event instanceof ObjectRemoveMultipleEvent) || !event.connection || !this._roomEngine) return;
+
+        const parser = event.getParser();
+
+        if(!parser) return;
+
+        for(const itemId of parser.ids)
+        {
+            this._activeConfInvisHiddenItemIds.delete(itemId);
+            this._activeAreaHideControllers.delete(itemId);
+            this._roomEngine.removeRoomObjectFloor(this._currentRoomId, itemId, parser.pickerId, true);
+        }
+
+        this._roomEngine.refreshTileObjectMap(this._currentRoomId, 'RoomMessageHandler.onObjectRemoveMultipleEvent()');
+        this.applyAreaHideStateToRoomObjects();
+    }
+
+    /**
+     * `ItemRemoveMultiple` (2204), the wall-item twin of the batch above
+     * (`class_1902.onItemRemoveMultiple`).
+     */
+    private onItemRemoveMultipleEvent(event: ItemRemoveMultipleEvent): void
+    {
+        if(!(event instanceof ItemRemoveMultipleEvent) || !event.connection || !this._roomEngine) return;
+
+        const parser = event.getParser();
+
+        if(!parser) return;
+
+        for(const itemId of parser.itemIds) this._roomEngine.removeRoomObjectWall(this._currentRoomId, itemId, parser.pickerId);
+
+        this.applyAreaHideStateToWallObjects();
+    }
+
+    /**
+     * `ItemsStateUpdate` (3697): the batched form of the single wall-item data
+     * update (`class_1902.onItemsStateUpdate`).
+     */
+    private onItemsStateUpdateEvent(event: ItemsStateUpdateEvent): void
+    {
+        if(!(event instanceof ItemsStateUpdateEvent) || !event.connection || !this._roomEngine) return;
+
+        const parser = event.getParser();
+
+        if(!parser) return;
+
+        const updatedIds: number[] = [];
+
+        for(const item of parser.items)
+        {
+            this._roomEngine.updateRoomObjectWallItemData(this._currentRoomId, item.id, item.itemData);
+            updatedIds.push(item.id);
+        }
+
+        if(updatedIds.length) this.applyAreaHideStateToWallObjects(updatedIds);
     }
 
     private onFurnitureFloorUpdateEvent(event: FurnitureFloorUpdateEvent): void

@@ -28,3 +28,5 @@ export * from './GuideSessionRequesterCancelsMessageComposer';
 export * from './GuideSessionResolvedMessageComposer';
 export * from './PostQuizAnswersComposer';
 export * from './SearchFaqsMessageComposer';
+export * from './AppealReportMessageComposer';
+export * from './GetMyReportsStatusMessageComposer';

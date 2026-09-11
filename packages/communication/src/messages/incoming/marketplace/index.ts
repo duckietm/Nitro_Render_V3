@@ -6,3 +6,5 @@ export * from './MarketplaceItemStatsEvent';
 export * from './MarketplaceMakeOfferResult';
 export * from './MarketplaceOffersEvent';
 export * from './MarketplaceOwnOffersEvent';
+export * from './MarketplaceCancelAllOffersResultEvent';
+export * from './MarketplaceClearOwnHistoryResultEvent';

@@ -49,6 +49,10 @@ export class IncomingHeader
     public static GAME_CENTER_DIRECTORY_STATUS = 2246;
     public static GAME_CENTER_STARTING_GAME_FAILED = 2142;
     public static GAME_CENTER_JOINING_FAILED = 1730;
+    public static GAME_CENTER_GAME_NOT_FOUND = 444;
+    public static GAME_CENTER_GAME_CANCELLED = 3493;
+    public static GAME_CENTER_USER_BLOCKED = 3508;
+    public static SNOWWAR_GAME_TOKENS = 3419;
     public static GAMESTATUSMESSAGE = 3805;
     public static GAMEACHIEVEMENTS = 1689;
     public static GAMEINVITE = 904;
@@ -166,7 +170,7 @@ export class IncomingHeader
     public static PET_BREEDING = 1746;
     public static PET_CONFIRM_BREEDING_RESULT = 1625;
     public static PET_GO_TO_BREEDING_NEST_FAILURE = 2621;
-    public static PET_NEST_BREEDING_SUCCESS = 2527;
+    public static PET_NEST_BREEDING_SUCCESS = 1901;
     public static PET_CONFIRM_BREEDING_REQUEST = 634;
     public static PET_BREEDING_RESULT = 1553;
     public static RECYCLER_PRIZES = 3164;
@@ -302,6 +306,16 @@ export class IncomingHeader
     public static WIRED_FURNI_OPACITY = 5109;
     public static WIRED_FURNI_MOVE_STYLE = 5110;
     public static WIRED_ARRAY_INSPECTION_DATA = 5111;
+    // AIR 13 wired leftovers. 420 (WiredClickUserResponse) and 2901 (WiredUserVariablesPage)
+    // are already GROUP_LIST / PET_INFO here, so those two take custom ids instead.
+    public static WIRED_ENVIRONMENT = 347;
+    public static WIRED_CLICK_SETTINGS = 2288;
+    public static WIRED_LOG_PAGE = 918;
+    public static WIRED_ALL_VARIABLES_HASH = 1646;
+    public static WIRED_ALL_VARIABLES_DIFF = 2498;
+    public static WIRED_CLICK_USER_RESPONSE = 9460;
+    public static WIRED_VARIABLE_HOLDERS_PAGE = 9461;
+    public static WIRED_VARIABLE_HOLDERS = 9462;
     public static WIRED_OPEN = 1830;
     public static WIRED_REWARD = 178;
     public static WIRED_SAVE = 1155;
@@ -350,6 +364,17 @@ export class IncomingHeader
     public static MARKETPLACE_ITEM_POSTED = 1359;
     public static MARKETPLACE_ITEMS_SEARCHED = 680;
     public static MARKETPLACE_AFTER_ORDER_STATUS = 2032;
+    // AIR 13 marketplace batch results: 1949 MarketPlaceCancelAllResult, 175 MarketPlaceClearOwnHistoryResult.
+    public static MARKETPLACE_CANCEL_ALL_RESULT = 1949;
+    public static MARKETPLACE_CLEAR_OWN_HISTORY_RESULT = 175;
+    // AIR 13 catalog: 933 LtdRaffleEntered, 2316 LtdRaffleResult.
+    public static CATALOG_LTD_RAFFLE_ENTERED = 933;
+    public static CATALOG_LTD_RAFFLE_RESULT = 2316;
+    // AIR 13 purchasable chat bubble styles: 946 the owned list, 2580 one style added/removed.
+    public static PURCHASABLE_CHAT_STYLES = 946;
+    public static CHAT_STYLE_NOTIFICATION = 2580;
+    // AIR 13 help: 2981 the reports this player filed (MyReportStatus window).
+    public static MY_REPORTS_STATUS = 2981;
     public static CATALOG_RECEIVE_PET_BREEDS = 3331;
     public static CATALOG_APPROVE_NAME_RESULT = 1503;
     public static OBJECTS_DATA_UPDATE = 1453;
@@ -432,6 +457,7 @@ export class IncomingHeader
     public static COMPETITION_SECONDS_UNTIL = 3926;
     public static BADGE_POINT_LIMITS = 2501;
     public static BADGE_REQUEST_FULFILLED = 2998;
+    public static BADGE_INFO = 3228;
     public static HELPER_TALENT_TRACK = 3406;
     public static TALENT_TRACK_LEVEL = 1203;
     public static TALENT_TRACK_LEVEL_UP = 638;
@@ -515,6 +541,10 @@ export class IncomingHeader
     public static WEEKLY_COMPETITIVE_FRIENDS_LEADERBOARD = 3560;
     public static WEEKLY_GAME2_FRIENDS_LEADERBOARD = 2270;
     public static WEEKLY_GAME2_LEADERBOARD = 2196;
+    public static GAME2_FRIENDS_LEADERBOARD = 47;
+    public static GAME2_TOTAL_LEADERBOARD = 2594;
+    public static GAME2_TOTAL_GROUP_LEADERBOARD = 1769;
+    public static GAME2_WEEKLY_GROUP_LEADERBOARD = 2956;
     public static RENTABLE_FURNI_RENT_OR_BUYOUT_OFFER = 35;
     public static HANDSHAKE_IDENTITY_ACCOUNT = 3523;
 
@@ -575,6 +605,7 @@ export class IncomingHeader
     public static SOUNDBOARD_PLAY = 9406;
     public static EARNINGS_CENTER = 9407;
     public static EARNINGS_CLAIM_RESULT = 9408;
+    public static INCOME_REWARD_NOTIFICATION = 1753;
     public static TRAX_EDITOR_SONGS = 9430;
     public static TRAX_EDITOR_ERROR = 9431;
     public static SOUNDBOARD_PLAY_DENIED = 9440;
@@ -613,4 +644,33 @@ export class IncomingHeader
     public static UNIT_HABBICON = 9410;
     // AIR 13 avatar editor hot looks tab (server -> client). 9360 to match emulator HotLooksComposer.
     public static HOT_LOOKS = 9360;
+    // AIR 13 official rooms view (server -> client), official id 438.
+    public static OFFICIAL_ROOMS = 438;
+    // AIR 13 batched room / inventory removals and wall-item state batch.
+    public static OBJECT_REMOVE_MULTIPLE = 1451;
+    public static ITEM_REMOVE_MULTIPLE = 2204;
+    public static FURNI_LIST_REMOVE_MULTIPLE = 2813;
+    public static OBJECT_REMOVE_CONFIRM = 3488;
+    public static ITEMS_STATE_UPDATE = 3697;
+    // AIR 13 room flags and room-wide events.
+    public static CONFIGURATION_ITEM_STATES = 1508;
+    public static SPECIAL_SYSTEM_CHAT = 1971;
+    public static SPECIAL_ROOM_EVENT = 2163;
+    public static YOU_ARE_NOT_SPECTATOR = 3242;
+    // AIR 13 session block list (server -> client), official ids 2649 / 366.
+    public static USER_BLOCK_LIST = 2649;
+    public static USER_BLOCK_RESULT = 366;
+    // AIR 13 PetRespectFailed; official id 2703 is taken by FURNITURE_FLOOR_REMOVE, so 9470.
+    public static PET_RESPECT_FAILED = 9470;
+    // AIR 13 BanInfo; official id 2524 is taken by USER_FAVORITE_ROOM, so 9471.
+    public static USER_BAN_INFO = 9471;
+    // AIR 13 Discord preferences; official id 1600 is taken by GENERIC_ERROR, so 9472.
+    public static DISCORD_PREFERENCES = 9472;
+    // AIR 13 treasure hunt (server -> client). Official 1631 is taken by UNIT_EXPRESSION,
+    // so the first-winner packet uses the reserved custom id 9485; the other two are official.
+    public static TREASURE_HUNT_FIRST_WINNER = 9485;
+    public static TREASURE_HUNT_FAIL = 2383;
+    public static TREASURE_HUNT_UPDATE = 3368;
+    // AIR 13 self donation tool result (server -> client), official id.
+    public static SELF_DONATION_RESULT = 2920;
 }

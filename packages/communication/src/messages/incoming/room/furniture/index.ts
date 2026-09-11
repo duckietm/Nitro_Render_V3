@@ -38,3 +38,4 @@ export * from './WiredTradeOpenEvent';
 export * from './WiredTradeItemsEvent';
 export * from './WiredTradeCancelledEvent';
 export * from './WiredTradeCompletedEvent';
+export * from './ObjectRemoveConfirmEvent';

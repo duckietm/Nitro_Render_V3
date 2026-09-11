@@ -1,5 +1,5 @@
 import { IRoomSession, IUserDataManager, RoomControllerLevel, RoomTradingLevelEnum } from '@octane/api';
-import { BotRemoveComposer, ChangeQueueMessageComposer, CompostPlantMessageComposer, FurnitureMultiStateComposer, GetCommunication, GetPetCommandsComposer, HarvestPetMessageComposer, MoodlightSettingsComposer, MoodlightSettingsSaveComposer, MoodlightTogggleStateComposer, NewUserExperienceScriptProceedComposer, OpenPetPackageMessageComposer, OpenPresentComposer, PeerUsersClassificationMessageComposer, PetMountComposer, PetRemoveComposer, PollAnswerComposer, PollRejectComposer, PollStartComposer, RemovePetSaddleComposer, RoomAmbassadorAlertComposer, RoomBanUserComposer, RoomDoorbellAccessComposer, RoomEnterComposer, RoomGiveRightsComposer, RoomKickUserComposer, RoomModerationSettings, RoomMuteUserComposer, RoomTakeRightsComposer, RoomUnitActionComposer, RoomUnitBackgroundComposer, RoomUnitChatComposer, RoomUnitChatShoutComposer, RoomUnitChatWhisperComposer, RoomUnitDanceComposer, RoomUnitPostureComposer, RoomUnitSignComposer, RoomUnitTypingStartComposer, RoomUnitTypingStopComposer, RoomUsersClassificationMessageComposer, SetClothingChangeDataMessageComposer, TogglePetBreedingComposer, TogglePetRidingComposer, UsePetProductComposer, UserMottoComposer, VotePollCounterMessageComposer } from '@octane/communication';
+import { BotRemoveComposer, ChangeQueueMessageComposer, CompostPlantMessageComposer, FurnitureMultiStateComposer, GetCommunication, GetPetCommandsComposer, HarvestPetMessageComposer, MoodlightSettingsComposer, MoodlightSettingsSaveComposer, MoodlightTogggleStateComposer, NewUserExperienceScriptProceedComposer, OpenPetPackageMessageComposer, OpenPresentComposer, PeerUsersClassificationMessageComposer, PetMountComposer, PetRemoveComposer, PollAnswerComposer, PollRejectComposer, PollStartComposer, RemovePetSaddleComposer, RoomAmbassadorAlertComposer, RoomBanUserComposer, RoomDoorbellAccessComposer, RoomEnterComposer, RoomGiveRightsComposer, RoomKickUserComposer, RoomModerationSettings, RoomMuteUserComposer, RoomTakeRightsComposer, RoomUnmuteUserComposer, RoomUnitActionComposer, RoomUnitBackgroundComposer, RoomUnitChatComposer, RoomUnitChatShoutComposer, RoomUnitChatWhisperComposer, RoomUnitDanceComposer, RoomUnitPostureComposer, RoomUnitSignComposer, RoomUnitTypingStartComposer, RoomUnitTypingStopComposer, RoomUsersClassificationMessageComposer, SetClothingChangeDataMessageComposer, TogglePetBreedingComposer, TogglePetRidingComposer, UsePetProductComposer, UserMottoComposer, VotePollCounterMessageComposer } from '@octane/communication';
 import { RoomSessionEvent } from '@octane/events';
 import { UserDataManager } from './UserDataManager';
 
@@ -149,6 +149,12 @@ export class RoomSession implements IRoomSession
         GetCommunication().connection.send(new RoomMuteUserComposer(userId, minutes, this._roomId));
     }
 
+    /** Official `RoomSession.unmuteUser(userId)` -> composer 3302 `(userId, roomId)`. */
+    public sendUnmuteMessage(userId: number): void
+    {
+        GetCommunication().connection.send(new RoomUnmuteUserComposer(userId, this._roomId));
+    }
+
     public sendBanMessage(userId: number, type: string): void
     {
         GetCommunication().connection.send(new RoomBanUserComposer(userId, this._roomId, type));
@@ -283,9 +289,12 @@ export class RoomSession implements IRoomSession
         GetCommunication().connection.send(new GetPetCommandsComposer(id));
     }
 
-    public sendScriptProceed(): void
+    /**
+     * Official `HabboNuxDialogs`: 0 from "Verify & get gifts", 2 from "never again".
+     */
+    public sendScriptProceed(reason: number = 0): void
     {
-        GetCommunication().connection.send(new NewUserExperienceScriptProceedComposer());
+        GetCommunication().connection.send(new NewUserExperienceScriptProceedComposer(reason));
     }
 
     public sendUpdateClothingChangeFurniture(objectId: number, gender: string, look: string):void

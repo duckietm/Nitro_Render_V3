@@ -32,3 +32,4 @@ export * from './RoomThumbnailUpdateResultMessageParser';
 export * from './UserEventCatsMessageParser';
 export * from './UserFlatCatsMessageParser';
 export * from './utils';
+export * from './OfficialRoomsParser';

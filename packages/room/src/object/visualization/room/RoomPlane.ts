@@ -1137,9 +1137,7 @@ export class RoomPlane implements IRoomPlane
                 return false;
             }
 
-            const maskFraction = (closestMask.mask.leftSideLoc - Math.round(closestMask.mask.leftSideLoc));
-            const rawDeltaLeft = Math.abs(closestMask.mask.leftSideLoc - rawLeftSideLoc);
-            const leftSideLoc = (rawLeftSideLoc + maskFraction);
+            const leftSideLoc = rawLeftSideLoc;
 
             const deltaLeft = Math.abs(closestMask.mask.leftSideLoc - leftSideLoc);
             const deltaRight = Math.abs(closestMask.mask.rightSideLoc - rightSideLoc);
@@ -1147,12 +1145,12 @@ export class RoomPlane implements IRoomPlane
 
             if(maskScore > 3)
             {
-                if(debugEnabled) console.log(`[Reflection] plane ${this._uniqueId}: avatar at (${location.x}, ${location.y}) rejected — mask score ${maskScore.toFixed(2)} (rawDeltaLeft ${rawDeltaLeft.toFixed(2)}, deltaRight ${deltaRight.toFixed(2)}, masks ${JSON.stringify(this._windowMasks)})`);
+                if(debugEnabled) console.log(`[Reflection] plane ${this._uniqueId}: avatar at (${location.x}, ${location.y}) rejected — mask score ${maskScore.toFixed(2)} (deltaLeft ${deltaLeft.toFixed(2)}, deltaRight ${deltaRight.toFixed(2)}, masks ${JSON.stringify(this._windowMasks)})`);
 
                 return false;
             }
 
-            if(debugEnabled) console.log(`[Reflection] plane ${this._uniqueId}: avatar at (${location.x}, ${location.y}) DRAWN — planeDist ${planeDistance.toFixed(2)}, maskScore ${maskScore.toFixed(2)}, rawDeltaLeft ${rawDeltaLeft.toFixed(2)}, maskFraction ${maskFraction.toFixed(2)}`);
+            if(debugEnabled) console.log(`[Reflection] plane ${this._uniqueId}: avatar at (${location.x}, ${location.y}) DRAWN — planeDist ${planeDistance.toFixed(2)}, maskScore ${maskScore.toFixed(2)}, deltaLeft ${deltaLeft.toFixed(2)}, leftSideLoc ${leftSideLoc.toFixed(2)}`);
 
             const x = (canvasWidth - ((canvasWidth * leftSideLoc) / this._leftSide.length));
             const y = (canvasHeight - ((canvasHeight * rightSideLoc) / this._rightSide.length)) + verticalOffset;
@@ -1190,14 +1188,6 @@ export class RoomPlane implements IRoomPlane
             const screenSpot = projection.apply(new Point(x, y));
 
             const avatarPxPerTile = (canvasWidth / this._leftSide.length);
-
-            if(normal2DLength > 0.0001)
-            {
-                const depthX = (-normalX * planeDistance);
-                const depthY = (-normalY * planeDistance);
-
-                screenSpot.x += ((depthX - depthY) * avatarPxPerTile);
-            }
 
             screenSpot.y += (avatarPxPerTile * 0.35);
 
@@ -1276,10 +1266,9 @@ export class RoomPlane implements IRoomPlane
                 return false;
             }
 
-            const maskFraction = (closestMask.mask.leftSideLoc - Math.round(closestMask.mask.leftSideLoc));
-            const leftSideLoc = (rawLeftSideLoc + maskFraction);
+            const leftSideLoc = rawLeftSideLoc;
 
-            if(debugEnabled) console.log(`[Reflection] plane ${this._uniqueId}: unit at (${location.x}, ${location.y}) DRAWN — planeDist ${planeDistance.toFixed(2)}, maskScore ${closestMask.score.toFixed(2)}, leftSideLoc ${leftSideLoc.toFixed(2)}, maskFraction ${maskFraction.toFixed(2)}, masks ${JSON.stringify(this._windowMasks)}, mirrors ${projectionMirrors}`);
+            if(debugEnabled) console.log(`[Reflection] plane ${this._uniqueId}: unit at (${location.x}, ${location.y}) DRAWN — planeDist ${planeDistance.toFixed(2)}, maskScore ${closestMask.score.toFixed(2)}, leftSideLoc ${leftSideLoc.toFixed(2)}, masks ${JSON.stringify(this._windowMasks)}, mirrors ${projectionMirrors}`);
 
             const x = (canvasWidth - ((canvasWidth * leftSideLoc) / this._leftSide.length));
             const y = (canvasHeight - ((canvasHeight * rightSideLoc) / this._rightSide.length));
@@ -1305,15 +1294,6 @@ export class RoomPlane implements IRoomPlane
             const screenSpot = projection.apply(new Point(x, y));
 
             const pxPerTile = (canvasWidth / this._leftSide.length);
-            const normal2DLength = Math.hypot(this._normal.x, this._normal.y);
-
-            if(normal2DLength > 0.0001)
-            {
-                const depthX = (-(this._normal.x / normal2DLength) * planeDistance);
-                const depthY = (-(this._normal.y / normal2DLength) * planeDistance);
-
-                screenSpot.x += ((depthX - depthY) * pxPerTile);
-            }
 
             screenSpot.y += (pxPerTile * 0.35);
 

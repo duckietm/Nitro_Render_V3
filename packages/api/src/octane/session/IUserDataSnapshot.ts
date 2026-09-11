@@ -8,6 +8,10 @@ export interface IUserDataSnapshot
     respectsReceived: number;
     respectsLeft: number;
     respectsPetLeft: number;
+    // Official user object (2661) trailing block: how many respect replenishes are left
+    // today and what a replenish restores `respectsLeft` to.
+    respectReplenishesLeft: number;
+    maxRespectPerDay: number;
     canChangeName: boolean;
     clubLevel: number;
     securityLevel: number;

@@ -6,4 +6,6 @@ export * from './NavigatorSearchResultList';
 export * from './NavigatorSearchResultSet';
 export * from './NavigatorTopLevelContext';
 export * from './OfficialRoomEntryData';
+export * from './OfficialRoomsData';
+export * from './PromotedRoomsData';
 export * from './RoomEventData';

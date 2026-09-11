@@ -11,6 +11,8 @@ export class MapDataType extends ObjectDataBase
 
     private static STATE: string = 'state';
     private static RARITY: string = 'rarity';
+    private static CONTENTS_COUNT: string = 'contents_count';
+    private static CHEST_NAME: string = 'chest_name';
 
     private _data: { [index: string]: string };
 
@@ -79,6 +81,32 @@ export class MapDataType extends ObjectDataBase
         if(state === undefined || state === null) return -1;
 
         return parseInt(state);
+    }
+
+    /** Official `MapStuffData.contentsCount`: how many items a chest holds. */
+    public get contentsCount(): number
+    {
+        if(!this._data) return 0;
+
+        const count = this._data[MapDataType.CONTENTS_COUNT];
+
+        if(count === undefined || count === null) return 0;
+
+        const parsed = parseInt(count);
+
+        return isNaN(parsed) ? 0 : parsed;
+    }
+
+    /** Official `MapStuffData.chestName`: the name the owner gave the chest. */
+    public get chestName(): string
+    {
+        if(!this._data) return '';
+
+        const name = this._data[MapDataType.CHEST_NAME];
+
+        if(name === undefined || name === null) return '';
+
+        return name;
     }
 
     // TODO: How to get the keys?

@@ -1,6 +1,9 @@
 export * from './access';
 export * from './AccountSafetyLockStatusChangeMessageEvent';
 export * from './ApproveNameMessageEvent';
+export * from './BanInfoEvent';
+export * from './BlockedUsersEvent';
+export * from './BlockResultEvent';
 export * from './ChangeEmailResultEvent';
 export * from './data';
 export * from './EmailStatusResultEvent';
@@ -19,6 +22,7 @@ export * from './inventory';
 export * from './inventory/currency';
 export * from './inventory/subscription';
 export * from './MemberData';
+export * from './PetRespectFailedEvent';
 export * from './PetRespectNoficationEvent';
 export * from './PetSupplementedNotificationEvent';
 export * from './RespectReceivedEvent';

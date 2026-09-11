@@ -8,3 +8,5 @@ export * from './MarketplaceOffer';
 export * from './MarketplaceOfferData';
 export * from './MarketplaceOffersParser';
 export * from './MarketplaceOwnOffersParser';
+export * from './MarketplaceCancelAllOffersResultParser';
+export * from './MarketplaceClearOwnHistoryResultParser';

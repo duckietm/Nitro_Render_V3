@@ -87,6 +87,20 @@ export class ObjectDataBase implements IObjectData
         return -1;
     }
 
+    /**
+     * Official `IStuffData.contentsCount` / `chestName` (AIR 13): only a chest
+     * furni carries them, every other stuff-data format reports the defaults.
+     */
+    public get contentsCount(): number
+    {
+        return 0;
+    }
+
+    public get chestName(): string
+    {
+        return '';
+    }
+
     public get flags(): number
     {
         return this._flags;

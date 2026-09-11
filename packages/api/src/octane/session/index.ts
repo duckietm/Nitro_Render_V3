@@ -3,6 +3,7 @@ export * from './FurnitureType';
 export * from './IFurnitureData';
 export * from './IFurnitureDataListener';
 export * from './IGroupInformationManager';
+export * from './IBlockedUsersManager';
 export * from './IIgnoredUsersManager';
 export * from './IPetCustomPart';
 export * from './IPollChoice';

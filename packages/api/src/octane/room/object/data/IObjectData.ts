@@ -8,6 +8,8 @@ export interface IObjectData
     uniqueNumber: number;
     uniqueSeries: number;
     rarityLevel: number;
+    contentsCount: number;
+    chestName: string;
     flags: number;
     parseWrapper(wrapper: IMessageDataWrapper): void;
     initializeFromRoomObjectModel(model: IRoomObjectModel): void;

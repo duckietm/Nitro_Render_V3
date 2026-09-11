@@ -41,3 +41,4 @@ export * from './WiredTradeOpenMessageParser';
 export * from './WiredTradeItemsMessageParser';
 export * from './WiredTradeCancelledMessageParser';
 export * from './WiredTradeCompletedMessageParser';
+export * from './ObjectRemoveConfirmParser';

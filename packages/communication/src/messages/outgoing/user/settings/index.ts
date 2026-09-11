@@ -1,3 +1,4 @@
+export * from './UpdateUIFlagsComposer';
 export * from './UserSettingsCameraFollowComposer';
 export * from './UserSettingsOldChatComposer';
 export * from './UserSettingsPrivacyComposer';

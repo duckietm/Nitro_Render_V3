@@ -1,5 +1,5 @@
 import { IConnection, IRoomHandlerListener, SystemChatStyleEnum } from '@octane/api';
-import { FloodControlEvent, PetRespectNoficationEvent, PetSupplementTypeEnum, PetSupplementedNotificationEvent, RemainingMuteEvent, RespectReceivedEvent, RoomUnitChatEvent, RoomUnitChatShoutEvent, RoomUnitChatWhisperEvent, RoomUnitHandItemReceivedEvent } from '@octane/communication';
+import { FloodControlEvent, PetRespectNoficationEvent, PetSupplementTypeEnum, PetSupplementedNotificationEvent, RemainingMuteEvent, RespectReceivedEvent, RoomUnitChatEvent, RoomUnitChatShoutEvent, RoomUnitChatWhisperEvent, RoomUnitHandItemReceivedEvent, SpecialSystemChatEvent } from '@octane/communication';
 import { GetEventDispatcher, RoomSessionChatEvent } from '@octane/events';
 import { BaseHandler } from './BaseHandler';
 
@@ -18,6 +18,7 @@ export class RoomChatHandler extends BaseHandler
         connection.addMessageEvent(new PetSupplementedNotificationEvent(this.onPetSupplementedNotificationEvent.bind(this)));
         connection.addMessageEvent(new FloodControlEvent(this.onFloodControlEvent.bind(this)));
         connection.addMessageEvent(new RemainingMuteEvent(this.onRemainingMuteEvent.bind(this)));
+        connection.addMessageEvent(new SpecialSystemChatEvent(this.onSpecialSystemChatEvent.bind(this)));
     }
 
     private onRoomUnitChatEvent(event: RoomUnitChatEvent): void
@@ -154,6 +155,39 @@ export class RoomChatHandler extends BaseHandler
         const seconds = parser.seconds;
 
         GetEventDispatcher().dispatchEvent(new RoomSessionChatEvent(RoomSessionChatEvent.FLOOD_EVENT, session, -1, seconds.toString(), 0, 0));
+    }
+
+    /**
+     * AIR 13 `SpecialSystemChat` (1971). `RoomChatHandler.onSpecialSystemChat`
+     * resolves the unit by room index and dispatches an empty chat event of
+     * type 12 carrying the specialSystemType in `extraParam`.
+     */
+    private onSpecialSystemChatEvent(event: SpecialSystemChatEvent): void
+    {
+        if(!this.listener) return;
+
+        const session = this.listener.getSession(this.roomId);
+
+        if(!session) return;
+
+        const parser = event.getParser();
+
+        if(!parser) return;
+
+        const userData = session.userDataManager?.getUserDataByIndex(parser.userIndex);
+
+        if(!userData) return;
+
+        GetEventDispatcher().dispatchEvent(new RoomSessionChatEvent(
+            RoomSessionChatEvent.CHAT_EVENT,
+            session,
+            userData.roomIndex,
+            '',
+            RoomSessionChatEvent.CHAT_TYPE_SPECIAL_SYSTEM,
+            SystemChatStyleEnum.GENERIC,
+            '',
+            [],
+            parser.specialSystemType));
     }
 
     private onRemainingMuteEvent(event: RemainingMuteEvent): void

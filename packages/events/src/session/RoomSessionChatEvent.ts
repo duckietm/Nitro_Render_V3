@@ -17,6 +17,9 @@ export class RoomSessionChatEvent extends RoomSessionEvent
     public static CHAT_TYPE_PET_REBREED_FERTILIZE: number = 8;
     public static CHAT_TYPE_PET_SPEED_FERTILIZE: number = 9;
     public static CHAT_TYPE_MUTE_REMAINING: number = 10;
+    // AIR 13 `SpecialSystemChat` (1971): RoomChatHandler.onSpecialSystemChat
+    // dispatches chat type 12 with the specialSystemType in extraParam.
+    public static CHAT_TYPE_SPECIAL_SYSTEM: number = 12;
 
     private _objectId: number;
     private _message: string;

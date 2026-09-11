@@ -3,3 +3,4 @@ export * from './BadgePointLimitsParser';
 export * from './BadgeReceivedParser';
 export * from './BadgesParser';
 export * from './IsBadgeRequestFulfilledParser';
+export * from './BadgeInfoParser';

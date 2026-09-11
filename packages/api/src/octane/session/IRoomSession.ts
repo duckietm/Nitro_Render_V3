@@ -23,6 +23,7 @@ export interface IRoomSession
     sendAmbassadorAlertMessage(userId: number): void;
     sendKickMessage(userId: number): void;
     sendMuteMessage(userId: number, minutes: number): void;
+    sendUnmuteMessage(userId: number): void;
     sendBanMessage(userId: number, type: string): void;
     sendGiveRightsMessage(userId: number): void;
     sendTakeRightsMessage(userId: number): void;
@@ -47,7 +48,7 @@ export interface IRoomSession
     harvestPet(id: number): void;
     compostPlant(id: number): void;
     requestPetCommands(id: number): void;
-    sendScriptProceed(): void;
+    sendScriptProceed(reason?: number): void;
     userDataManager: IUserDataManager;
     roomId: number;
     password: string;
