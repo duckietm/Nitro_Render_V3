@@ -40,6 +40,7 @@ import { DeleteMentionComposer, MarkMentionsReadComposer, MentionReceivedEvent, 
 import { ActiveDailyTasksMessageEvent, ClaimDailyTaskMessageComposer, ClaimRewardTrackPrizeMessageComposer, DailyTaskUpdatedMessageEvent, DailyTasksAddedMessageEvent, GetDailyTasksMessageComposer, GetRewardTracksMessageComposer, PurchaseRewardTrackPremiumMessageComposer, RewardTrackClaimResultMessageEvent, RewardTrackPremiumPurchaseResultMessageEvent, RewardTrackProgressMessageEvent, RewardTracksMessageEvent } from './messages';
 import { TreasureHuntFirstWinnerMessageEvent, TreasureHuntFailMessageEvent, TreasureHuntUpdateMessageEvent } from './messages';
 import { SelfDonationResultMessageEvent, SelfDonationMessageComposer } from './messages';
+import { RaidProtectionCapabilityEvent, RaidProtectionSaveResultEvent, RaidProtectionSettingsEvent, RaidProtectionSettingsRequestComposer, RaidProtectionSettingsSaveComposer } from './messages';
 export class OctaneMessages implements IMessageConfiguration
 {
     private _events: Map<number, Function>;
@@ -632,6 +633,9 @@ export class OctaneMessages implements IMessageConfiguration
         this._events.set(IncomingHeader.WIRED_FURNI_MOVE_STYLE, WiredFurniMoveStyleEvent);
         this._events.set(IncomingHeader.WIRED_ENVIRONMENT, WiredEnvironmentEvent);
         this._events.set(IncomingHeader.WIRED_CLICK_USER_RESPONSE, WiredClickUserResponseEvent);
+        this._events.set(IncomingHeader.RAID_PROTECTION_CAPABILITY, RaidProtectionCapabilityEvent);
+        this._events.set(IncomingHeader.RAID_PROTECTION_SETTINGS, RaidProtectionSettingsEvent);
+        this._events.set(IncomingHeader.RAID_PROTECTION_SAVE_RESULT, RaidProtectionSaveResultEvent);
         this._events.set(IncomingHeader.WIRED_CLICK_SETTINGS, WiredClickSettingsEvent);
         this._events.set(IncomingHeader.WIRED_LOG_PAGE, WiredLogPageEvent);
         this._events.set(IncomingHeader.WIRED_VARIABLE_HOLDERS_PAGE, WiredVariableHoldersPageEvent);
@@ -1358,6 +1362,8 @@ export class OctaneMessages implements IMessageConfiguration
         this._composers.set(OutgoingHeader.WIRED_APPLY_SNAPSHOT, ApplySnapshotMessageComposer);
         this._composers.set(OutgoingHeader.WIRED_MONITOR_REQUEST, WiredMonitorRequestComposer);
         this._composers.set(OutgoingHeader.WIRED_ROOM_SETTINGS_REQUEST, WiredRoomSettingsRequestComposer);
+        this._composers.set(OutgoingHeader.RAID_PROTECTION_SETTINGS_REQUEST, RaidProtectionSettingsRequestComposer);
+        this._composers.set(OutgoingHeader.RAID_PROTECTION_SETTINGS_SAVE, RaidProtectionSettingsSaveComposer);
         this._composers.set(OutgoingHeader.WIRED_ROOM_SETTINGS_SAVE, WiredRoomSettingsSaveComposer);
         this._composers.set(OutgoingHeader.WIRED_USER_VARIABLES_REQUEST, WiredUserVariablesRequestComposer);
         this._composers.set(OutgoingHeader.WIRED_USER_VARIABLE_UPDATE, WiredUserVariableUpdateComposer);

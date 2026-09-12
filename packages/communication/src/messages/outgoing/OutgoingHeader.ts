@@ -727,4 +727,6 @@ export class OutgoingHeader
     public static DISCORD_UPDATE_PREFERENCES = 2774;
     // AIR 13 self donation tool (client -> server), official id.
     public static SELF_DONATION = 2499;
+    public static RAID_PROTECTION_SETTINGS_REQUEST = 206;
+    public static RAID_PROTECTION_SETTINGS_SAVE = 9346;
 }
